@@ -4,6 +4,7 @@
 #include <QGraphicsTextItem>
 #include <QBrush>
 #include <QPen>
+// github 上传测试注释
 
 MyGraphicsView::MyGraphicsView(QWidget *parent)
     : QGraphicsView(parent)
