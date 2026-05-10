@@ -5,15 +5,27 @@
 #include <QtMath> // 提供 qSin, qCos 和 M_PI
 #include <QMessageBox>
 
-GameView::GameView() {
+GameView::GameView(const int moveMode)
+    : moveMode(moveMode)
+{
+    // 基本设置
+    setMouseTracking(true);
+
     // 创建场景
     scene = new QGraphicsScene(this);
-    scene->setSceneRect(0, 0, 800, 600); // 800 * 600 像素
+    scene->setSceneRect(0, 0, 800, 500); // 800 * 600 像素
     setScene(scene);
+
+    // 创建背景
+    QGraphicsRectItem *backgroundItem = new QGraphicsRectItem(scene->sceneRect());
+    backgroundItem->setBrush(QBrush(Qt::lightGray)); // 设置为浅灰色
+    backgroundItem->setPen(Qt::NoPen); // 移除边框
+    backgroundItem->setZValue(-1); // 设置 Z 值为最低，确保它在所有其他图元的下方
+    scene->addItem(backgroundItem);
 
     // 创建玩家
     player = new Player();
-    player->setPos(400, 300); // 放在地图中间
+    player->setPos(400, 250); // 放在地图中间
     scene->addItem(player);
 
     // 主循环 计时器 60 FPS
@@ -26,7 +38,11 @@ GameView::GameView() {
     connect(enemySpawnTimer, &QTimer::timeout, this, &GameView::spawnEnemy);
     enemySpawnTimer->start(2000);
 
+}
 
+void GameView::mouseMoveEvent(QMouseEvent *event) {
+    mousePos = mapToScene(event->pos());
+    QGraphicsView::mouseMoveEvent(event);
 }
 
 void GameView::keyPressEvent(QKeyEvent *event) {
@@ -74,11 +90,17 @@ void GameView::keyReleaseEvent(QKeyEvent *event) {
 
 void GameView::updateGame() {
     // 1. 移动玩家
-    player->move(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
+    if (moveMode == 0) {
+        player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
+    } else if (moveMode == 1) {
+        // QPointF sceneWH = {scene->width(), scene->height()};
+        player->mouseMove(mousePos, 0.1);
+    }
+
 
     // 2. 遍历场景中的所有敌人，让它们移动并检测碰撞
     QList<QGraphicsItem *> items = scene->items(); // 获取场景所有物体
-    for (QGraphicsItem *item : items) {
+    for (QGraphicsItem *item : std::as_const(items)) {
         Enemy *enemy = dynamic_cast<Enemy*>(item);
         if (enemy) {
             enemy->moveTowardsTarget(); // 敌人朝玩家移动
@@ -88,7 +110,7 @@ void GameView::updateGame() {
     // 3. 碰撞检测 (死亡判定)
     // player->collidingItems() 会返回当前与玩家重叠的所有物体
     QList<QGraphicsItem *> collisions = player->collidingItems();
-    for (QGraphicsItem *item : collisions) {
+    for (QGraphicsItem *item : std::as_const(collisions)) {
         if (dynamic_cast<Enemy*>(item)) {
             // 碰到了敌人！游戏结束
             gameOver();
@@ -107,7 +129,7 @@ void GameView::spawnEnemy() {
     qreal spawnY = 0;
     bool validPos = false;
 
-    // 2. 循环生成坐标，直到生成的坐标在地图范围内
+    // 循环生成坐标，直到生成的坐标在地图范围内
     // 假设你的地图 (Scene) 大小是 800 x 600
     int mapWidth = 800;
     int mapHeight = 600;
@@ -132,7 +154,7 @@ void GameView::spawnEnemy() {
             }
         }
 
-        // 3. 在合法坐标处生成并添加敌人
+        // 在合法坐标处生成并添加敌人
         Enemy *enemy = new Enemy(player);
         enemy->setPos(spawnX, spawnY); // 使用刚刚算出的安全坐标
         scene->addItem(enemy);
@@ -154,5 +176,3 @@ void GameView::gameOver() {
     // 4. 关闭当前游戏窗口（因为我们之前设置了 WA_DeleteOnClose，这里 close() 会自动释放内存）
     this->close();
 }
-
-

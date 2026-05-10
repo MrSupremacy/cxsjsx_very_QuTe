@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
         this->hide();
 
         // 2. 创建并显示游戏界面
-        GameView *game = new GameView();
+        GameView *game = new GameView(moveMode);
 
 
         // 关键设置：当关闭游戏窗口时，自动释放 game 占用的内存，防止内存泄漏
@@ -26,8 +26,21 @@ MainWindow::MainWindow(QWidget *parent)
         connect(game, &GameView::gameEnded, this, &MainWindow::show);
 
         // 设置游戏窗口的大小，并显示出来
-        game->resize(800, 600);
+        game->resize(900, 600);
         game->show();
+    });
+
+    // 控制模式切换按钮
+    connect(ui->move_mode, &QPushButton::clicked, this, [=]() {
+        if (moveMode == 0) {
+            moveMode = 1;
+            ui->move_mode->setText("启用鼠标移动");
+            ui->move_mode->setStyleSheet("background-color: #bda; color: #222;");
+        } else if (moveMode == 1) {
+            moveMode = 0;
+            ui->move_mode->setText("禁用鼠标移动");
+            ui->move_mode->setStyleSheet("background-color: #336; color: #ddd;");
+        }
     });
 
 }

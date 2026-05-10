@@ -10,7 +10,7 @@
 class GameView: public QGraphicsView {
     Q_OBJECT
 public:
-    GameView(); // 构造函数 加载地图 & 启动游戏
+    GameView(const int moveMode); // 构造函数 加载地图 & 启动游戏
 
 signals: // 定义信号的关键字
     void gameEnded(); // 声明一个游戏结束的信号
@@ -21,9 +21,12 @@ private:
     QTimer *gameTimer;  // 每帧刷新（移动、碰撞）
     QTimer *enemySpawnTimer; // 定时生成敌人
 
-    bool keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight; // 记录按键状态
+    bool keyW = false, keyA = false, keyS = false, keyD = false;
+    bool keyUp = false, keyLeft = false, keyDown = false, keyRight = false;
 
     Player* player; // 玩家
+    const int moveMode;
+    QPointF mousePos = {0.0, 0.0};
 
     int spawn_num = 5; // 敌人生成个数
 
@@ -33,6 +36,7 @@ protected:
     // 按键
     void keyPressEvent(QKeyEvent *event) override; // 按压 -> true
     void keyReleaseEvent(QKeyEvent *event) override; // 松开 -> false
+    void mouseMoveEvent(QMouseEvent *event) override; // 储存鼠标在scene中相对左上角坐标
 
     void updateGame(); // 更新战场
 

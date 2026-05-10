@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>500</height>
+    <width>900</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,18 +15,36 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QWidget" name="main_menu" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
        <item>
         <widget class="QWidget" name="menu" native="true">
          <property name="minimumSize">
           <size>
-           <width>200</width>
+           <width>300</width>
            <height>0</height>
           </size>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="leftMargin">
+           <number>36</number>
+          </property>
+          <property name="bottomMargin">
+           <number>18</number>
+          </property>
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
@@ -42,20 +60,77 @@
           </item>
           <item>
            <widget class="QPushButton" name="start_game">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
              <string>开始游戏</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="move_mode">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: #336;</string>
+            </property>
             <property name="text">
-             <string>PushButton</string>
+             <string>禁用鼠标移动</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
              <string>PushButton</string>
             </property>
@@ -63,22 +138,30 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_3">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="text">
              <string>PushButton</string>
             </property>
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="menu_menu" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>200</width>
-           <height>0</height>
-          </size>
-         </property>
         </widget>
        </item>
        <item>

@@ -19,5 +19,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+    // 0: wasd/↑↓←→, 1: mouse tank
+    int moveMode = 0;
 };
 #endif // MAINWINDOW_H

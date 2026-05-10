@@ -11,7 +11,7 @@ public:
 
 private:
     QGraphicsItem *playerTarget; // 玩家
-    double speed = 3.0f; // 敌人速度
+    double speed = 1.0f; // 敌人速度
 };
 
 #endif // ENEMY_H
