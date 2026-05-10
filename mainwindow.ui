@@ -14,10 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
-    <item>
-     <widget class="MyGraphicsView" name="battle_field"/>
-    </item>
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
     <item>
      <widget class="QWidget" name="main_menu" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -103,13 +100,6 @@
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MyGraphicsView</class>
-   <extends>QGraphicsView</extends>
-   <header>mygraphicsview.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
