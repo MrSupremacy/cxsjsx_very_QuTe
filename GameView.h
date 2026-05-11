@@ -28,7 +28,9 @@ private:
     const int moveMode;
     QPointF mousePos = {0.0, 0.0};
 
-    int spawn_num = 5; // 敌人生成个数
+    int spawnNum = 10; // 敌人生成个数
+
+    int mapWidth = 800, mapHeight = 500; // 地图尺寸
 
 
 

@@ -13,7 +13,7 @@ GameView::GameView(const int moveMode)
 
     // 创建场景
     scene = new QGraphicsScene(this);
-    scene->setSceneRect(0, 0, 800, 500); // 800 * 600 像素
+    scene->setSceneRect(0, 0, mapWidth, mapHeight); // 800 * 500 像素
     setScene(scene);
 
     // 创建背景
@@ -104,6 +104,7 @@ void GameView::updateGame() {
         Enemy *enemy = dynamic_cast<Enemy*>(item);
         if (enemy) {
             enemy->moveTowardsTarget(); // 敌人朝玩家移动
+            enemy->teleportThroughWall(); //敌人有可能穿越
         }
     }
 
@@ -130,11 +131,9 @@ void GameView::spawnEnemy() {
     bool validPos = false;
 
     // 循环生成坐标，直到生成的坐标在地图范围内
-    // 假设你的地图 (Scene) 大小是 800 x 600
-    int mapWidth = 800;
-    int mapHeight = 600;
+    // 假设你的地图 (Scene) 大小是 800 x 500
 
-    for(int i = 0; i < spawn_num; i ++) {
+    for(int i = 0; i < spawnNum; i ++) {
         while (!validPos) {
             // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
             qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
