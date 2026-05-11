@@ -14,6 +14,9 @@ public:
     void mouseMove( // 鼠标移动
         const QPointF posInScene, const double sensibility); // posInScene是相对于左上角坐标
 
+    void mouse3Dmove(
+        const QPointF mouseDiff, const double sensibility);
+
 private:
     double speed = 3.0f; // 玩家移动速度
 };

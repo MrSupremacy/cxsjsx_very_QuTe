@@ -65,3 +65,15 @@ void Player::mouseMove(const QPointF posInScene, const double sensibility)
 
     this->moveBy(dx, dy);
 }
+
+void Player::mouse3Dmove(const QPointF mouseDiff, const double sensibility)
+{
+    double L = sqrt(QPointF::dotProduct(mouseDiff, mouseDiff));
+    if (L < 30.0) return;
+
+    // 跟随鼠标角度
+    double dx = -mouseDiff.x() / L * speed;
+    double dy = -mouseDiff.y() / L * speed;
+
+    this->moveBy(dx, dy);
+}

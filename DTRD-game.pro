@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui openglwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,14 +12,18 @@ SOURCES += \
     Enemy.cpp \
     GameView.cpp \
     Player.cpp \
+    enemy3d.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    openglgameview.cpp
 
 HEADERS += \
     Enemy.h \
     GameView.h \
     Player.h \
-    mainwindow.h
+    enemy3d.h \
+    mainwindow.h \
+    openglgameview.h
 
 FORMS += \
     mainwindow.ui

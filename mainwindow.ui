@@ -104,7 +104,7 @@
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: #336;</string>
+             <string notr="true">background-color: #336; color: #ddd;</string>
             </property>
             <property name="text">
              <string>禁用鼠标移动</string>
