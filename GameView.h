@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "Player.h"
 #include "Enemy.h"
+#include "Ability.h"
 
 class GameView: public QGraphicsView {
     Q_OBJECT
@@ -20,6 +21,7 @@ private:
 
     QTimer *gameTimer;  // 每帧刷新（移动、碰撞）
     QTimer *enemySpawnTimer; // 定时生成敌人
+    QTimer *abilitySpawnTimer; // 定时生成技能
 
     bool keyW = false, keyA = false, keyS = false, keyD = false;
     bool keyUp = false, keyLeft = false, keyDown = false, keyRight = false;
@@ -28,7 +30,7 @@ private:
     const int moveMode;
     QPointF mousePos = {0.0, 0.0};
 
-    int spawnNum = 10; // 敌人生成个数
+    int spawnNum = 6; // 敌人生成个数
 
     int mapWidth = 800, mapHeight = 500; // 地图尺寸
 
@@ -43,6 +45,8 @@ protected:
     void updateGame(); // 更新战场
 
     void spawnEnemy(); // 生成敌人
+
+    void generateAbility(); // 生成技能
 
     void gameOver(); // 游戏结束
 

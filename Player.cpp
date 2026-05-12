@@ -3,7 +3,23 @@
 #include <QGraphicsScene>
 
 Player::Player() {
-    setRect(0, 0, 10, 10);
+    setRect(0, 0, 12, 12);
+    setBrush(QBrush(Qt::white)); // 基础颜色为白色
+    setPen(Qt::NoPen); // 移除边框
+
+    // 设置光剑
+    swordItem = new QGraphicsRectItem(0, -1.5, 50, 3, this);
+    swordItem->setBrush(Qt::yellow); // 给剑涂成黄色
+    swordItem->hide(); // 初始状态隐藏（没吃到技能时没有剑）
+    swordItem->setPos(5, 5); // 放到中间位置
+
+    // 创建剑的定时器
+    swordTimer = new QTimer();
+    // 当定时器时间到，隐藏这把剑
+    QObject::connect(swordTimer, &QTimer::timeout, [=](){
+        swordItem->hide();
+    });
+    swordTimer->setSingleShot(true); // 设为单次触发模式
 }
 
 void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bool down, bool right) {
@@ -53,17 +69,65 @@ void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bo
     this->setPos(nextX, nextY);
 }
 
-void Player::mouseMove(const QPointF posInScene, const double sensibility)
-{
-    const QPointF pos = posInScene - this->pos();
-    double L = sqrt(QPointF::dotProduct(pos, pos));
+void Player::mouseMove(const QPointF posInScene, const double sensibility) {
+    // 1. 手感优化：获取玩家的中心点坐标，而不是左上角
+    QRectF pRect = this->rect();
+    QPointF centerPos = this->pos() + QPointF(pRect.width() / 2.0, pRect.height() / 2.0);
+
+    // 计算中心点到鼠标的向量
+    const QPointF dirVector = posInScene - centerPos;
+
+    // 计算距离
+    double L = sqrt(QPointF::dotProduct(dirVector, dirVector));
+
+    // 如果鼠标离玩家中心非常近（死区），则不移动也不旋转，防止鬼畜抖动
     if (L < 2.0) return;
 
-    // 跟随鼠标角度
-    double dx = pos.x() / L * speed;
-    double dy = pos.y() / L * speed;
+    // 2. 计算位移分量 (跟随鼠标角度)
+    double speedL = speed * L/(L + 15);
+    double dx = dirVector.x() / L * speedL;
+    double dy = dirVector.y() / L * speedL;
 
-    this->moveBy(dx, dy);
+    // ================= 新增：360度丝滑旋转剑 =================
+    // 更新最后面朝的方向（供静止时使用）
+    lastDir = dirVector;
+
+    // 只要有位移向量，且剑在显示状态，就计算出精确的 360 度弧度并旋转
+    if (swordItem->isVisible()) {
+        double angle = qRadiansToDegrees(qAtan2(dirVector.y(), dirVector.x()));
+        swordItem->setRotation(angle);
+    }
+    // ========================================================
+
+    // 3. 预判下一步位置
+    double nextX = this->x() + dx;
+    double nextY = this->y() + dy;
+
+    // ================= 新增：边界限制逻辑 =================
+    if (this->scene()) {
+        QRectF mapRect = this->scene()->sceneRect();
+        QRectF playerRect = this->rect();
+
+        // 限制 X 坐标 (左右碰壁)
+        if (nextX < mapRect.left()) {
+            nextX = mapRect.left();
+        }
+        else if (nextX + playerRect.width() > mapRect.right()) {
+            nextX = mapRect.right() - playerRect.width();
+        }
+
+        // 限制 Y 坐标 (上下碰壁)
+        if (nextY < mapRect.top()) {
+            nextY = mapRect.top();
+        }
+        else if (nextY + playerRect.height() > mapRect.bottom()) {
+            nextY = mapRect.bottom() - playerRect.height();
+        }
+    }
+    // ========================================================
+
+    // 4. 执行移动
+    this->setPos(nextX, nextY);
 }
 
 void Player::mouse3Dmove(const QPointF mouseDiff, const double sensibility)
@@ -77,3 +141,16 @@ void Player::mouse3Dmove(const QPointF mouseDiff, const double sensibility)
 
     this->moveBy(dx, dy);
 }
+
+
+// 光剑技能相关实现
+
+QGraphicsRectItem* Player::getSword() {
+    return swordItem;
+}
+
+void Player::equipSword(int durationMs) {
+    swordItem->show(); // 把剑显示出来
+    swordTimer->start(durationMs);
+}
+

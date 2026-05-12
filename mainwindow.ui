@@ -104,10 +104,10 @@
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: #336; color: #ddd;</string>
+             <string notr="true">background-color: #bda; color: #222;</string>
             </property>
             <property name="text">
-             <string>禁用鼠标移动</string>
+             <string>启用鼠标移动</string>
             </property>
            </widget>
           </item>

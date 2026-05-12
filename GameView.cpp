@@ -18,7 +18,7 @@ GameView::GameView(const int moveMode)
 
     // 创建背景
     QGraphicsRectItem *backgroundItem = new QGraphicsRectItem(scene->sceneRect());
-    backgroundItem->setBrush(QBrush(Qt::lightGray)); // 设置为浅灰色
+    backgroundItem->setBrush(QBrush(Qt::darkGreen)); // 设置为浅灰色
     backgroundItem->setPen(Qt::NoPen); // 移除边框
     backgroundItem->setZValue(-1); // 设置 Z 值为最低，确保它在所有其他图元的下方
     scene->addItem(backgroundItem);
@@ -36,8 +36,12 @@ GameView::GameView(const int moveMode)
     // 敌人生成 计时器
     enemySpawnTimer = new QTimer(this);
     connect(enemySpawnTimer, &QTimer::timeout, this, &GameView::spawnEnemy);
-    enemySpawnTimer->start(2000);
+    enemySpawnTimer->start(3000);
 
+    // 技能生成 计时器
+    abilitySpawnTimer = new QTimer(this);
+    connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
+    abilitySpawnTimer->start(8000);
 }
 
 void GameView::mouseMoveEvent(QMouseEvent *event) {
@@ -97,23 +101,52 @@ void GameView::updateGame() {
         player->mouseMove(mousePos, 0.1);
     }
 
-
-    // 2. 遍历场景中的所有敌人，让它们移动并检测碰撞
+    // 2. 遍历场景中的所有物体，让它们移动
     QList<QGraphicsItem *> items = scene->items(); // 获取场景所有物体
     for (QGraphicsItem *item : std::as_const(items)) {
+        // 遍历敌人
         Enemy *enemy = dynamic_cast<Enemy*>(item);
         if (enemy) {
             enemy->moveTowardsTarget(); // 敌人朝玩家移动
             enemy->teleportThroughWall(); //敌人有可能穿越
         }
+
+        // 遍历技能
+        Ability* ability = dynamic_cast<Ability*>(item);
+        if(ability) {
+            ability->updateFloating(); // 更新浮动效果
+        }
     }
 
-    // 3. 碰撞检测 (死亡判定)
+    // 3. 剑和敌人的碰撞检测
+    if (player->getSword()->isVisible()) {
+        QList<QGraphicsItem*> swordHits = player->getSword()->collidingItems();
+        for (QGraphicsItem* item : std::as_const(swordHits)) {
+            Enemy* enemy = dynamic_cast<Enemy*>(item);
+            if (enemy) {
+                // 怪物碰到了剑！杀掉它！
+                scene->removeItem(enemy);
+                delete enemy;
+            }
+        }
+    }
+
+    // 4. 玩家和敌人/技能的碰撞检测
     // player->collidingItems() 会返回当前与玩家重叠的所有物体
     QList<QGraphicsItem *> collisions = player->collidingItems();
     for (QGraphicsItem *item : std::as_const(collisions)) {
+        // 检测技能
+        Ability *ability = dynamic_cast<Ability *>(item);
+
+        if (ability) {
+            ability->pickUp();        // 触发技能效果
+            scene->removeItem(ability);   // 从地图上移除
+            delete ability;           // 销毁内存
+        }
+
+
+        // 检测敌人 碰到了敌人！游戏结束
         if (dynamic_cast<Enemy*>(item)) {
-            // 碰到了敌人！游戏结束
             gameOver();
             return;
         }
@@ -138,9 +171,8 @@ void GameView::spawnEnemy() {
             // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
             qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
 
-            // 生成一个距离：基础距离 100 + 随机浮动距离 (例如 0~300)
-            // 这样敌人就会刷在距离玩家 100 到 400 的环形区域内
-            qreal distance = 100.0 + QRandomGenerator::global()->generateDouble() * 300.0;
+            // 这样敌人就会刷在距离玩家 150 到 600 的环形区域内
+            qreal distance = 150.0 + QRandomGenerator::global()->generateDouble() * 400.0;
 
             // 根据极坐标公式算出生成的 X 和 Y 坐标
             spawnX = px + distance * qCos(angle);
@@ -161,10 +193,48 @@ void GameView::spawnEnemy() {
     }
 }
 
+void GameView::generateAbility() {
+    if(!player) return;
+
+    qreal px = player->x();
+    qreal py = player->y();
+
+    qreal spawnX = 0;
+    qreal spawnY = 0;
+    bool validPos = false;
+
+    // 找到合适的位置生成
+    while (!validPos) {
+        // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
+        qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
+
+        // 这样技能就会刷在距离玩家 200 到 700 的环形区域内
+        qreal distance = 200.0 + QRandomGenerator::global()->generateDouble() * 500.0;
+
+        // 根据极坐标公式算出生成的 X 和 Y 坐标
+        spawnX = px + distance * qCos(angle);
+        spawnY = py + distance * qSin(angle);
+
+        // 检查生成的坐标是否在地图内部
+        // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
+        if (spawnX >= 0 && spawnX <= mapWidth && spawnY >= 0 && spawnY <= mapHeight) {
+            validPos = true;
+        }
+    }
+
+    // 生成新技能（目前只是基类，后续通过随机数实现随机生成某个）
+    Ability* ability = new LightSaber({spawnX, spawnY}, player);
+    ability->setPos(spawnX, spawnY);
+    scene->addItem(ability);
+
+
+}
+
 void GameView::gameOver() {
     // 1. 停止游戏循环和生成敌人的定时器
     gameTimer->stop();
     enemySpawnTimer->stop();
+    abilitySpawnTimer->stop();
 
     // 2. 弹出一个提示框告诉玩家游戏结束（体验更好，不会死得太突兀）
     QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
