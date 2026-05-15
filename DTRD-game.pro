@@ -8,24 +8,32 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += \
+    "$$PWD/" \
+    "$$PWD/abilities" \
+    "$$PWD/games"
+
 SOURCES += \
-    Ability.cpp \
     Enemy.cpp \
-    GameView.cpp \
     Player.cpp \
+    abilities/Ability.cpp \
     enemy3d.cpp \
+    games/GameView.cpp \
+    games/openglgameview.cpp \
     main.cpp \
-    mainwindow.cpp \
-    openglgameview.cpp
+    mainwindow.cpp
 
 HEADERS += \
-    Ability.h \
     Enemy.h \
-    GameView.h \
     Player.h \
+    abilities/Ability.h \
+    abilities/Bullet.h \
+    abilities/LightSaber.h \
+    abilities/WipeOut.h \
     enemy3d.h \
-    mainwindow.h \
-    openglgameview.h
+    games/GameView.h \
+    games/openglgameview.h \
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui

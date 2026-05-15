@@ -5,7 +5,8 @@
 #include <QBrush>
 #include <QPen>
 #include <QPointF>
-#include "Player.h"
+
+
 
 // 基础技能/增益类
 class Ability: public QGraphicsEllipseItem {
@@ -29,13 +30,5 @@ protected:
     double floatSpeed;  // 悬浮的速度
 };
 
-
-// 光剑技能类
-class LightSaber: public Ability {
-public:
-    LightSaber(QPointF spawnPos, QGraphicsItem *target);
-    void pickUp() override;
-
-};
 
 #endif // ABILITY_H

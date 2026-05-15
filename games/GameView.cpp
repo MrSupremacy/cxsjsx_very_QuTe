@@ -93,62 +93,80 @@ void GameView::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void GameView::updateGame() {
-    // 1. 移动玩家
+    // 移动玩家
     if (moveMode == 0) {
         player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
     } else if (moveMode == 1) {
-        // QPointF sceneWH = {scene->width(), scene->height()};
         player->mouseMove(mousePos, 0.1);
     }
 
-    // 2. 遍历场景中的所有物体，让它们移动
-    QList<QGraphicsItem *> items = scene->items(); // 获取场景所有物体
+    // 1. 准备一个集合，记录这一帧需要被删除的物体
+    QSet<QGraphicsItem*> itemsToRemove;
+
+    // 获取场景所有物体
+    QList<QGraphicsItem *> items = scene->items();
+
+    // 第一遍遍历：逻辑更新与碰撞记录
     for (QGraphicsItem *item : std::as_const(items)) {
-        // 遍历敌人
-        Enemy *enemy = dynamic_cast<Enemy*>(item);
-        if (enemy) {
-            enemy->moveTowardsTarget(); // 敌人朝玩家移动
-            enemy->teleportThroughWall(); //敌人有可能穿越
-        }
+        // 【关键】如果这个物体在之前的逻辑里已经被标为删除了，直接跳过
+        if (itemsToRemove.contains(item)) continue;
 
-        // 遍历技能
-        Ability* ability = dynamic_cast<Ability*>(item);
-        if(ability) {
-            ability->updateFloating(); // 更新浮动效果
+        // 敌人移动
+        if (Enemy *enemy = dynamic_cast<Enemy*>(item)) {
+            enemy->moveTowardsTarget();
+            enemy->teleportThroughWall();
         }
-    }
+        // 技能浮动
+        else if (Ability* ability = dynamic_cast<Ability*>(item)) {
+            ability->updateFloating();
+        }
+        // 子弹逻辑
+        else if (Bullet* bullet = dynamic_cast<Bullet*>(item)) {
+            bullet->updatePosition();
 
-    // 3. 剑和敌人的碰撞检测
-    if (player->getSword()->isVisible()) {
-        QList<QGraphicsItem*> swordHits = player->getSword()->collidingItems();
-        for (QGraphicsItem* item : std::as_const(swordHits)) {
-            Enemy* enemy = dynamic_cast<Enemy*>(item);
-            if (enemy) {
-                // 怪物碰到了剑！杀掉它！
-                scene->removeItem(enemy);
-                delete enemy;
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> bulletCollisions = bullet->collidingItems();
+            for (QGraphicsItem* colItem : bulletCollisions) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记敌人和子弹都要删除
+                    itemsToRemove.insert(e);
+                    itemsToRemove.insert(bullet);
+                    break; // 停止检测这个子弹
+                }
             }
         }
     }
 
-    // 4. 玩家和敌人/技能的碰撞检测
-    // player->collidingItems() 会返回当前与玩家重叠的所有物体
-    QList<QGraphicsItem *> collisions = player->collidingItems();
-    for (QGraphicsItem *item : std::as_const(collisions)) {
-        // 检测技能
-        Ability *ability = dynamic_cast<Ability *>(item);
-
-        if (ability) {
-            ability->pickUp();        // 触发技能效果
-            scene->removeItem(ability);   // 从地图上移除
-            delete ability;           // 销毁内存
+    // 2. 剑的碰撞检测（同样使用标记法）
+    if (player->getSword()->isVisible()) {
+        QList<QGraphicsItem*> swordHits = player->getSword()->collidingItems();
+        for (QGraphicsItem* item : swordHits) {
+            if (Enemy* enemy = dynamic_cast<Enemy*>(item)) {
+                itemsToRemove.insert(enemy);
+            }
         }
+    }
 
+    // 3. 玩家的碰撞检测
+    QList<QGraphicsItem *> playerCollisions = player->collidingItems();
+    for (QGraphicsItem *item : playerCollisions) {
+        if (itemsToRemove.contains(item)) continue; // 如果该物体已被子弹打死，就不算撞到玩家
 
-        // 检测敌人 碰到了敌人！游戏结束
-        if (dynamic_cast<Enemy*>(item)) {
+        if (Ability *ability = dynamic_cast<Ability *>(item)) {
+            ability->pickUp();
+            itemsToRemove.insert(ability);
+        } else if (dynamic_cast<Enemy*>(item)) {
             gameOver();
             return;
+        }
+    }
+
+    // 4. 最后统一物理销毁（这一步才真正 delete）
+    for (QGraphicsItem* item : itemsToRemove) {
+        // 防止重复删除（比如两颗子弹同时打中一个敌人）
+        if (item->scene() == scene) {
+            scene->removeItem(item);
+            delete item;
         }
     }
 }
@@ -223,7 +241,9 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能（目前只是基类，后续通过随机数实现随机生成某个）
-    Ability* ability = new LightSaber({spawnX, spawnY}, player);
+    // TODO
+    // Ability* ability = new LightSaber({spawnX, spawnY}, player);
+    Ability* ability = new WipeOut({spawnX, spawnY}, player);
     ability->setPos(spawnX, spawnY);
     scene->addItem(ability);
 

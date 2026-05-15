@@ -44,19 +44,3 @@ void Ability::pickUp() {
     // 拾取后，通常我们需要把这个物体从场景中移除，并在外部 delete 它
     // 注意：不要直接在这里 delete this，建议在主循环检测到碰撞后统一处理
 }
-
-// 光剑类实现
-LightSaber::LightSaber(QPointF spawnPos, QGraphicsItem *target)
-    : Ability(spawnPos, target)
-{
-    // 可以改变这个技能球的颜色，比如变成红色代表是攻击技能
-    setBrush(Qt::red);
-}
-
-void LightSaber::pickUp() {
-    // 将父类保存的 QGraphicsItem 指针安全地转换为 Player 指针
-    Player *p = dynamic_cast<Player*>(playerTarget);
-    if (p) {
-        p->equipSword(6000); // 赋予玩家 6 秒的剑！
-    }
-}

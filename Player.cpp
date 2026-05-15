@@ -1,8 +1,10 @@
 #include "Player.h"
 #include <math.h>
-#include <QGraphicsScene>
+#include <QLineF>
 
-Player::Player() {
+
+Player::Player()
+{
     setRect(0, 0, 12, 12);
     setBrush(QBrush(Qt::white)); // 基础颜色为白色
     setPen(Qt::NoPen); // 移除边框
@@ -20,6 +22,34 @@ Player::Player() {
         swordItem->hide();
     });
     swordTimer->setSingleShot(true); // 设为单次触发模式
+
+    // 射击技能 connect
+    fireTimer = new QTimer(); // 确保 fireTimer 已实例化
+    fireTimer->setSingleShot(true); // 设置为单次触发模式
+
+    QObject::connect(fireTimer, &QTimer::timeout, [&]() mutable {
+        if (fireTimes > 0) {
+            fireTimes--;
+            double ang = QLineF({0, 0}, lastDir).angle();
+            ang = qDegreesToRadians(ang);
+
+            // 生成 currNum 个子弹
+            QPointF dir = {std::cos(ang), std::sin(ang)};
+            QPointF perp = {-dir.y(), dir.x()};
+
+            // 生成 currNum 个子弹
+            for (int var = 0; var < currNum; ++var) {
+                double offset = (var - (currNum - 1) / 2.0) * distPx;
+                QPointF currentPos = this->pos() + perp *offset;
+                Bullet* temp = new Bullet(0, 4, ang, currentPos);
+                this->scene()->addItem(temp);
+            }
+
+            if (fireTimes > 0) {
+                fireTimer->start(currInterval);
+            }
+        }
+    });
 }
 
 void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bool down, bool right) {
@@ -154,3 +184,12 @@ void Player::equipSword(int durationMs) {
     swordTimer->start(durationMs);
 }
 
+// 射击技能
+void Player::autoFire(int rounds, int interval, int num)
+{
+    fireTimes = rounds;
+    currNum = num;
+    currInterval = interval;
+
+    fireTimer->start(interval);
+}

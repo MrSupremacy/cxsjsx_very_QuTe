@@ -7,6 +7,8 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Ability.h"
+#include "LightSaber.h"
+#include "WipeOut.h"
 
 class GameView: public QGraphicsView {
     Q_OBJECT
