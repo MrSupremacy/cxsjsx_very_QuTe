@@ -5,15 +5,13 @@
 #include <QGraphicsScene>
 #include <QTimer>
 #include "Player.h"
-#include "Enemy.h"
-#include "Ability.h"
-#include "LightSaber.h"
-#include "WipeOut.h"
+
 
 class GameView: public QGraphicsView {
     Q_OBJECT
 public:
     GameView(const int moveMode); // 构造函数 加载地图 & 启动游戏
+    ~GameView(); // 析构函数声明
 
 signals: // 定义信号的关键字
     void gameEnded(); // 声明一个游戏结束的信号

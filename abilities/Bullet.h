@@ -3,7 +3,6 @@
 
 #include <QGraphicsEllipseItem>
 #include <QGraphicsScene>
-#include <QObject>
 #include <QTimer>
 #include <QBrush>
 #include <QColor>
@@ -13,20 +12,19 @@
 
 class Bullet: public QObject, public QGraphicsEllipseItem
 {
-    Q_OBJECT
 public:
-    const int damage;
-    const int radius;
-    const QPointF speedV;
-    inline static const double speed = 3.0;
+    QPointF speedV;
+    int lifeFrames;
+
+    inline static const int LIFE = 180;
+    inline static const double SPEED = 3.0;
 
 public:
-    Bullet(int dmg, int r, qreal ang, QPointF& p) // 伤害，半径，弧度制方向角，全局坐标
+    Bullet(qreal ang, const QPointF& p) // 伤害，半径，弧度制方向角，全局坐标
         : QObject()
         , QGraphicsEllipseItem(0, 0, 10, 10)
-        , damage(dmg)
-        , radius(r)
-        , speedV(speed * QPointF(qCos(ang), qSin(ang)))
+        , speedV(SPEED * QPointF(qCos(ang), qSin(ang)))
+        , lifeFrames(LIFE)
     {
         setPos(p);
 
@@ -35,40 +33,45 @@ public:
         QPen pen(QColor(0, 0, 0));
         pen.setWidth(2);
         setPen(pen);
-
-        QTimer::singleShot(3000, this, &Bullet::deleteLater);
     }
 
-    void updatePosition()
+    void init(qreal ang, const QPointF& p) {
+        speedV = SPEED * QPointF(qCos(ang), qSin(ang));
+        setPos(p);
+        lifeFrames = LIFE;
+        setVisible(true);
+    }
+
+    // 返回 false 表示子弹应该被销毁/回收
+    bool updatePosition()
     {
-        // 先移动
+        // 1. 生命周期递减
+        lifeFrames--;
+        if (lifeFrames <= 0) {
+            setVisible(false); // 回收时只隐藏，不 removeItem
+            return false;
+        }
+
+        // 2. 正常移动
         this->moveBy(speedV.x(), speedV.y());
 
-        QRectF mapRect = this->scene()->sceneRect(); // 获取地图范围
-        qreal ex = this->x(); // 获取自身在地图上的绝对坐标
+        if (!this->scene()) return false;
+
+        QRectF mapRect = this->scene()->sceneRect();
+        qreal ex = this->x();
         qreal ey = this->y();
-        int selfWidth = this->rect().width(); // 获取自身大小
+        int selfWidth = this->rect().width();
         int selfHeight = this->rect().height();
 
-        // ---------------- 处理 X 轴 ----------------
-        if(ex < mapRect.left()) {
-            this->setPos(mapRect.right() - selfWidth, ey);
+        // 3. 碰到边界直接返回 false 请求回收
+        if (ex < mapRect.left() || ex + selfWidth > mapRect.right()) {
+            return false;
         }
-        else if(ex + selfWidth > mapRect.right()) {
-            this->setPos(mapRect.left(), ey);
+        if (ey < mapRect.top() || ey + selfHeight > mapRect.bottom()) {
+            return false;
         }
 
-        // 重新获取一下现在的坐标（防止因为上面 X 轴传送了，下面的 ex 还是老数据）
-        ex = this->x();
-        ey = this->y();
-
-        // ---------------- 处理 Y 轴 ----------------
-        if(ey < mapRect.top()) {
-            this->setPos(ex, mapRect.bottom() - selfHeight);
-        }
-        else if(ey + selfHeight > mapRect.bottom()) {
-            this->setPos(ex, mapRect.top());
-        }
+        return true; // 存活
     }
 };
 

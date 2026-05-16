@@ -423,7 +423,7 @@ void OpenGLGameView::updateGame() {
     if (moveMode == 0) {
         player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
     } else if (moveMode == 1) {
-        player->mouse3Dmove(mousePos - 0.5*QPointF(width(), height()), 0.05);
+        player->mouse3Dmove(mousePos - 0.5*QPointF(width(), height()));
     }
 
     // [新增特性] 地图是甜甜圈形状，所以玩家和敌人走到边界应该从另一边出来 (Wrap Around)

@@ -7,6 +7,9 @@
 #include <QTimer>
 #include <QPointF>
 #include "Bullet.h"
+#include "BulletPool.h"
+#include "CrescentWave.h"
+#include "PlayerChargeBar.h"
 
 
 class Player: public QGraphicsEllipseItem {
@@ -17,13 +20,13 @@ public:
         bool w, bool a, bool s, bool d, bool up, bool left, bool down, bool right); // 键盘移动
 
     void mouseMove( // 鼠标移动
-        const QPointF posInScene, const double sensibility); // posInScene是相对于左上角坐标
+        const QPointF posInScene); // posInScene是相对于左上角坐标
 
     void mouse3Dmove(
-        const QPointF mouseDiff, const double sensibility);
+        const QPointF mouseDiff);
 
 
-private:
+public:
     double speed = 3.0f;             // 玩家移动速度
     QPointF lastDir = QPointF(1, 0); // 记录最后一次的面朝方向（默认朝右）
 
@@ -35,12 +38,23 @@ public:
     void equipSword(int durationMs); // 装备剑的函数
     QGraphicsRectItem* getSword();   // 获取剑的指针（用于在 GameView 里做碰撞检测）
 
+    // 蓄力条 咖喱棒技能
+    QTimer *chargeBarTimer;
+    PlayerChargeBar *chargeBar;
+    double currProgress;
+    double deltaP;
+    void startCharging(double time_in_s);
+    void onCharging();
+    void launchLochunhin();
+
     // 射击技能
-    const int distPx = 10;
+    const int distPx = 15;
     int fireTimes;     // 记录已射击次数
     int currNum, currInterval;
     QTimer *fireTimer; // 发送射击信号
     void autoFire(int rounds, int interval, int num); // num: 一排子弹个数
+
+
 
 };
 

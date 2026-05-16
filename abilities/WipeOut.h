@@ -18,7 +18,7 @@ public:
     {
         Player *p = dynamic_cast<Player*>(playerTarget);
         if (p) {
-            p->autoFire(6, 500, 6); // 赋予射击
+            p->autoFire(6, 500, 4); // 赋予射击
         }
     }
 
