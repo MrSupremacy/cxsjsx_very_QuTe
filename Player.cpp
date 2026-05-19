@@ -1,5 +1,4 @@
 #include "Player.h"
-#include <math.h>
 #include <QLineF>
 
 
@@ -9,21 +8,27 @@ Player::Player()
     setBrush(QBrush(Qt::white)); // 基础颜色为白色
     setPen(Qt::NoPen); // 移除边框
 
-    // 设置光剑
+    // 光剑技能
     swordItem = new QGraphicsRectItem(0, -1.5, 50, 3, this);
     swordItem->setBrush(Qt::yellow); // 给剑涂成黄色
     swordItem->hide(); // 初始状态隐藏（没吃到技能时没有剑）
     swordItem->setPos(5, 5); // 放到中间位置
 
-    // 创建剑的定时器
     swordTimer = new QTimer();
-    // 当定时器时间到，隐藏这把剑
-    QObject::connect(swordTimer, &QTimer::timeout, [=](){
+    QObject::connect(swordTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这把剑
         swordItem->hide();
     });
     swordTimer->setSingleShot(true); // 设为单次触发模式
 
-    // 射击技能 connect
+    // 蓄力条
+    chargeBar = new PlayerChargeBar(this);
+    chargeBar->setPos({6, 6 - 12});
+    chargeBarTimer = new QTimer();
+    QObject::connect(chargeBarTimer, &QTimer::timeout, [this](){
+        this->onCharging();
+    });
+
+    // 射击技能
     fireTimer = new QTimer(); // 确保 fireTimer 已实例化
     fireTimer->setSingleShot(true); // 设置为单次触发模式
 
@@ -34,15 +39,22 @@ Player::Player()
             ang = qDegreesToRadians(ang);
 
             // 生成 currNum 个子弹
-            QPointF dir = {std::cos(ang), std::sin(ang)};
+            QPointF dir = {-qCos(ang), qSin(ang)};
             QPointF perp = {-dir.y(), dir.x()};
 
-            // 生成 currNum 个子弹
+            // 生成 currNum 个子弹 from 对象池
             for (int var = 0; var < currNum; ++var) {
                 double offset = (var - (currNum - 1) / 2.0) * distPx;
                 QPointF currentPos = this->pos() + perp *offset;
-                Bullet* temp = new Bullet(0, 4, ang, currentPos);
-                this->scene()->addItem(temp);
+
+                // 从对象池获取子弹
+                Bullet* temp = BulletPool::getInstance().getBullet(-ang, currentPos);
+                if (!temp) break;
+
+                // 如果子弹当前不在场景中，才把它加进去：额外检查，理论不会
+                if (temp->scene() != this->scene()) {
+                    this->scene()->addItem(temp);
+                }
             }
 
             if (fireTimes > 0) {
@@ -99,10 +111,10 @@ void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bo
     this->setPos(nextX, nextY);
 }
 
-void Player::mouseMove(const QPointF posInScene, const double sensibility) {
+void Player::mouseMove(const QPointF posInScene) {
     // 1. 手感优化：获取玩家的中心点坐标，而不是左上角
     QRectF pRect = this->rect();
-    QPointF centerPos = this->pos() + QPointF(pRect.width() / 2.0, pRect.height() / 2.0);
+    QPointF centerPos = this->scenePos() + QPointF(pRect.width() / 2.0, pRect.height() / 2.0);
 
     // 计算中心点到鼠标的向量
     const QPointF dirVector = posInScene - centerPos;
@@ -160,7 +172,7 @@ void Player::mouseMove(const QPointF posInScene, const double sensibility) {
     this->setPos(nextX, nextY);
 }
 
-void Player::mouse3Dmove(const QPointF mouseDiff, const double sensibility)
+void Player::mouse3Dmove(const QPointF mouseDiff)
 {
     double L = sqrt(QPointF::dotProduct(mouseDiff, mouseDiff));
     if (L < 30.0) return;
@@ -192,4 +204,33 @@ void Player::autoFire(int rounds, int interval, int num)
     currInterval = interval;
 
     fireTimer->start(interval);
+}
+
+// 蓄力条 咖喱棒
+void Player::startCharging(double time_in_s) {
+    currProgress = 1.0;
+    deltaP = 0.050 / time_in_s;  // 每50ms更新一次
+    chargeBar->setProgress(0.0);
+    chargeBar->setVisible(true);
+    chargeBarTimer->start(50);   // 每50ms更新一次
+}
+
+void Player::onCharging() {
+    currProgress -= deltaP;
+    chargeBar->setProgress(std::min(1.0, 1.0 - currProgress));
+
+    if (currProgress <= 0.0) {
+        chargeBarTimer->stop();
+        chargeBar->setVisible(false);
+
+        launchLochunhin();
+    }
+}
+
+void Player::launchLochunhin()
+{
+    double ang = - QLineF({0, 0}, lastDir).angle();
+    QPointF currentPos = this->pos();
+    CrescentWave* temp = new CrescentWave(ang, currentPos);
+    this->scene()->addItem(temp);
 }

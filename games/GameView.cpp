@@ -5,11 +5,22 @@
 #include <QtMath> // 提供 qSin, qCos 和 M_PI
 #include <QMessageBox>
 
+#include "BulletPool.h"
+#include "Enemy.h"
+#include "Ability.h"
+#include "LightSaber.h"
+#include "Lochunhin.h"
+#include "WipeOut.h"
+
+
 GameView::GameView(const int moveMode)
     : moveMode(moveMode)
 {
     // 基本设置
     setMouseTracking(true);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    // 另外，关闭抗锯齿可以大幅提升性能（如果不需要特别圆滑的边缘）
+    // view->setRenderHint(QPainter::Antialiasing, false);
 
     // 创建场景
     scene = new QGraphicsScene(this);
@@ -28,6 +39,9 @@ GameView::GameView(const int moveMode)
     player->setPos(400, 250); // 放在地图中间
     scene->addItem(player);
 
+    // 初始化 BulletPool
+    BulletPool::getInstance().addToScene(scene);
+
     // 主循环 计时器 60 FPS
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &GameView::updateGame);
@@ -41,7 +55,13 @@ GameView::GameView(const int moveMode)
     // 技能生成 计时器
     abilitySpawnTimer = new QTimer(this);
     connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
-    abilitySpawnTimer->start(8000);
+    abilitySpawnTimer->start(4000);
+}
+
+GameView::~GameView()
+{
+    // 游戏窗口销毁时，清空子弹对象池释放内存
+    // BulletPool::getInstance().clear();
 }
 
 void GameView::mouseMoveEvent(QMouseEvent *event) {
@@ -97,7 +117,7 @@ void GameView::updateGame() {
     if (moveMode == 0) {
         player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
     } else if (moveMode == 1) {
-        player->mouseMove(mousePos, 0.1);
+        player->mouseMove(mousePos);
     }
 
     // 1. 准备一个集合，记录这一帧需要被删除的物体
@@ -122,15 +142,32 @@ void GameView::updateGame() {
         }
         // 子弹逻辑
         else if (Bullet* bullet = dynamic_cast<Bullet*>(item)) {
-            bullet->updatePosition();
+            // 如果 updatePosition 返回 false（撞墙或超时），直接标记待处理并跳过碰撞检测
+            if (!bullet->updatePosition()) {
+                itemsToRemove.insert(bullet);
+                continue;
+            }
 
             // 子弹碰撞检测
             QList<QGraphicsItem*> bulletCollisions = bullet->collidingItems();
-            for (QGraphicsItem* colItem : bulletCollisions) {
+            for (QGraphicsItem* colItem : std::as_const(bulletCollisions)) {
                 if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
-                    // 标记敌人和子弹都要删除
+                    // 标记敌人和子弹都要移除
                     itemsToRemove.insert(e);
                     itemsToRemove.insert(bullet);
+                    break; // 停止检测这个子弹
+                }
+            }
+        }
+        // 咖喱棒剑气碰撞检测
+        else if (CrescentWave* wave = dynamic_cast<CrescentWave*>(item)) {
+            // 已经自己处理移动和碰壁删除了。见 CrescentWave.h
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> waveCollisions = wave->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(waveCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记子弹要删除
+                    itemsToRemove.insert(e);
                     break; // 停止检测这个子弹
                 }
             }
@@ -140,7 +177,7 @@ void GameView::updateGame() {
     // 2. 剑的碰撞检测（同样使用标记法）
     if (player->getSword()->isVisible()) {
         QList<QGraphicsItem*> swordHits = player->getSword()->collidingItems();
-        for (QGraphicsItem* item : swordHits) {
+        for (QGraphicsItem* item : std::as_const(swordHits)) {
             if (Enemy* enemy = dynamic_cast<Enemy*>(item)) {
                 itemsToRemove.insert(enemy);
             }
@@ -149,7 +186,7 @@ void GameView::updateGame() {
 
     // 3. 玩家的碰撞检测
     QList<QGraphicsItem *> playerCollisions = player->collidingItems();
-    for (QGraphicsItem *item : playerCollisions) {
+    for (QGraphicsItem *item : std::as_const(playerCollisions)) {
         if (itemsToRemove.contains(item)) continue; // 如果该物体已被子弹打死，就不算撞到玩家
 
         if (Ability *ability = dynamic_cast<Ability *>(item)) {
@@ -163,10 +200,17 @@ void GameView::updateGame() {
 
     // 4. 最后统一物理销毁（这一步才真正 delete）
     for (QGraphicsItem* item : itemsToRemove) {
-        // 防止重复删除（比如两颗子弹同时打中一个敌人）
+        // 防止重复删除
         if (item->scene() == scene) {
-            scene->removeItem(item);
-            delete item;
+            // 类型判断
+            if (Bullet* b = dynamic_cast<Bullet*>(item)) {
+                // 如果是子弹，不要 delete，把它交还给对象池
+                BulletPool::getInstance().recycle(b);
+            } else {
+                // 如果是敌人等其他物品，按原计划物理移除并销毁
+                scene->removeItem(item);
+                delete item;
+            }
         }
     }
 }
@@ -240,12 +284,26 @@ void GameView::generateAbility() {
         }
     }
 
-    // 生成新技能（目前只是基类，后续通过随机数实现随机生成某个）
-    // TODO
-    // Ability* ability = new LightSaber({spawnX, spawnY}, player);
-    Ability* ability = new WipeOut({spawnX, spawnY}, player);
-    ability->setPos(spawnX, spawnY);
-    scene->addItem(ability);
+    // 生成新技能
+    int randomValue = QRandomGenerator::global()->bounded(3);
+    Ability* ability = nullptr;
+
+    switch (randomValue) {
+    case 0:
+        ability = new LightSaber({spawnX, spawnY}, player);
+        break;
+    case 1:
+        ability = new WipeOut({spawnX, spawnY}, player);
+        break;
+    case 2:
+        ability = new Lochunhin({spawnX, spawnY}, player);
+        break;
+    }
+
+    if (ability) {
+        ability->setPos(spawnX, spawnY);
+        scene->addItem(ability);
+    }
 
 
 }
