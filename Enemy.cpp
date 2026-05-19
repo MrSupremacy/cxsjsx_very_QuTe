@@ -5,7 +5,7 @@
 
 Enemy::Enemy(QGraphicsItem *target) {
     playerTarget = target;
-    setRect(0, 0, 6, 6); // 设置敌人大小
+    setRect(0, 0, 8, 8); // 设置敌人大小
     setBrush(QBrush(Qt::red)); // 基础颜色为红色
     setPen(Qt::NoPen); // 移除边框
 }

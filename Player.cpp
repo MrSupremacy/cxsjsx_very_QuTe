@@ -114,7 +114,7 @@ void Player::mouseMove(const QPointF posInScene, const double sensibility) {
     if (L < 2.0) return;
 
     // 2. 计算位移分量 (跟随鼠标角度)
-    double speedL = speed * L/(L + 15);
+    double speedL = speed * L/(L + 10);
     double dx = dirVector.x() / L * speedL;
     double dy = dirVector.y() / L * speedL;
 

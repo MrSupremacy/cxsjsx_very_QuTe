@@ -18,12 +18,12 @@ public:
     const int damage;
     const int radius;
     const QPointF speedV;
-    inline static const double speed = 3.0;
+    inline static const double speed = 5.0;
 
 public:
     Bullet(int dmg, int r, qreal ang, QPointF& p) // 伤害，半径，弧度制方向角，全局坐标
         : QObject()
-        , QGraphicsEllipseItem(0, 0, 10, 10)
+        , QGraphicsEllipseItem(0, 0, 4, 4)
         , damage(dmg)
         , radius(r)
         , speedV(speed * QPointF(qCos(ang), qSin(ang)))
