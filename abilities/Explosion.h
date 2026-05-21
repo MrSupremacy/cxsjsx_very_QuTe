@@ -3,13 +3,20 @@
 #ifndef EXPLOSION_H
 #define EXPLOSION_H
 
-#include <QGraphicsObject> // 统一使用 QGraphicsObject
-#include <QPainter>
+#include <QObject>
+#include <QGraphicsEllipseItem>
+#include <QBrush>
+#include <QPen>
 #include <QTimer>
 #include <QGraphicsScene>
 
-class Explosion : public QGraphicsObject
-{
+// 同时继承 QObject 和 QGraphicsEllipseItem，这样才能安全使用 QTimer
+class Explosion : public QObject, public QGraphicsEllipseItem {
+    Q_OBJECT // 继承 QObject 最好加上这个宏
+
+private:
+    int lifeSpan; // 存活周期 (毫秒)
+
 public:
     // r 代表半径 (Radius)。
     // 注意这里传给父类的矩形是 (-r, -r, 2*r, 2*r)，这样 Explosion 的坐标中心点 (0,0) 就是圆心！
@@ -24,27 +31,11 @@ public:
         // 传入 this 作为上下文，如果 Explosion 被提前销毁，定时器会自动取消，很安全
         QTimer::singleShot(lifeSpan, this, [this]() {
             if (this->scene()) {
-                this->scene()->removeItem(this);
+                this->scene()->removeItem(this); // 从场景中移除
             }
-            this->deleteLater();
+            this->deleteLater(); // 安全释放内存
         });
     }
-
-    // 必须重写的两个纯虚函数
-    QRectF boundingRect() const override {
-        return QRectF(-radius, -radius, 2 * radius, 2 * radius);
-    }
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
-        Q_UNUSED(option); Q_UNUSED(widget);
-        painter->setRenderHint(QPainter::Antialiasing);
-        painter->setBrush(QColor(255, 50, 50, 150)); // 半透明红色
-        painter->setPen(Qt::NoPen);
-        painter->drawEllipse(boundingRect());
-    }
-
-private:
-    qreal radius;
 };
 
 #endif // EXPLOSION_H

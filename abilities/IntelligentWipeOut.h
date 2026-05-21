@@ -13,7 +13,6 @@ public:
         : Ability(spawnPos, target)
     {
         setBrush(QColor(255, 127, 0));
-        setBrush(QColor(255, 127, 0));
     }
 
     void pickUp() override
