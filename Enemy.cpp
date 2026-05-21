@@ -10,6 +10,8 @@ Enemy::Enemy(QGraphicsItem *target) {
     setRect(0, 0, 8, 8); // 设置敌人大小
     setBrush(QBrush(Qt::red)); // 基础颜色为红色
     setPen(Qt::NoPen); // 移除边框
+
+    this->setData(0, "enemy"); // id 标记，省的 include Enemy 来判断类型
 }
 
 // 常规版本索敌

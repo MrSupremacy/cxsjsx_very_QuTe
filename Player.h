@@ -13,6 +13,7 @@
 #include "CrescentWave.h"
 #include "PlayerChargeBar.h"
 #include "Explosion.h"
+#include "Missile.h"
 
 
 class Player: public QObject, public QGraphicsEllipseItem {
@@ -67,13 +68,15 @@ public:
     void breakShieldAndExplode(int radius = 60, int lifeTime = 1000); // 销毁护盾并产生爆炸
     QGraphicsEllipseItem* getShield();   // 获取护盾的指针（用于在 GameView 里做碰撞检测）
 
-
     // 射击技能
     const int distPx = 15;
     int fireTimes;     // 记录已射击次数
     int currNum, currInterval;
     QTimer *fireTimer; // 发送射击信号
     void autoFire(int rounds, int interval, int num); // num: 一排子弹个数
+
+    // 导弹技能
+    void launchMissile(int n);
 
 
 

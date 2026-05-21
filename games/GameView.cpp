@@ -15,6 +15,7 @@
 #include "WipeOut.h"
 #include "Explosion.h"
 #include "Shield.h"
+#include "IntelligentWipeOut.h"
 #include "Formation.h"
 #include "Arrow.h"
 
@@ -185,6 +186,22 @@ void GameView::updateGame() {
                 }
             }
         }
+        // 导弹碰撞检测
+        else if (Missile* missile = dynamic_cast<Missile*>(item)) {
+            // 已经自己处理移动和碰壁删除了。见 Missile.h
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> missileCollisions = missile->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(missileCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记双方要删除
+                    itemsToRemove.insert(e);
+                    itemsToRemove.insert(missile);
+                    missile->explode();
+                }
+            }
+            if (missile->m_isDead) itemsToRemove.insert(missile);
+        }
+
         // 爆炸区域碰撞检测
         else if (Explosion* explosion = dynamic_cast<Explosion*>(item)) {
             // 清除所有碰到的敌人
@@ -323,7 +340,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = QRandomGenerator::global()->bounded(4);
+    int randomValue = QRandomGenerator::global()->bounded(5);
     Ability* ability = nullptr;
 
     switch (randomValue) {
@@ -338,6 +355,10 @@ void GameView::generateAbility() {
         break;
     case 3:
         ability = new Shield({spawnX, spawnY}, player);
+        break;
+    case 4:
+        ability = new IntelligentWipeOut({spawnX, spawnY}, player);
+        break;
     }
     if (ability) {
         ability->setPos(spawnX, spawnY);

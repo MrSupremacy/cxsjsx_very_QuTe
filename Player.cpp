@@ -2,6 +2,8 @@
 
 #include "Player.h"
 #include <QLineF>
+#include <QRandomGenerator>
+#include <QtMath>   // 用于 std::mt19937 和 std::random_device
 
 
 Player::Player()
@@ -302,4 +304,43 @@ void Player::launchLochunhin()
     QPointF currentPos = this->pos();
     CrescentWave* temp = new CrescentWave(ang, currentPos);
     this->scene()->addItem(temp);
+}
+
+// 导弹
+void Player::launchMissile(int N)
+{
+    QGraphicsScene* sc = scene();
+    if (!sc) return;
+
+    QList<QGraphicsItem*> enemyList;
+
+    const QList<QGraphicsItem*> allItems = sc->items();
+    for (QGraphicsItem* item : allItems) {
+        // 通过 data() 系统判断类型，无需 include 敌人头文件
+        if (item->data(0).toString() == "enemy") {
+            enemyList.append(item);
+        }
+    }
+
+    QRandomGenerator* random = QRandomGenerator::global();
+
+    for (int i = 0; i < N; ++i) {
+        // 无论敌人列表是否为空，都随机生成弧度值 (0 到 2*pi 之间)
+        double ang = random->bounded(360.0);
+
+        QGraphicsItem* target = nullptr;
+
+        // 如果有敌人，随机选择一个作为目标
+        // 当 n 大于敌人数量时，由于每次循环都是独立随机抽取，自然会出现多个导弹锁定同一个目标的情况
+        if (!enemyList.isEmpty()) {
+            int randomIndex = random->bounded(enemyList.size());
+            target = enemyList.at(randomIndex);
+        }
+
+        // 实例化导弹
+        Missile* missile = new Missile(target, ang, this->pos());
+
+        // 将导弹添加到场景中
+        sc->addItem(missile);
+    }
 }

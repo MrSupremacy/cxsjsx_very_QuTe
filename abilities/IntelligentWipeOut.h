@@ -13,13 +13,14 @@ public:
         : Ability(spawnPos, target)
     {
         setBrush(QColor(255, 127, 0));
+        setBrush(QColor(255, 127, 0));
     }
 
     void pickUp() override
     {
         Player *p = dynamic_cast<Player*>(playerTarget);
         if (p) {
-            p->launchMissile(5); // 发射导弹
+            p->launchMissile(8); // 发射导弹
         }
     }
 };
