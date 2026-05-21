@@ -8,11 +8,11 @@ Player::Player()
     setBrush(QBrush(Qt::white)); // 基础颜色为白色
     setPen(Qt::NoPen); // 移除边框
 
-    // 光剑技能
+    // 光剑技能 配置光剑
     swordItem = new QGraphicsRectItem(0, -1.5, 50, 3, this);
     swordItem->setBrush(Qt::yellow); // 给剑涂成黄色
     swordItem->hide(); // 初始状态隐藏（没吃到技能时没有剑）
-    swordItem->setPos(5, 5); // 放到中间位置
+    swordItem->setPos(6, 6); // 放到中间位置
 
     swordTimer = new QTimer();
     QObject::connect(swordTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这把剑
@@ -20,7 +20,7 @@ Player::Player()
     });
     swordTimer->setSingleShot(true); // 设为单次触发模式
 
-    // 蓄力条
+    // 咖喱棒技能 配置蓄力条
     chargeBar = new PlayerChargeBar(this);
     chargeBar->setPos({6, 6 - 12});
     chargeBarTimer = new QTimer();
@@ -28,7 +28,21 @@ Player::Player()
         this->onCharging();
     });
 
-    // 射击技能
+    // 护盾技能 配置护盾
+    shieldItem = new QGraphicsEllipseItem(-10, -10, 20, 20, this);
+    shieldItem->setBrush(Qt::NoBrush); // 无填充
+    shieldItem->setPen(QPen(Qt::darkCyan)); // 涂成淡青色
+    shieldItem->hide();
+    shieldItem->setPos(6, 6); // 放到中间位置
+
+    shieldTimer = new QTimer();
+    QObject::connect(shieldTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这个盾
+        shieldItem->hide();
+        breakShieldAndExplode(); // 盾自己破也要炸
+    });
+    shieldTimer->setSingleShot(true); // 设为单次触发模式
+
+    // 射击技能 配置射击方法
     fireTimer = new QTimer(); // 确保 fireTimer 已实例化
     fireTimer->setSingleShot(true); // 设置为单次触发模式
 
@@ -204,6 +218,39 @@ void Player::autoFire(int rounds, int interval, int num)
     currInterval = interval;
 
     fireTimer->start(interval);
+}
+
+// 护盾技能
+QGraphicsEllipseItem* Player::getShield() {
+    return shieldItem;
+}
+
+void Player::equipShield(int durationMs) {
+    shieldItem->show();
+    shieldTimer->start(durationMs);
+}
+
+void Player::breakShieldAndExplode(int radius, int lifeTime) {
+    // 1. 隐藏盾牌的图形
+    if(shieldItem) {
+        shieldItem->hide();
+    }
+
+    // 2. 停止盾牌的倒计时器
+    if (shieldTimer && shieldTimer->isActive()) {
+        shieldTimer->stop();
+    }
+
+    // 3. 生成爆炸类对象
+    Explosion* boom = new Explosion(radius, lifeTime);
+
+    // 4. 设置爆炸的中心点坐标为玩家的当前坐标
+    boom->setPos(this->pos());
+
+    // 5. 将爆炸对象添加到当前的游戏场景中
+    if (this->scene()) {
+        this->scene()->addItem(boom);
+    }
 }
 
 // 蓄力条 咖喱棒

@@ -11,6 +11,8 @@
 #include "LightSaber.h"
 #include "Lochunhin.h"
 #include "WipeOut.h"
+#include "Explosion.h"
+#include "Shield.h"
 
 
 GameView::GameView(const int moveMode)
@@ -29,7 +31,7 @@ GameView::GameView(const int moveMode)
 
     // 创建背景
     QGraphicsRectItem *backgroundItem = new QGraphicsRectItem(scene->sceneRect());
-    backgroundItem->setBrush(QBrush(Qt::darkGreen)); // 设置为浅灰色
+    backgroundItem->setBrush(QBrush(Qt::lightGray)); // 设置为浅灰色
     backgroundItem->setPen(Qt::NoPen); // 移除边框
     backgroundItem->setZValue(-1); // 设置 Z 值为最低，确保它在所有其他图元的下方
     scene->addItem(backgroundItem);
@@ -166,9 +168,20 @@ void GameView::updateGame() {
             QList<QGraphicsItem*> waveCollisions = wave->collidingItems();
             for (QGraphicsItem* colItem : std::as_const(waveCollisions)) {
                 if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
-                    // 标记子弹要删除
+                    // 标记敌人要删除
                     itemsToRemove.insert(e);
-                    break; // 停止检测这个子弹
+                }
+            }
+        }
+
+        // 爆炸区域碰撞检测
+        else if (Explosion* explosion = dynamic_cast<Explosion*>(item)) {
+            // 清除所有碰到的敌人
+            QList<QGraphicsItem*> explosionCollisions = explosion->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(explosionCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记敌人要删除
+                    itemsToRemove.insert(e);
                 }
             }
         }
@@ -184,7 +197,18 @@ void GameView::updateGame() {
         }
     }
 
-    // 3. 玩家的碰撞检测
+    // 3. 护盾的碰撞检测
+    if (player->getShield()->isVisible()) {
+        QList<QGraphicsItem*> shieldHits = player->getShield()->collidingItems();
+        for (QGraphicsItem* item : std::as_const(shieldHits)) {
+            if (Enemy* enemy = dynamic_cast<Enemy*>(item)) {
+                player->breakShieldAndExplode();
+                break;
+            }
+        }
+    }
+
+    // 4. 玩家的碰撞检测
     QList<QGraphicsItem *> playerCollisions = player->collidingItems();
     for (QGraphicsItem *item : std::as_const(playerCollisions)) {
         if (itemsToRemove.contains(item)) continue; // 如果该物体已被子弹打死，就不算撞到玩家
@@ -285,7 +309,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = QRandomGenerator::global()->bounded(3);
+    int randomValue = QRandomGenerator::global()->bounded(4);
     Ability* ability = nullptr;
 
     switch (randomValue) {
@@ -298,8 +322,9 @@ void GameView::generateAbility() {
     case 2:
         ability = new Lochunhin({spawnX, spawnY}, player);
         break;
+    case 3:
+        ability = new Shield({spawnX, spawnY}, player);
     }
-
     if (ability) {
         ability->setPos(spawnX, spawnY);
         scene->addItem(ability);

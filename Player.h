@@ -10,6 +10,7 @@
 #include "BulletPool.h"
 #include "CrescentWave.h"
 #include "PlayerChargeBar.h"
+#include "Explosion.h"
 
 
 class Player: public QGraphicsEllipseItem {
@@ -32,7 +33,7 @@ public:
 
 
 public:
-    // 光剑技能
+    // 光剑 光剑技能
     QGraphicsRectItem *swordItem;    // 剑的图形
     QTimer *swordTimer;              // 控制剑持续时间的定时器
     void equipSword(int durationMs); // 装备剑的函数
@@ -46,6 +47,14 @@ public:
     void startCharging(double time_in_s);
     void onCharging();
     void launchLochunhin();
+
+    // 护盾 护盾技能
+    QGraphicsEllipseItem *shieldItem; // 护盾图形
+    QTimer *shieldTimer;              // 控制护盾持续时间的定时器
+    void equipShield(int durationMs); // 装备护盾的函数
+    void breakShieldAndExplode(int radius = 60, int lifeTime = 1000); // 销毁护盾并产生爆炸
+    QGraphicsEllipseItem* getShield();   // 获取护盾的指针（用于在 GameView 里做碰撞检测）
+
 
     // 射击技能
     const int distPx = 15;

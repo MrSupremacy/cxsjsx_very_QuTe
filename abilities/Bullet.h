@@ -17,12 +17,12 @@ public:
     int lifeFrames;
 
     inline static const int LIFE = 180;
-    inline static const double SPEED = 3.0;
+    inline static const double SPEED = 4.5;
 
 public:
     Bullet(qreal ang, const QPointF& p) // 伤害，半径，弧度制方向角，全局坐标
         : QObject()
-        , QGraphicsEllipseItem(0, 0, 10, 10)
+        , QGraphicsEllipseItem(0, 0, 8, 8)
         , speedV(SPEED * QPointF(qCos(ang), qSin(ang)))
         , lifeFrames(LIFE)
     {

@@ -30,9 +30,11 @@ HEADERS += \
     abilities/Bullet.h \
     abilities/BulletPool.h \
     abilities/CrescentWave.h \
+    abilities/Explosion.h \
     abilities/LightSaber.h \
     abilities/Lochunhin.h \
     abilities/PlayerChargeBar.h \
+    abilities/Shield.h \
     abilities/WipeOut.h \
     enemy3d.h \
     games/GameView.h \
