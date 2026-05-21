@@ -34,9 +34,11 @@ HEADERS += \
     abilities/Bullet.h \
     abilities/BulletPool.h \
     abilities/CrescentWave.h \
+    abilities/IntelligentWipeOut.h \
     abilities/Explosion.h \
     abilities/LightSaber.h \
     abilities/Lochunhin.h \
+    abilities/Missile.h \
     abilities/PlayerChargeBar.h \
     abilities/Shield.h \
     abilities/WipeOut.h \
