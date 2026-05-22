@@ -22,14 +22,85 @@
 #include "Tetris.h"
 #include "Circle.h"
 
-GameView::GameView(const int moveMode)
-    : moveMode(moveMode)
+GameView::GameView(const DataCarrier& dc)
+    : difficulty(dc.difficulty)
+    , volume(dc.volume)
+    , timeLimited(dc.timeLimited)
+    , maxSeconds(dc.maxSeconds)
+    , moveMode(dc.moveMode)
 {
     // 基本设置
     setMouseTracking(true);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     // 另外，关闭抗锯齿可以大幅提升性能（如果不需要特别圆滑的边缘）
     // view->setRenderHint(QPainter::Antialiasing, false);
+
+    // 创建 计时板、计分板 & 设置样式
+    scoreRecordBoard = new QLabel("Score:    0", this);
+    scoreRecordBoard->setStyleSheet(R"(
+        QLabel {
+           color: white;
+           font-family: 'Consolas';
+           font-size: 16px;
+           font-weight: bold;
+           background-color: rgba(0, 0, 0, 95);
+           border-radius: 5px;
+           padding: 5px;
+        }
+    )");
+
+    QString initT = timeLimited
+        ? QString("%1:%2")
+            .arg(maxSeconds / 60, 2, 10, QChar('0'))
+            .arg(maxSeconds % 60, 2, 10, QChar('0'))
+        : "00:00";
+    timeRecordBoard = new QLabel(initT, this);
+    timeRecordBoard->setStyleSheet(R"(
+        QLabel {
+           color: white;
+           font-family: 'Consolas';
+           font-size: 16px;
+           font-weight: bold;
+           background-color: rgba(0, 0, 0, 95);
+           border-radius: 5px;
+           padding: 5px;
+        }
+    )");
+
+    scoreRecordBoard->setGeometry(10, 10, 120, 30);
+    // 计时 Timer
+    secondTimer = new QTimer(this);
+    // 绑定
+    connect(secondTimer, &QTimer::timeout, this, [&]() {
+        seconds++;
+        QString T = timeLimited
+            ? QString("%1:%2")
+                .arg((maxSeconds -seconds) / 60, 2, 10, QChar('0'))
+                .arg((maxSeconds -seconds) % 60, 2, 10, QChar('0'))
+            : QString("%1:%2")
+                .arg(seconds / 60, 2, 10, QChar('0'))
+                .arg(seconds % 60, 2, 10, QChar('0'));
+        timeRecordBoard->setText(T);
+
+        if (timeLimited && seconds >= maxSeconds)
+        {
+            gameTimer->stop();
+            enemySpawnTimer->stop();
+            abilitySpawnTimer->stop();
+            formationSpawnTimer->stop();
+            secondTimer->stop();
+
+            // 弹出一个提示框告诉玩家游戏结束
+            QMessageBox::information(this, "Game Over", "计时结束！\n点击确定返回主菜单。");
+
+            emit gameEnded({scores, seconds});
+            this->close();
+        }
+    });
+    // 启动
+    secondTimer->start(1000);
+    timeRecordBoard->setGeometry(130, 10, 60, 30);
+
 
     // 创建场景
     scene = new QGraphicsScene(this);
@@ -59,6 +130,8 @@ GameView::GameView(const int moveMode)
     connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
     abilitySpawnTimer->start(8000);
 
+
+    // 阵型生成计时器
     formationSpawnTimer = new QTimer(this);
     connect(formationSpawnTimer, &QTimer::timeout, this, &GameView::spawnFormation);
     formationSpawnTimer->start(10000);
@@ -274,8 +347,19 @@ void GameView::updateGame() {
                 // BulletPool::getInstance().recycle(b);
                 scene->removeItem(b);
                 delete b;
-            } else {
-                // 如果是敌人等其他物品，按原计划物理移除并销毁
+            }
+            else if (item->data(0).toString() == "enemy") {
+                scores++;
+                qDebug() << scores;
+                scoreRecordBoard->setText(
+                    QString("Score: %1").arg(scores, 4, 10, QChar(' '))
+                );
+
+                scene->removeItem(item);
+                delete item;
+            }
+            else {
+                // 如果是其他物品，按原计划物理移除并销毁
                 scene->removeItem(item);
                 delete item;
             }
@@ -479,17 +563,18 @@ void GameView::spawnFormation() {
 
 
 void GameView::gameOver() {
-    // 1. 停止游戏循环和生成敌人的定时器
+    // 停止定时器
     gameTimer->stop();
     enemySpawnTimer->stop();
     abilitySpawnTimer->stop();
     formationSpawnTimer->stop();
+    secondTimer->stop();
 
     // 2. 弹出一个提示框告诉玩家游戏结束（体验更好，不会死得太突兀）
     QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
 
     // 3. 发出“游戏结束”的信号！
-    emit gameEnded();
+    emit gameEnded({scores, seconds});
 
     // 4. 关闭当前游戏窗口（因为我们之前设置了 WA_DeleteOnClose，这里 close() 会自动释放内存）
     this->close();

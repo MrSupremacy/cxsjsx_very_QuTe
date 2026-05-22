@@ -5,7 +5,6 @@
 
 #include <QGraphicsEllipseItem>
 #include <QGraphicsScene>
-#include <QTimer>
 #include <QBrush>
 #include <QColor>
 #include <QPen>

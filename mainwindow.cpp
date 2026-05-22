@@ -4,6 +4,8 @@
 #include "ui_mainwindow.h"
 #include "GameView.h"
 #include "openglgameview.h"
+
+#include "DataCarrier.h"
 #include <QPushButton>
 
 
@@ -19,7 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
         this->hide();
 
         // 2. 创建并显示游戏界面
-        GameView *game = new GameView(moveMode);
+        DataCarrier para = {moveMode, Difficulty, Volume, timeLimited, maxSeconds};
+        GameView *game = new GameView(para);
         //OpenGLGameView *game = new OpenGLGameView(moveMode);
 
 
@@ -27,15 +30,23 @@ MainWindow::MainWindow(QWidget *parent)
         game->setAttribute(Qt::WA_DeleteOnClose);
 
         // 当 game 发出 gameEnded 信号时，执行主界面的 show() 函数重新显示出来
-        connect(game, &GameView::gameEnded, this, &MainWindow::show);
+        connect(game, &GameView::gameEnded, this, [this](EndData ed) {
+            this->show();
+            QString txt = QString("E %1 / %2 S")
+                .arg(ed.score, 4, 10, QChar('0'))
+                .arg(ed.second, 4, 10, QChar('0'));
+            ui->last_score->setText(txt);
+        });
         //connect(game, &OpenGLGameView::gameEnded, this, &MainWindow::show);
+
+        connect(game, &GameView::destroyed, this, &MainWindow::show);
 
         // 设置游戏窗口的大小，并显示出来
         game->resize(900, 600);
         game->show();
     });
 
-    // 控制模式切换按钮
+    // 控制移动模式切换按钮
     connect(ui->move_mode, &QPushButton::clicked, this, [=]() {
         if (moveMode == 0) {
             moveMode = 1;
@@ -48,6 +59,59 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    // 设置 按钮
+    connect(ui->Set, &QPushButton::clicked, this, [=]() {
+        if (settingsMode == 1) {
+            ui->settings->hide();
+            settingsMode = 0;
+        } else {
+            ui->modes->hide();
+            ui->settings->show();
+            settingsMode = 1;
+        }
+    });
+
+    // 模式 按钮
+    connect(ui->Mod, &QPushButton::clicked, this, [=]() {
+        if (settingsMode == 2) {
+            ui->modes->hide();
+            settingsMode = 0;
+        } else {
+            ui->settings->hide();
+            ui->modes->show();
+            settingsMode = 2;
+        }
+    });
+
+    // 游戏模式切换
+    connect(ui->infty_time, &QPushButton::clicked, this, [=]() {
+        ui->infty_time->setStyleSheet("background-color: rgb(189, 17, 77);");
+        ui->limit_time->setStyleSheet("");
+        timeLimited = false;
+    });
+    connect(ui->limit_time, &QPushButton::clicked, this, [=]() {
+        ui->limit_time->setStyleSheet("background-color: rgb(189, 17, 77);");
+        ui->infty_time->setStyleSheet("");
+        timeLimited = true;
+    });
+
+    // 滑块
+    connect(ui->difficulty, &QSlider::valueChanged, this, [=](int value){
+        Difficulty = value;
+    });
+    connect(ui->volume, &QSlider::valueChanged, this, [=](int value){
+        Volume = value / 100.0;
+    });
+    connect(ui->max_seconds, &QSlider::valueChanged, this, [=](int value){
+        maxSeconds = value;
+    });
+
+
+    // 弃用键盘移动
+    ui->move_mode->hide();
+
+    ui->settings->hide();
+    ui->modes->hide();
 }
 
 MainWindow::~MainWindow()

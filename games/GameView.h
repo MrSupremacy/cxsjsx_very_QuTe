@@ -6,13 +6,15 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QTimer>
+#include <QLabel>
 #include "Player.h"
+#include "DataCarrier.h"
 
 
 class GameView: public QGraphicsView {
     Q_OBJECT
 public:
-    GameView(const int moveMode); // 构造函数 加载地图 & 启动游戏
+    GameView(const DataCarrier& dc); // 构造函数 加载地图 & 启动游戏
 
     // 缩放保持 edge 不变
     // const int edge = 100;
@@ -22,10 +24,24 @@ public:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
 
 signals: // 定义信号的关键字
-    void gameEnded(); // 声明一个游戏结束的信号
+    void gameEnded(EndData ed); // 声明一个游戏结束的信号
 
 private:
     QGraphicsScene *scene; // 存储地图实体 & 处理碰撞检测
+
+    // 游戏设置 (以及 moveMode)
+    const int difficulty;   // 难度
+    const double volume;    // 音量 [0, 1]
+    const bool timeLimited; // 是计时模式
+    const int maxSeconds;   // 计时时长
+    int seconds = 0; // 已过时长
+    QTimer *secondTimer;
+    int scores = 0;  // 已得分数
+
+    // 计时板、计分板
+    QLabel *timeRecordBoard;
+    QLabel *scoreRecordBoard;
+
 
     QTimer *gameTimer;  // 每帧刷新（移动、碰撞）
     QTimer *enemySpawnTimer; // 定时生成敌人

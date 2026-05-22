@@ -22,7 +22,7 @@ Player::Player()
     swordItem->hide(); // 初始状态隐藏（没吃到技能时没有剑）
     swordItem->setPos(6, 6); // 放到中间位置
 
-    swordTimer = new QTimer();
+    swordTimer = new QTimer(this);
     QObject::connect(swordTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这把剑
         swordItem->hide();
     });
@@ -31,7 +31,7 @@ Player::Player()
     // 咖喱棒技能 配置蓄力条
     chargeBar = new PlayerChargeBar(this);
     chargeBar->setPos({6, 6 - 12});
-    chargeBarTimer = new QTimer();
+    chargeBarTimer = new QTimer(this);
     QObject::connect(chargeBarTimer, &QTimer::timeout, [this](){
         this->onCharging();
     });
@@ -43,7 +43,7 @@ Player::Player()
     shieldItem->hide();
     shieldItem->setPos(6, 6); // 放到中间位置
 
-    shieldTimer = new QTimer();
+    shieldTimer = new QTimer(this);
     QObject::connect(shieldTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这个盾
         shieldItem->hide();
         breakShieldAndExplode(); // 盾自己破也要炸
@@ -51,7 +51,7 @@ Player::Player()
     shieldTimer->setSingleShot(true); // 设为单次触发模式
 
     // 射击技能 配置射击方法
-    fireTimer = new QTimer(); // 确保 fireTimer 已实例化
+    fireTimer = new QTimer(this); // 确保 fireTimer 已实例化
     fireTimer->setSingleShot(true); // 设置为单次触发模式
 
     QObject::connect(fireTimer, &QTimer::timeout, [&]() mutable {
