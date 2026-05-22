@@ -4,9 +4,9 @@
 #define ENEMY_H
 
 // Enemy.h
-#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
 
-class Enemy : public QGraphicsRectItem {
+class Enemy : public QGraphicsEllipseItem {
 public:
     Enemy(QGraphicsItem *target); // 传入玩家作为目标
     void moveTowardsTarget(); // 朝玩家移动
