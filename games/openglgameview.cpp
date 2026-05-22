@@ -5,8 +5,19 @@
 #include <QRandomGenerator>
 #include <QtMath>
 #include <QMessageBox>
+#include <QColor>
 #include <QOpenGLContext>
-#include <QPainter>
+#include <QOpenGLPaintDevice>
+
+#include "BulletPool.h"
+#include "Enemy.h"
+#include "Ability.h"
+#include "LightSaber.h"
+#include "Lochunhin.h"
+#include "WipeOut.h"
+#include "Explosion.h"
+#include "Shield.h"
+#include "IntelligentWipeOut.h"
 
 
 const char* fragmentShaderSource = R"(
@@ -171,299 +182,219 @@ void main() {
 }
 )";
 
-const char* vertexShaderSource = R"(
-#version 440 core
-layout (location = 0) in vec2 aPos;
-void main() {
-    gl_Position = vec4(aPos, 0.0, 1.0);
-}
-)";
-
 
 OpenGLGameView::OpenGLGameView(const int moveMode)
     : moveMode(moveMode)
 {
-    // 基本设置
-    setMouseTracking(true);
-
-    // 1. 设置 QOpenGLWidget 为视口 (替代原本的 CPU 绘制)
+    // 1. 设置 OpenGL 视口，激活硬件加速
     QOpenGLWidget *glWidget = new QOpenGLWidget(this);
     setViewport(glWidget);
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate); // 每帧完全重绘
     glWidget->setMouseTracking(true);
 
-    // 去掉滚动条
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setMouseTracking(true);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-    // 2. 创建场景并设置透明背景
+    // 创建场景
     scene = new QGraphicsScene(this);
-    scene->setBackgroundBrush(Qt::transparent); // 关键：让底下的 OpenGL 露出来
+    scene->setSceneRect(edge, edge, width() - edge, height() - edge);
     setScene(scene);
 
     // 创建玩家
     player = new Player();
-    player->setPos(400, 300);
+    player->setPos(400, 250);
     scene->addItem(player);
 
-    // 启动时间
-    m_elapsedTimer.start();
+    BulletPool::getInstance().addToScene(scene);
 
-    // 游戏主循环 (不仅更新逻辑，还要触发重绘)
+    // 计时器设置
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &OpenGLGameView::updateGame);
     gameTimer->start(16);
 
     enemySpawnTimer = new QTimer(this);
     connect(enemySpawnTimer, &QTimer::timeout, this, &OpenGLGameView::spawnEnemy);
-    enemySpawnTimer->start(2000);
+    enemySpawnTimer->start(3000);
+
+    abilitySpawnTimer = new QTimer(this);
+    connect(abilitySpawnTimer, &QTimer::timeout, this, &OpenGLGameView::generateAbility);
+    abilitySpawnTimer->start(4000);
 }
 
 OpenGLGameView::~OpenGLGameView() {
-    if (m_glInitialized) {
+    // 将 viewport 转换为 QOpenGLWidget 指针
+    QOpenGLWidget *glWidget = qobject_cast<QOpenGLWidget*>(viewport());
+    if (glWidget) {
+        glWidget->makeCurrent(); // 激活当前视口的 OpenGL 上下文
+
+        if (m_fbo) {
+            delete m_fbo;
+            m_fbo = nullptr;
+        }
         m_vao.destroy();
         m_vbo.destroy();
+
+        glWidget->doneCurrent(); // 释放上下文
     }
 }
 
-// 保证 Scene 和 View 永远一样大
-void OpenGLGameView::resizeEvent(QResizeEvent *event) {
-    QGraphicsView::resizeEvent(event);
-    scene->setSceneRect(0, 0, width(), height());
+// ---------------------------------------------------------
+// 核心改动 1：初始化 OpenGL 顶点与着色器
+// ---------------------------------------------------------
+void OpenGLGameView::initializeShader() {
+    initializeOpenGLFunctions();
+
+    // 顶点着色器：直接把全屏矩形画在屏幕上
+    const char *vsrc = R"(
+#version 440 core
+layout (location = 0) in vec4 aPosTex;
+out vec2 TexCoords;
+void main() {
+    gl_Position = vec4(aPosTex.x, aPosTex.y, 0.0, 1.0);
+    TexCoords = vec2(aPosTex.z, aPosTex.w);
 }
+    )";
 
-// ---------------------------------------------------------
-// OpenGL 渲染逻辑
-// ---------------------------------------------------------
-void OpenGLGameView::initShader() {
-    QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
+    const char *fsrc = R"(
+#version 440 core
+out vec4 FragColor;
+in vec2 TexCoords;
 
-    // 编译 Shader
-    m_shaderProgram.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-    m_shaderProgram.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
-    m_shaderProgram.link();
+uniform sampler2D screenTexture;
+uniform vec2 Pp;
 
-    // 准备全屏覆盖的两个三角形 (Triangle Strip)
-    float vertices[] = {
-        -1.0f,  1.0f, // 左上
-        -1.0f, -1.0f, // 左下
-        1.0f,  1.0f, // 右上
-        1.0f, -1.0f  // 右下
+void main() {
+    vec4 col = texture(screenTexture, TexCoords);
+    col.rgb = vec3(1.0) - col.rgb;
+    if (length(gl_FragCoord.xy - Pp) < 6.0) {
+        col = vec4(vec3(0.2), 1.0);
+    }
+    FragColor = col;
+}
+    )";
+
+    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vsrc);
+    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fsrc);
+    m_program.link();
+
+    // 准备一个覆盖全屏的矩形 (x, y, u, v)
+    float quadVertices[] = {
+        // 位置 (x,y)   // 纹理坐标 (u,v)
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f
     };
 
     m_vao.create();
     m_vao.bind();
-
     m_vbo.create();
     m_vbo.bind();
-    m_vbo.allocate(vertices, sizeof(vertices));
+    m_vbo.allocate(quadVertices, sizeof(quadVertices));
 
-    m_shaderProgram.bind();
-    m_shaderProgram.enableAttributeArray(0);
-    m_shaderProgram.setAttributeBuffer(0, GL_FLOAT, 0, 2);
-
+    m_program.bind();
+    m_program.enableAttributeArray(0);
+    m_program.setAttributeBuffer(0, GL_FLOAT, 0, 4, 4 * sizeof(float));
+    m_program.release();
     m_vao.release();
-    m_vbo.release();
-    m_shaderProgram.release();
+
+    m_glInitialized = true;
 }
 
-QVector3D OpenGLGameView::mapToTorus(const QPointF& pos) {
-    // 1. 将窗口坐标归一化到 [0, 2*PI] 的角度
-    qreal phi = (pos.x() / width()) * 2.0 * M_PI;   // 对应Shader中的t2 (大圆角度)
-    qreal theta = (pos.y() / height()) * 2.0 * M_PI; // 对应Shader中的t1 (小圆角度)
+// ---------------------------------------------------------
+// 拦截绘制事件，实现 FBO -> Shader 链路
+// ---------------------------------------------------------
+void OpenGLGameView::paintEvent(QPaintEvent *event)
+{
+    // 保持使用真实的 dpr 计算高清物理尺寸
+    const qreal dpr = viewport()->devicePixelRatioF();
+    QSize physicalSize = viewport()->size() * dpr;
 
-    // 2. 使用环面的参数方程计算3D坐标
-    // (注意：为了匹配Shader中 y-z平面旋转t1, x-z平面旋转t2 的方式，参数方程需要对应)
-    // 初始点在 x-y 平面，绕 y 轴转 (小圆)
-    qreal x_local = TORUS_R + TORUS_r * qCos(theta);
-    qreal y_local = TORUS_r * qSin(theta);
+    QPainter painter(viewport());
+    painter.beginNativePainting(); // 暂停 QPainter，接管 OpenGL 底层
 
-    // 再绕 y 轴转 (大圆)
-    qreal x_world = x_local * qCos(phi);
-    qreal z_world = x_local * qSin(phi);
-    qreal y_world = y_local;
+    // 1. 初始化 Shader 和缓冲
+    if (!m_glInitialized) {
+        initializeShader();
+    }
 
-    return QVector3D(x_world, y_world, z_world);
+    // 2. 动态维护 FBO 的尺寸（窗口改变大小时重新生成）
+    if (!m_fbo || m_fbo->size() != physicalSize) {
+        if (m_fbo) delete m_fbo;
+        QOpenGLFramebufferObjectFormat format;
+        format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+        m_fbo = new QOpenGLFramebufferObject(physicalSize, format);
+    }
+
+    // ==========================================
+    // 第一阶段：让 CPU 发出指令，GPU 把场景画到 FBO
+    // ==========================================
+    m_fbo->bind();
+    glViewport(0, 0, physicalSize.width(), physicalSize.height());
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    QOpenGLPaintDevice device(m_fbo->size());
+    QPainter fboPainter(&device);
+    fboPainter.setRenderHint(QPainter::Antialiasing, false);
+
+    // 此时 this->render 会自动将逻辑视口等比放大填满物理尺寸的 FBO
+    this->render(&fboPainter);
+
+    fboPainter.end();
+    m_fbo->release();
+
+    // ==========================================
+    // 第二阶段：把 FBO 当作纹理，喂给你的自定义 Shader
+    // ==========================================
+    glViewport(0, 0, physicalSize.width(), physicalSize.height());
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_program.bind();
+    // Uniform IS HERE
+    m_program.setUniformValue("screenTexture", 0);
+
+    // 1. 获取玩家在其自身坐标系下的中心点
+    QPointF localCenter = player->rect().center();
+    // 2. 将玩家中心点映射到【场景坐标系】(Scene)
+    QPointF sceneCenter = player->mapToScene(localCenter);
+    // 3. 利用 QGraphicsView 自带的方法，将【场景坐标】精确转换为【视口逻辑坐标】(Viewport)
+    // 这步会自动扣除 edge 以及任何视口的偏移
+    QPointF viewportCenter = mapFromScene(sceneCenter);
+    // 4. 将【视口逻辑坐标】乘以 dpr，转换为【OpenGL 物理像素坐标】
+    QPointF physicalCenter = viewportCenter * dpr;
+    // 5. 翻转 Y 轴以匹配 OpenGL 坐标系 (左下角为原点)
+    physicalCenter.setY(physicalSize.height() - physicalCenter.y());
+    m_program.setUniformValue("Pp", physicalCenter);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_fbo->texture());
+
+    m_vao.bind();
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // 画出全屏矩形
+    m_vao.release();
+
+    m_program.release();
+
+    painter.endNativePainting(); // 归还控制权
+}
+
+
+
+void OpenGLGameView::resizeEvent(QResizeEvent *event) {
+    QGraphicsView::resizeEvent(event);
+    scene->setSceneRect(edge, edge, width() - edge, height() - edge);
 }
 
 void OpenGLGameView::drawBackground(QPainter *painter, const QRectF &rect) {
-    painter->beginNativePainting();
-
-    QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
-
-    // -------------------------------------------------------------
-    // 【核心修复 1】暴力关闭 Qt QPainter 残留的各种测试和遮罩！
-    // -------------------------------------------------------------
-    gl->glDisable(GL_SCISSOR_TEST);  // 关闭矩形裁剪
-    gl->glDisable(GL_STENCIL_TEST);  // 关闭模板测试（解决“圆”的罪魁祸首）
-    gl->glDisable(GL_DEPTH_TEST);    // 关闭深度测试
-    gl->glDisable(GL_CULL_FACE);     // 关闭面剔除
-    gl->glDisable(GL_BLEND);         // 关闭混合
-
-    // -------------------------------------------------------------
-    // 【核心修复 2】重新映射视口，适配高分屏 (DPI 缩放)
-    // -------------------------------------------------------------
-    qreal dpr = window()->devicePixelRatio();
-    gl->glViewport(0, 0, width() * dpr, height() * dpr);
-
-    if (!m_glInitialized) {
-        initShader();
-        m_glInitialized = true;
-    }
-
-    gl->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    m_shaderProgram.bind();
-
-    // 传入 Uniform 变量
-    m_shaderProgram.setUniformValue("playerPos", dpr*QVector2D(player->x(), player->y()));
-    m_shaderProgram.setUniformValue("iResolution", dpr*QVector2D(width(), height()));
-
-    m_shaderProgram.setUniformValue("iTime", (float)(m_elapsedTimer.elapsed()) / 1000.0f);
-
-    m_shaderProgram.setUniformValue("uCameraDist", CAMERA_DIST);
-    // 根据在 .h 文件中定义的 FOV (视场角) 来计算缩放因子
-    // 公式是: zoom = 1.0 / tan(fov_in_radians / 2.0)
-    float fov_rad = qDegreesToRadians(CAMERA_FOV);
-    float zoom_factor = 1.0f / tan(fov_rad / 2.0f);
-    m_shaderProgram.setUniformValue("uCameraZoom", zoom_factor);
-
-    m_shaderProgram.setUniformValue("TORUS_R", (float)TORUS_R);
-    m_shaderProgram.setUniformValue("TORUS_r", (float)TORUS_r);
-
-    m_vao.bind();
-    gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    m_vao.release();
-    m_shaderProgram.release();
-
-    // 恢复 Qt 的绘制状态
-    painter->endNativePainting();
-}
-
-// 我们不再使用 QGraphicsScene 的自动绘制，所以需要重写 drawForeground
-// drawForeground 在 drawBackground 之后，在滚动条等前景元素之前绘制
-void OpenGLGameView::drawForeground(QPainter *painter, const QRectF &rect)
-{
-    Q_UNUSED(rect);
-
-    if (!player) return;
-
-    // --- 1. 设置3D摄像机 ---
-    // 摄像机位置由玩家的2D逻辑位置决定
-    QPointF playerPos = player->pos();
-    QVector3D player3DPos = mapToTorus(playerPos);
-
-    // 计算玩家位置的法线 (向外)
-    qreal phi = (playerPos.x() / width()) * 2.0 * M_PI;
-    QVector3D R_vec(TORUS_R * qCos(phi), 0, TORUS_R * qSin(phi));
-    QVector3D playerNormal = (player3DPos - R_vec).normalized();
-
-    // 直接使用头文件中的距离
-    float cameraDist = CAMERA_DIST;
-    QVector3D cameraPos = player3DPos + playerNormal * cameraDist;
-    QVector3D cameraTarget = player3DPos;
-
-    QVector3D upVector = mapToTorus(playerPos + QPointF(0, height()*0.25)); // 全局向上向量
-    upVector = (upVector - R_vec).normalized();
-
-    // 创建视图矩阵
-    QMatrix4x4 viewMatrix;
-    viewMatrix.lookAt(cameraPos, cameraTarget, upVector);
-
-    // 创建投影矩阵
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.perspective(CAMERA_FOV, (float)width() / height(), 0.1f, 100.0f);
-
-    // --- 2. 绘制玩家 (始终在屏幕中心) ---
-    painter->setBrush(Qt::green); // 玩家颜色
-    painter->setPen(Qt::NoPen);
-    qreal playerSize = player->rect().width();
-    painter->drawRect(width()/2.0 - playerSize/2.0, height()/2.0 - playerSize/2.0, playerSize, playerSize);
-
-
-    // --- 3. 绘制所有敌人 ---
-    painter->setBrush(Qt::red); // 敌人颜色
-    for (QGraphicsItem *item : scene->items()) {
-        Enemy3D *enemy3d = dynamic_cast<Enemy3D*>(item);
-        if (!enemy3d) continue;
-
-        // 获取敌人的3D世界坐标
-        QVector3D enemy3DPos = mapToTorus(enemy3d->pos());
-
-        // QVector3D toEnemy = (enemy3DPos - player3DPos).normalized();
-        // // playerNormal是摄像机朝向的反方向
-        // if (QVector3D::dotProduct(toEnemy, -playerNormal) < 0.1) { // 0.1作为阈值，避免在边缘闪烁
-        //     continue; // 敌人在背面，不绘制
-        // }
-
-        // 将敌人的3D世界坐标变换到2D屏幕坐标
-        QMatrix4x4 modelMatrix; // 单位矩阵，因为我们的坐标已经是世界坐标
-        QVector3D screenPos = (projectionMatrix * viewMatrix * modelMatrix) * enemy3DPos;
-
-        // 归一化设备坐标 (NDC) [-1, 1] -> 视口坐标 [0, w] & [0, h]
-        if (screenPos.z() < 1.0f) { // 简单的裁剪
-            qreal x = (screenPos.x() + 1.0) / 2.0 * width();
-            qreal y = (1.0 - screenPos.y()) / 2.0 * height(); // Y轴反转
-
-            // 根据距离调整大小 (简单的透视效果)
-            qreal dist = (enemy3DPos - cameraPos).length();
-            qreal scale = 10.0 / dist; // 调整这个20.0来控制大小
-            qreal enemySize = enemy3d->rect().width() * scale;
-
-            painter->drawRect(x - enemySize/2.0, y - enemySize/2.0, enemySize, enemySize);
-        }
+    painter->fillRect(rect, QColor(128, 128, 128));
+    QRectF sRect = sceneRect();
+    QRectF intersectRect = rect.intersected(sRect);
+    if (!intersectRect.isEmpty()) {
+        painter->fillRect(intersectRect, QColor(191, 191, 191));
     }
 }
 
-// ---------------------------------------------------------
-// 游戏逻辑 (保持 2D 的简单性，但增加边缘环绕)
-// ---------------------------------------------------------
-void OpenGLGameView::updateGame() {
-    // 1. 移动玩家
-    if (moveMode == 0) {
-        player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
-    } else if (moveMode == 1) {
-        player->mouse3Dmove(mousePos - 0.5*QPointF(width(), height()));
-    }
-
-    // [新增特性] 地图是甜甜圈形状，所以玩家和敌人走到边界应该从另一边出来 (Wrap Around)
-    int mapW = width();
-    int mapH = height();
-    if(player->x() < 0) player->setX(player->x() + mapW);
-    if(player->x() > mapW) player->setX(player->x() - mapW);
-    if(player->y() < 0) player->setY(player->y() + mapH);
-    if(player->y() > mapH) player->setY(player->y() - mapH);
-
-    // 2. 敌人逻辑
-    QList<QGraphicsItem *> items = scene->items();
-    for (QGraphicsItem *item : std::as_const(items)) {
-        Enemy3D *enemy3d = dynamic_cast<Enemy3D*>(item);
-        if (enemy3d) {
-            enemy3d->moveTowardsTarget();
-            // 敌人也遵循甜甜圈边界法则
-            if(enemy3d->x() < 0) enemy3d->setX(enemy3d->x() + mapW);
-            if(enemy3d->x() > mapW) enemy3d->setX(enemy3d->x() - mapW);
-            if(enemy3d->y() < 0) enemy3d->setY(enemy3d->y() + mapH);
-            if(enemy3d->y() > mapH) enemy3d->setY(enemy3d->y() - mapH);
-        }
-    }
-
-    // 3. 碰撞检测
-    QList<QGraphicsItem *> collisions = player->collidingItems();
-    for (QGraphicsItem *item : std::as_const(collisions)) {
-        if (dynamic_cast<Enemy3D*>(item)) {
-            gameOver();
-            return;
-        }
-    }
-
-    // 必须调用！强制刷新视口，否则如果没有 2D 物品移动，Shader动画会卡住
-    viewport()->update();
-}
-
-// 鼠标、按键等事件逻辑与原来完全一致...
 void OpenGLGameView::mouseMoveEvent(QMouseEvent *event) {
     mousePos = mapToScene(event->pos());
     QGraphicsView::mouseMoveEvent(event);
@@ -499,35 +430,256 @@ void OpenGLGameView::keyReleaseEvent(QKeyEvent *event) {
     QGraphicsView::keyReleaseEvent(event);
 }
 
+void OpenGLGameView::updateGame() {
+    // 移动玩家
+    if (moveMode == 0) {
+        player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
+    } else if (moveMode == 1) {
+        player->mouseMove(mousePos);
+    }
+
+    // 1. 准备一个集合，记录这一帧需要被删除的物体
+    QSet<QGraphicsItem*> itemsToRemove;
+
+    // 获取场景所有物体
+    QList<QGraphicsItem *> items = scene->items();
+
+    // 第一遍遍历：逻辑更新与碰撞记录
+    for (QGraphicsItem *item : std::as_const(items)) {
+        // 【关键】如果这个物体在之前的逻辑里已经被标为删除了，直接跳过
+        if (itemsToRemove.contains(item)) continue;
+
+        // 敌人移动
+        if (Enemy *enemy = dynamic_cast<Enemy*>(item)) {
+            enemy->moveTowardsTarget();
+            enemy->teleportThroughWall();
+        }
+        // 技能浮动
+        else if (Ability* ability = dynamic_cast<Ability*>(item)) {
+            ability->updateFloating();
+        }
+        // 子弹逻辑
+        else if (Bullet* bullet = dynamic_cast<Bullet*>(item)) {
+            // 如果 updatePosition 返回 false（撞墙或超时），直接标记待处理并跳过碰撞检测
+            if (!bullet->updatePosition()) {
+                itemsToRemove.insert(bullet);
+                continue;
+            }
+
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> bulletCollisions = bullet->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(bulletCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记敌人和子弹都要移除
+                    itemsToRemove.insert(e);
+                    itemsToRemove.insert(bullet);
+                    break; // 停止检测这个子弹
+                }
+            }
+        }
+        // 咖喱棒剑气碰撞检测
+        else if (CrescentWave* wave = dynamic_cast<CrescentWave*>(item)) {
+            // 已经自己处理移动和碰壁删除了。见 CrescentWave.h
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> waveCollisions = wave->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(waveCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记敌人要删除
+                    itemsToRemove.insert(e);
+                }
+            }
+        }
+        // 导弹碰撞检测
+        else if (Missile* missile = dynamic_cast<Missile*>(item)) {
+            // 已经自己处理移动和碰壁删除了。见 Missile.h
+            // 子弹碰撞检测
+            QList<QGraphicsItem*> missileCollisions = missile->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(missileCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记双方要删除
+                    itemsToRemove.insert(e);
+                    itemsToRemove.insert(missile);
+                    missile->explode();
+                }
+            }
+            if (missile->m_isDead) itemsToRemove.insert(missile);
+        }
+
+        // 爆炸区域碰撞检测
+        else if (Explosion* explosion = dynamic_cast<Explosion*>(item)) {
+            // 清除所有碰到的敌人
+            QList<QGraphicsItem*> explosionCollisions = explosion->collidingItems();
+            for (QGraphicsItem* colItem : std::as_const(explosionCollisions)) {
+                if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
+                    // 标记敌人要删除
+                    itemsToRemove.insert(e);
+                }
+            }
+        }
+    }
+
+    // 2. 剑的碰撞检测（同样使用标记法）
+    if (player->getSword()->isVisible()) {
+        QList<QGraphicsItem*> swordHits = player->getSword()->collidingItems();
+        for (QGraphicsItem* item : std::as_const(swordHits)) {
+            if (Enemy* enemy = dynamic_cast<Enemy*>(item)) {
+                itemsToRemove.insert(enemy);
+            }
+        }
+    }
+
+    // 3. 护盾的碰撞检测
+    if (player->getShield()->isVisible()) {
+        QList<QGraphicsItem*> shieldHits = player->getShield()->collidingItems();
+        for (QGraphicsItem* item : std::as_const(shieldHits)) {
+            if (item->data(0).toString() == "enemy") {
+                player->breakShieldAndExplode();
+                break;
+            }
+        }
+    }
+
+    // 4. 玩家的碰撞检测
+    QList<QGraphicsItem *> playerCollisions = player->collidingItems();
+    for (QGraphicsItem *item : std::as_const(playerCollisions)) {
+        if (itemsToRemove.contains(item)) continue; // 如果该物体已被子弹打死，就不算撞到玩家
+
+        if (Ability *ability = dynamic_cast<Ability *>(item)) {
+            ability->pickUp();
+            itemsToRemove.insert(ability);
+        } else if (dynamic_cast<Enemy*>(item)) {
+            gameOver();
+            return;
+        }
+    }
+
+    // 4. 最后统一物理销毁（这一步才真正 delete）
+    for (QGraphicsItem* item : itemsToRemove) {
+        // 防止重复删除
+        if (item->scene() == scene) {
+            // 类型判断
+            if (Bullet* b = dynamic_cast<Bullet*>(item)) {
+                // 如果是子弹，不要 delete，把它交还给对象池
+                // BulletPool::getInstance().recycle(b);
+                scene->removeItem(b);
+                delete b;
+            } else {
+                // 如果是敌人等其他物品，按原计划物理移除并销毁
+                scene->removeItem(item);
+                delete item;
+            }
+        }
+    }
+
+    viewport()->update();
+}
+
 void OpenGLGameView::spawnEnemy() {
-    // 逻辑与你写的完全一致 (省略...)
     if(!player) return;
-    qreal px = player->x(), py = player->y();
-    qreal spawnX = 0, spawnY = 0;
+
+    qreal px = player->x();
+    qreal py = player->y();
+
+    qreal spawnX = 0;
+    qreal spawnY = 0;
     bool validPos = false;
 
-    for(int i = 0; i < spawn_num; i ++) {
+    // 循环生成坐标，直到生成的坐标在地图范围内
+    // 假设你的地图 (Scene) 大小是 800 x 500
+
+    for(int i = 0; i < spawnNum; i ++) {
         while (!validPos) {
+            // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
             qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
-            qreal distance = 100.0 + QRandomGenerator::global()->generateDouble() * 300.0;
+
+            // 这样敌人就会刷在距离玩家 150 到 600 的环形区域内
+            qreal distance = 150.0 + QRandomGenerator::global()->generateDouble() * 400.0;
+
+            // 根据极坐标公式算出生成的 X 和 Y 坐标
             spawnX = px + distance * qCos(angle);
             spawnY = py + distance * qSin(angle);
 
-            // 放宽出生点判断，因为现在是甜甜圈循环地图
-            validPos = true;
+            // 检查生成的坐标是否在地图内部
+            // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
+            if (spawnX >= edge && spawnX <= scene->width() +edge
+                && spawnY >= edge && spawnY <= scene->height() +edge) {
+                validPos = true;
+            }
         }
 
-        Enemy3D *enemy3d = new Enemy3D(player, width(), height()); // 传入地图大小
-        enemy3d->setPos(spawnX, spawnY);
-        scene->addItem(enemy3d);
+        // 在合法坐标处生成并添加敌人
+        Enemy *enemy = new Enemy(player);
+        enemy->setPos(spawnX, spawnY); // 使用刚刚算出的安全坐标
+        scene->addItem(enemy);
         validPos = false;
     }
 }
 
+void OpenGLGameView::generateAbility() {
+    if(!player) return;
+
+    qreal px = player->x();
+    qreal py = player->y();
+
+    qreal spawnX = 0;
+    qreal spawnY = 0;
+    bool validPos = false;
+
+    // 找到合适的位置生成
+    while (!validPos) {
+        // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
+        qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
+
+        // 这样技能就会刷在距离玩家 200 到 700 的环形区域内
+        qreal distance = 200.0 + QRandomGenerator::global()->generateDouble() * 500.0;
+
+        // 根据极坐标公式算出生成的 X 和 Y 坐标
+        spawnX = px + distance * qCos(angle);
+        spawnY = py + distance * qSin(angle);
+
+        // 检查生成的坐标是否在地图内部
+        // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
+        if (spawnX >= edge && spawnX <= scene->width() +edge
+            && spawnY >= edge && spawnY <= scene->height() +edge) {
+            validPos = true;
+        }
+    }
+
+    // 生成新技能
+    int randomValue = QRandomGenerator::global()->bounded(5);
+    Ability* ability = nullptr;
+
+    switch (randomValue) {
+    case 0:
+        ability = new LightSaber({spawnX, spawnY}, player);
+        break;
+    case 1:
+        ability = new WipeOut({spawnX, spawnY}, player);
+        break;
+    case 2:
+        ability = new Lochunhin({spawnX, spawnY}, player);
+        break;
+    case 3:
+        ability = new Shield({spawnX, spawnY}, player);
+        break;
+    case 4:
+        ability = new IntelligentWipeOut({spawnX, spawnY}, player);
+        break;
+    }
+    if (ability) {
+        ability->setPos(spawnX, spawnY);
+        scene->addItem(ability);
+    }
+}
+
 void OpenGLGameView::gameOver() {
+    // 停止游戏循环和生成敌人的定时器
     gameTimer->stop();
     enemySpawnTimer->stop();
+    abilitySpawnTimer->stop();
+
     QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
+
     emit gameEnded();
     this->close();
 }

@@ -28,6 +28,7 @@ public:
         , speedV(SPEED * QPointF(qCos(ang), qSin(ang)))
         , lifeFrames(LIFE)
     {
+        this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
         setPos(p);
 
         setBrush(QBrush(QColor(1, 251, 255)));

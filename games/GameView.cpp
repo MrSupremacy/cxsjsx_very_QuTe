@@ -343,8 +343,6 @@ void GameView::generateAbility() {
         ability->setPos(spawnX, spawnY);
         scene->addItem(ability);
     }
-
-
 }
 
 void GameView::spawnFormation() {

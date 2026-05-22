@@ -21,7 +21,7 @@ public:
     // r 代表半径 (Radius)。
     // 注意这里传给父类的矩形是 (-r, -r, 2*r, 2*r)，这样 Explosion 的坐标中心点 (0,0) 就是圆心！
     Explosion(qreal r, int time) : QGraphicsEllipseItem(-r, -r, 2 * r, 2 * r), lifeSpan(time) {
-
+        this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
         // 1. 设置外观 (比如半透明的红色，代表爆炸伤害区)
         this->setBrush(QColor(255, 50, 50, 150)); // R, G, B, Alpha(透明度)
         this->setPen(Qt::NoPen);                  // 不需要边框

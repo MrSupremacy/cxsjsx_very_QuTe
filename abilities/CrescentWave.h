@@ -20,6 +20,8 @@ public:
     CrescentWave(qreal angle, QPointF startPos, QGraphicsItem *parent = nullptr)
         : QGraphicsObject(parent), m_isDead(false)
     {
+        this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
         setPos(startPos);
         setRotation(angle);
 

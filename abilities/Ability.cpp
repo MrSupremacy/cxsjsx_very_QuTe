@@ -8,7 +8,8 @@
 Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
     : playerTarget(target), anchorPos(spawnPos)
 {
-    // 1. 设置外观
+    this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
     // 设定一个直径为 20 的圆，圆心位于 (0,0)
     setRect(-7.5, -7.5, 15, 15);
     setBrush(QBrush(Qt::yellow)); // 基础颜色为黄色
@@ -17,7 +18,6 @@ Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
     // 2. 设置初始位置
     setPos(anchorPos);
 
-    // 3. 初始化悬浮参数
     // 让每个技能的初始角度随机，这样多个技能同时存在时，不会“神同步”晃动
     angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
     floatRange = 10.0; // 在锚点上下 10 像素范围内晃动

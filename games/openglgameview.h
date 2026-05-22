@@ -6,72 +6,67 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QTimer>
-#include <QElapsedTimer>
+#include <QOpenGLWidget>
 #include <QOpenGLFunctions>
-#include <QtOpenGL/QOpenGLShaderProgram>
-#include <QtOpenGL/QOpenGLFunctions_4_4_Core>
-#include <QtOpenGL/QOpenGLVertexArrayObject>
-#include <QtOpenGL/QOpenGLBuffer>
-#include <QtOpenGLWidgets/QOpenGLWidget>
-#include <QMatrix4x4>
-#include <QVector3D>
-
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
 #include "Player.h"
-#include "enemy3d.h"
 
-class OpenGLGameView: public QGraphicsView {
+// 继承 QGraphicsView，并引入 OpenGL 基础功能
+class OpenGLGameView : public QGraphicsView, protected QOpenGLFunctions {
     Q_OBJECT
 public:
     OpenGLGameView(const int moveMode);
-    ~OpenGLGameView();
+    ~OpenGLGameView() override;
+
+    const int edge = 100;
+    void resizeEvent(QResizeEvent *event) override;
 
 signals:
     void gameEnded();
 
+protected:
+    // 拦截绘制事件，在这里执行 FBO 渲染和 Shader 后处理
+    void paintEvent(QPaintEvent *event) override;
+
+    // 画背景（逻辑不变，但在 paintEvent 中被手动调用）
+    void drawBackground(QPainter *painter, const QRectF &rect) override;
+
+    // 按键与鼠标
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
 private:
+    void updateGame();
+    void spawnEnemy();
+    void generateAbility();
+    void gameOver();
+
+    // --- 新增：OpenGL 相关的成员变量 ---
+    void initializeShader(); // 初始化着色器
+    bool m_glInitialized = false;
+    QOpenGLFramebufferObject* m_fbo = nullptr;
+    QOpenGLShaderProgram m_program;
+    QOpenGLVertexArrayObject m_vao;
+    QOpenGLBuffer m_vbo;
+    // --------------------------------
+
     QGraphicsScene *scene;
     QTimer *gameTimer;
     QTimer *enemySpawnTimer;
+    QTimer *abilitySpawnTimer;
 
     bool keyW = false, keyA = false, keyS = false, keyD = false;
     bool keyUp = false, keyLeft = false, keyDown = false, keyRight = false;
 
     Player* player;
-    const int moveMode = 0;
+    const int moveMode;
     QPointF mousePos = {0.0, 0.0};
-    int spawn_num = 5;
 
-    // --- Shader 渲染相关变量 ---
-    bool m_glInitialized = false;
-    QOpenGLShaderProgram m_shaderProgram;
-    QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_vbo;
-    QElapsedTimer m_elapsedTimer;
-
-    // --- 环面映射相关 ---
-    static constexpr qreal TORUS_R = 2.0; // 大圆半径
-    static constexpr qreal TORUS_r = 1.0; // 小圆截面半径
-    QVector3D mapToTorus(const QPointF& pos);
-
-    // --- 摄像机与渲染参数 ---
-    static constexpr float CAMERA_DIST = 6.0f; // 摄像机距离 (原 4.0 * 3.5)
-    static constexpr float CAMERA_FOV  = 45.0f; // 视场角 Field of View
-
-    void initShader();
-
-protected:
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
-
-    // --- 核心绘制函数 ---
-    void drawBackground(QPainter *painter, const QRectF &rect) override;
-    void drawForeground(QPainter *painter, const QRectF &rect) override;
-
-    void updateGame();
-    void spawnEnemy();
-    void gameOver();
+    int spawnNum = 6;
 };
 
 #endif // OPENGLGAMEVIEW_H
