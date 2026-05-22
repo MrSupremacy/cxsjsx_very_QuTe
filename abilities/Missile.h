@@ -23,6 +23,8 @@ public:
         , target(tg)
         , m_isDead(false)
     {
+        this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
         // 1. 初始化位置和旋转
         setPos(startPos);
         setRotation(angleDeg);

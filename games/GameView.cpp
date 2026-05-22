@@ -6,6 +6,7 @@
 #include <QRandomGenerator>
 #include <QtMath> // 提供 qSin, qCos 和 M_PI
 #include <QMessageBox>
+#include <QColor>
 
 #include "BulletPool.h"
 #include "Enemy.h"
@@ -31,15 +32,8 @@ GameView::GameView(const int moveMode)
 
     // 创建场景
     scene = new QGraphicsScene(this);
-    scene->setSceneRect(0, 0, mapWidth, mapHeight); // 800 * 500 像素
+    scene->setSceneRect(edge, edge, width() -edge, height() -edge);
     setScene(scene);
-
-    // 创建背景
-    QGraphicsRectItem *backgroundItem = new QGraphicsRectItem(scene->sceneRect());
-    backgroundItem->setBrush(QBrush(Qt::lightGray)); // 设置为浅灰色
-    backgroundItem->setPen(Qt::NoPen); // 移除边框
-    backgroundItem->setZValue(-1); // 设置 Z 值为最低，确保它在所有其他图元的下方
-    scene->addItem(backgroundItem);
 
     // 创建玩家
     player = new Player();
@@ -69,10 +63,26 @@ GameView::GameView(const int moveMode)
     formationSpawnTimer->start(6000);
 }
 
-GameView::~GameView()
+void GameView::resizeEvent(QResizeEvent *event)
 {
-    // 游戏窗口销毁时，清空子弹对象池释放内存
-    // BulletPool::getInstance().clear();
+    QGraphicsView::resizeEvent(event);
+    scene->setSceneRect(edge, edge, width() -edge, height() -edge);
+}
+
+void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
+    // 1. 首先用“外部颜色”（例如灰色）填充整个需要绘制的区域
+    painter->fillRect(rect, QColor(128, 128, 128));
+
+    // 2. 获取场景的边界
+    QRectF sRect = sceneRect();
+
+    // 3. 计算当前绘制区域与场景区域的交集
+    QRectF intersectRect = rect.intersected(sRect);
+
+    // 4. 只在交集区域内填充“场景内部颜色”（例如黑色）
+    if (!intersectRect.isEmpty()) {
+        painter->fillRect(intersectRect, QColor(191, 191, 191));
+    }
 }
 
 void GameView::mouseMoveEvent(QMouseEvent *event) {
@@ -229,7 +239,7 @@ void GameView::updateGame() {
     if (player->getShield()->isVisible()) {
         QList<QGraphicsItem*> shieldHits = player->getShield()->collidingItems();
         for (QGraphicsItem* item : std::as_const(shieldHits)) {
-            if (Enemy* enemy = dynamic_cast<Enemy*>(item)) {
+            if (item->data(0).toString() == "enemy") {
                 player->breakShieldAndExplode();
                 break;
             }
@@ -260,7 +270,9 @@ void GameView::updateGame() {
             // 类型判断
             if (Bullet* b = dynamic_cast<Bullet*>(item)) {
                 // 如果是子弹，不要 delete，把它交还给对象池
-                BulletPool::getInstance().recycle(b);
+                // BulletPool::getInstance().recycle(b);
+                scene->removeItem(b);
+                delete b;
             } else {
                 // 如果是敌人等其他物品，按原计划物理移除并销毁
                 scene->removeItem(item);
@@ -297,7 +309,8 @@ void GameView::spawnEnemy() {
 
             // 检查生成的坐标是否在地图内部
             // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
-            if (spawnX >= 0 && spawnX <= mapWidth && spawnY >= 0 && spawnY <= mapHeight) {
+            if (spawnX >= edge && spawnX <= scene->width() +edge
+                && spawnY >= edge && spawnY <= scene->height() +edge) {
                 validPos = true;
             }
         }
@@ -334,7 +347,8 @@ void GameView::generateAbility() {
 
         // 检查生成的坐标是否在地图内部
         // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
-        if (spawnX >= 0 && spawnX <= mapWidth && spawnY >= 0 && spawnY <= mapHeight) {
+        if (spawnX >= edge && spawnX <= scene->width() +edge
+            && spawnY >= edge && spawnY <= scene->height() +edge) {
             validPos = true;
         }
     }

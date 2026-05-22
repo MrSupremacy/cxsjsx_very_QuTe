@@ -36,6 +36,8 @@ public:
         QPen pen(QColor(0, 0, 0));
         pen.setWidth(2);
         setPen(pen);
+
+        this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
     }
 
     void init(qreal ang, const QPointF& p) {

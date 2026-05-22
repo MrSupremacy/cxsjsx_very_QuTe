@@ -15,6 +15,8 @@ Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
     setBrush(QBrush(Qt::yellow)); // 基础颜色为黄色
     setPen(QPen(Qt::white, 2));   // 白色边框
 
+    this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
     // 2. 设置初始位置
     setPos(anchorPos);
 

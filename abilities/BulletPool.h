@@ -20,7 +20,6 @@ public:
         Bullet* b;
         if (pool.isEmpty()) {
             b = new Bullet(ang, p); // 只有当池子空了才 new
-            return nullptr;
         } else {
             b = pool.dequeue(); // 否则直接复用
         }
@@ -39,16 +38,16 @@ public:
     // 清空对象池（用于关闭游戏时释放内存）
     void clear() {
         while (!pool.isEmpty()) {
-            delete pool.dequeue();
+            pool.dequeue()->deleteLater();
         }
     }
 
     void addToScene(QGraphicsScene *sc) {
-        for (int i = 0; i < 200; ++i) {
+        for (int i = 0; i < 60; ++i) {
             Bullet* b = new Bullet(0, QPointF(30, 30));
             b->setVisible(false);
-            sc->addItem(b);
             pool.enqueue(b);
+            sc->addItem(b);
         }
     }
 

@@ -70,13 +70,18 @@ Player::Player()
                 QPointF currentPos = this->pos() + perp *offset;
 
                 // 从对象池获取子弹
-                Bullet* temp = BulletPool::getInstance().getBullet(-ang, currentPos);
-                if (!temp) break;
+                // Bullet* temp = BulletPool::getInstance().getBullet(-ang, currentPos);
+                Bullet* temp = new Bullet(-ang, currentPos);
+                if (!temp) continue;
 
                 // 如果子弹当前不在场景中，才把它加进去：额外检查，理论不会
-                if (temp->scene() != this->scene()) {
-                    this->scene()->addItem(temp);
+                try {
+                    if (temp->scene() != this->scene()) {
+                        this->scene()->addItem(temp);
+                    }
+                } catch (...) {
                 }
+
             }
 
             if (fireTimes > 0) {
