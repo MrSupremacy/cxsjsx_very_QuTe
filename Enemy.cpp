@@ -44,44 +44,50 @@ Enemy::Enemy(QGraphicsItem *target) {
 
 // 带穿越版本索敌
 void Enemy::moveTowardsTarget() {
+    if (inFormation) return; // 阵型中不自主移动
+
     if (!playerTarget || !this->scene()) return;
 
-    if (inFormation) return; // 在阵型中，就不自主移动
+    // --- 1. 计算原本的追击玩家向量 (你原本的代码) ---
+    qreal ex = this->scenePos().x(); // 建议统一用 scenePos 防止坐标系错乱
+    qreal ey = this->scenePos().y();
+    qreal px = playerTarget->scenePos().x();
+    qreal py = playerTarget->scenePos().y();
 
     qreal mapWidth = this->scene()->sceneRect().width();
     qreal mapHeight = this->scene()->sceneRect().height();
 
-    qreal ex = this->x();
-    qreal ey = this->y();
-    qreal px = playerTarget->x();
-    qreal py = playerTarget->y();
-
-    // --- 核心算法：最短穿越位移 ---
-
-    // 计算原始位移
     qreal dx = px - ex;
     qreal dy = py - ey;
 
-    // 如果 dx 的绝对值大于地图的一半，说明穿越走更近
-    if (qAbs(dx) > mapWidth / 2) {
-        // 如果 dx 是正的，说明玩家在右，敌人在左，穿越路径是让 dx 变负
-        dx = (dx > 0) ? (dx - mapWidth) : (dx + mapWidth);
-    }
+    if (qAbs(dx) > mapWidth / 2) dx = (dx > 0) ? (dx - mapWidth) : (dx + mapWidth);
+    if (qAbs(dy) > mapHeight / 2) dy = (dy > 0) ? (dy - mapHeight) : (dy + mapHeight);
 
-    // Y 轴同理
-    if (qAbs(dy) > mapHeight / 2) {
-        dy = (dy > 0) ? (dy - mapHeight) : (dy + mapHeight);
-    }
-
-    // 计算实际距离
     qreal distance = sqrt(dx * dx + dy * dy);
 
-    // 按比例移动
-    if (distance > 0.1) { // 留一点点阈值，防止抖动
-        qreal moveX = (dx / distance) * speed;
-        qreal moveY = (dy / distance) * speed;
-        this->moveBy(moveX, moveY);
+    // 最终要移动的步长
+    qreal finalMoveX = 0;
+    qreal finalMoveY = 0;
+
+    if (distance > 0.1) {
+        finalMoveX = (dx / distance) * speed;
+        finalMoveY = (dy / distance) * speed;
     }
+
+    // --- 2. 核心修改：如果处于散开状态，叠加散开动量 ---
+    if (scatterFrames > 0) {
+        finalMoveX += scatterVx;
+        finalMoveY += scatterVy;
+
+        // 模拟物理摩擦力/空气阻力：让散开的速度越来越慢，看起来更自然
+        scatterVx *= 0.9f;
+        scatterVy *= 0.9f;
+
+        scatterFrames--; // 帧数递减
+    }
+
+    // --- 3. 最终统一移动 ---
+    this->moveBy(finalMoveX, finalMoveY);
 }
 
 void Enemy::teleportThroughWall() {
@@ -127,4 +133,9 @@ void Enemy::teleportThroughWall() {
     }
 }
 
+void Enemy::applyScatter(qreal vx, qreal vy, int frames) {
+    this->scatterVx = vx;
+    this->scatterVy = vy;
+    this->scatterFrames = frames;
+}
 

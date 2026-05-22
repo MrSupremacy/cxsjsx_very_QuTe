@@ -19,7 +19,8 @@
 #include "IntelligentWipeOut.h"
 #include "Formation.h"
 #include "Arrow.h"
-
+#include "Tetris.h"
+#include "Circle.h"
 
 GameView::GameView(const int moveMode)
     : moveMode(moveMode)
@@ -51,16 +52,16 @@ GameView::GameView(const int moveMode)
     // 敌人生成 计时器
     enemySpawnTimer = new QTimer(this);
     connect(enemySpawnTimer, &QTimer::timeout, this, &GameView::spawnEnemy);
-    enemySpawnTimer->start(3000);
+    enemySpawnTimer->start(5000);
 
     // 技能生成 计时器
     abilitySpawnTimer = new QTimer(this);
     connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
-    abilitySpawnTimer->start(4000);
+    abilitySpawnTimer->start(8000);
 
     formationSpawnTimer = new QTimer(this);
     connect(formationSpawnTimer, &QTimer::timeout, this, &GameView::spawnFormation);
-    formationSpawnTimer->start(6000);
+    formationSpawnTimer->start(10000);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)
@@ -380,68 +381,99 @@ void GameView::generateAbility() {
     }
 }
 
+
 void GameView::spawnFormation() {
     if(!player || !scene) return;
 
-    // 建议统一使用 scenePos() 获取绝对坐标，防止玩家被编入其他节点后 x() 失准
     qreal px = player->scenePos().x();
     qreal py = player->scenePos().y();
 
     for(int i = 0; i < formationSpawnNum; i++) {
 
-        // 1. 先把阵型 new 出来 (这里以 ArrowFormation 为例，你也可以加个随机数来决定生成哪种阵型)
-        Formation *formation = new ArrowFormation(player, 0, this); // 参数按你实际的构造函数来
-
-        // 获取阵型的本地边界框！
-        // 它会返回一个 QRectF，包含了这个阵型所有敌人组合起来的总宽度和总高度
-        // 例如 formRect.left() 是最左侧敌人边缘的相对坐标，formRect.right() 是最右侧的
-        QRectF formRect = formation->boundingRect();
-
-        // 依次出现在屏幕上
-        formation->beginSequentialSpawn(64);
-
+        Formation *formation = nullptr;
+        bool isSpawnOnPlayer = false; // 标记是否在玩家脚下生成（包围圈专用）
         qreal spawnX = 0;
         qreal spawnY = 0;
-        bool validPos = false;
 
-        // --- 核心：安全防卡死机制 ---
-        int maxAttempts = 100; // 最多尝试 100 次
-        int attempts = 0;
+        // 随机 0, 1, 2。假设 2 是包围圈 (Circle)
+        int randomValue = QRandomGenerator::global()->bounded(3);
 
-        // 2. 循环生成坐标，直到完全在地图范围内，或者超过最大尝试次数
-        while (!validPos && attempts < maxAttempts) {
-            attempts++;
+        // --- 特殊处理：如果是包围圈阵型 ---
+        if (randomValue == 2) {
+            formation = new CircleFormation(player, 0, this);
+            QRectF formRect = formation->boundingRect();
 
-            qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
-            qreal distance = 250 + QRandomGenerator::global()->generateDouble() * 300.0;
-
-            spawnX = px + distance * qCos(angle);
-            spawnY = py + distance * qSin(angle);
-
-            // 检查整个阵型的四条边是否都在地图内
-            // spawnX 和 spawnY 是阵型的中心(0,0)，加上 boundingBox 的边缘值就是真实边缘
-            bool isLeftSafe = (spawnX + formRect.left()) >= 0;
-            bool isRightSafe = (spawnX + formRect.right()) <= mapWidth;
-            bool isTopSafe = (spawnY + formRect.top()) >= 0;
-            bool isBottomSafe = (spawnY + formRect.bottom()) <= mapHeight;
+            // 检测以玩家为中心生成的话，会不会出界
+            bool isLeftSafe = (px + formRect.left()) >= 0;
+            bool isRightSafe = (px + formRect.right()) <= mapWidth;
+            bool isTopSafe = (py + formRect.top()) >= 0;
+            bool isBottomSafe = (py + formRect.bottom()) <= mapHeight;
 
             if (isLeftSafe && isRightSafe && isTopSafe && isBottomSafe) {
-                validPos = true;
+                // 安全！确认生成包围圈
+                isSpawnOnPlayer = true;
+                spawnX = px;
+                spawnY = py;
+            } else {
+                // 不安全！玩家离墙太近了，包围圈会出界
+                // 销毁刚刚临时 new 出来的包围圈
+                delete formation;
+                formation = nullptr;
+                // 将随机数强制降级，在 0(Arrow) 和 1(Tetris) 之间重新选一个！
+                randomValue = QRandomGenerator::global()->bounded(2);
             }
         }
 
-        // 3. 兜底处理：如果 100 次都没找到合法坐标（比如玩家被堵在墙角）
-        // 我们就强行把阵型的坐标限制（Clamp）在地图的安全边缘，确保它绝对不会出界
-        if (!validPos) {
-            // qBound(min, value, max) 会把 value 强行限制在 min 和 max 之间
-            spawnX = qBound(-formRect.left(), spawnX, mapWidth - formRect.right());
-            spawnY = qBound(-formRect.top(), spawnY, mapHeight - formRect.bottom());
+        // --- 常规处理：如果是箭头或方块（包含被降级退回来的情况） ---
+        if (!isSpawnOnPlayer) {
+            switch(randomValue) {
+            case 0:
+                formation = new ArrowFormation(player, 0, this);
+                break;
+            case 1:
+                formation = new TetrisFormation(player, 11000, this); // 11s后解散
+                break;
+            }
+
+            QRectF formRect = formation->boundingRect();
+            bool validPos = false;
+            int maxAttempts = 100;
+            int attempts = 0;
+
+            // 在玩家附近随机找一个安全点生成
+            while (!validPos && attempts < maxAttempts) {
+                attempts++;
+
+                qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
+                qreal distance = 250 + QRandomGenerator::global()->generateDouble() * 300.0;
+
+                spawnX = px + distance * qCos(angle);
+                spawnY = py + distance * qSin(angle);
+
+                bool isLeftSafe = (spawnX + formRect.left()) >= 0;
+                bool isRightSafe = (spawnX + formRect.right()) <= mapWidth;
+                bool isTopSafe = (spawnY + formRect.top()) >= 0;
+                bool isBottomSafe = (spawnY + formRect.bottom()) <= mapHeight;
+
+                if (isLeftSafe && isRightSafe && isTopSafe && isBottomSafe) {
+                    validPos = true;
+                }
+            }
+
+            // 兜底处理
+            if (!validPos) {
+                spawnX = qBound(-formRect.left(), spawnX, mapWidth - formRect.right());
+                spawnY = qBound(-formRect.top(), spawnY, mapHeight - formRect.bottom());
+            }
         }
 
-        // 4. 将坐标赋给阵型，并加入地图
+        // --- 通用步骤：无论哪种阵型，都在这里统一调用显示和加入场景 ---
+
+        // 依次出现在屏幕上 (包围圈一个个画圈出现的效果也非常惊艳！)
+        formation->beginSequentialSpawn(64);
+
         formation->setPos(spawnX, spawnY);
         scene->addItem(formation);
-
     }
 }
 
@@ -451,6 +483,7 @@ void GameView::gameOver() {
     gameTimer->stop();
     enemySpawnTimer->stop();
     abilitySpawnTimer->stop();
+    formationSpawnTimer->stop();
 
     // 2. 弹出一个提示框告诉玩家游戏结束（体验更好，不会死得太突兀）
     QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");

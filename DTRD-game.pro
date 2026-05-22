@@ -26,6 +26,7 @@ SOURCES += \
 
 HEADERS += \
     Arrow.h \
+    Circle.h \
     Enemy.h \
     Formation.h \
     Player.h \

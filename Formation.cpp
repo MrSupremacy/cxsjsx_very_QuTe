@@ -54,6 +54,9 @@ void Formation::popNextEnemy() {
 void Formation::deformation() {
     if (!scene()) return;
 
+    // 获取阵型中心点
+    QPointF center = this->sceneBoundingRect().center();
+
     // 1. 获取组内剩下的所有存活敌人
     QList<QGraphicsItem*> children = this->childItems();
     for (QGraphicsItem* item : children) {
@@ -65,14 +68,31 @@ void Formation::deformation() {
             // 记录该敌人在地图上的绝对坐标
             QPointF absolutePos = enemy->scenePos();
 
+            // --- 新增：计算向外的散开动量 ---
+            qreal diffX = absolutePos.x() - center.x();
+            qreal diffY = absolutePos.y() - center.y();
+            qreal dist = sqrt(diffX * diffX + diffY * diffY);
+
+            qreal svx = 0;
+            qreal svy = 0;
+            if (dist > 0.1) {
+                // 如果敌人不在正中心，给它一个向外的初始爆破速度（比如 5.0，可以自己调）
+                svx = (diffX / dist) * 5.0f;
+                svy = (diffY / dist) * 5.0f;
+            } else {
+                // 兜底：如果敌人刚好在阵型绝对中心(dist==0)，给个默认的散开方向(比如向右)
+                svx = 5.0;
+                svy = 0;
+            }
+
             // 将其从编组中移除
             this->removeFromGroup(enemy);
-
             // 重新设置其在地图上的绝对坐标（否则它会跑回地图左上角）
             enemy->setPos(absolutePos);
-
             // 告诉敌人它自由了，恢复自主移动状态
             enemy->setInFormation(false);
+            // 赋予向外动量60帧
+            enemy->applyScatter(svx, svy, 60);
         }
     }
 
