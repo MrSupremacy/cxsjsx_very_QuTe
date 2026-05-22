@@ -1,3 +1,5 @@
+// Created by 樊轩楷 & 吉佑安
+
 #include "GameView.h"
 #include "Player.h"
 #include <QKeyEvent>
@@ -13,6 +15,8 @@
 #include "WipeOut.h"
 #include "Explosion.h"
 #include "Shield.h"
+#include "Formation.h"
+#include "Arrow.h"
 
 
 GameView::GameView(const int moveMode)
@@ -58,6 +62,10 @@ GameView::GameView(const int moveMode)
     abilitySpawnTimer = new QTimer(this);
     connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
     abilitySpawnTimer->start(4000);
+
+    formationSpawnTimer = new QTimer(this);
+    connect(formationSpawnTimer, &QTimer::timeout, this, &GameView::spawnFormation);
+    formationSpawnTimer->start(6000);
 }
 
 GameView::~GameView()
@@ -138,6 +146,10 @@ void GameView::updateGame() {
             enemy->moveTowardsTarget();
             enemy->teleportThroughWall();
         }
+        // 阵型移动
+        else if (Formation *formation = dynamic_cast<Formation*>(item)) {
+            formation->move();
+        }
         // 技能浮动
         else if (Ability* ability = dynamic_cast<Ability*>(item)) {
             ability->updateFloating();
@@ -173,7 +185,6 @@ void GameView::updateGame() {
                 }
             }
         }
-
         // 爆炸区域碰撞检测
         else if (Explosion* explosion = dynamic_cast<Explosion*>(item)) {
             // 清除所有碰到的敌人
@@ -216,9 +227,12 @@ void GameView::updateGame() {
         if (Ability *ability = dynamic_cast<Ability *>(item)) {
             ability->pickUp();
             itemsToRemove.insert(ability);
-        } else if (dynamic_cast<Enemy*>(item)) {
-            gameOver();
-            return;
+        }
+        else if (dynamic_cast<Enemy*>(item)) {
+            if(!player->getIsImmune()) {
+                gameOver();
+                return;
+            }
         }
     }
 
@@ -252,7 +266,7 @@ void GameView::spawnEnemy() {
     // 循环生成坐标，直到生成的坐标在地图范围内
     // 假设你的地图 (Scene) 大小是 800 x 500
 
-    for(int i = 0; i < spawnNum; i ++) {
+    for(int i = 0; i < enemySpawnNum; i ++) {
         while (!validPos) {
             // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
             qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
@@ -332,6 +346,72 @@ void GameView::generateAbility() {
 
 
 }
+
+void GameView::spawnFormation() {
+    if(!player || !scene) return;
+
+    // 建议统一使用 scenePos() 获取绝对坐标，防止玩家被编入其他节点后 x() 失准
+    qreal px = player->scenePos().x();
+    qreal py = player->scenePos().y();
+
+    for(int i = 0; i < formationSpawnNum; i++) {
+
+        // 1. 先把阵型 new 出来 (这里以 ArrowFormation 为例，你也可以加个随机数来决定生成哪种阵型)
+        Formation *formation = new ArrowFormation(player, 0, this); // 参数按你实际的构造函数来
+
+        // 获取阵型的本地边界框！
+        // 它会返回一个 QRectF，包含了这个阵型所有敌人组合起来的总宽度和总高度
+        // 例如 formRect.left() 是最左侧敌人边缘的相对坐标，formRect.right() 是最右侧的
+        QRectF formRect = formation->boundingRect();
+
+        // 依次出现在屏幕上
+        formation->beginSequentialSpawn(64);
+
+        qreal spawnX = 0;
+        qreal spawnY = 0;
+        bool validPos = false;
+
+        // --- 核心：安全防卡死机制 ---
+        int maxAttempts = 100; // 最多尝试 100 次
+        int attempts = 0;
+
+        // 2. 循环生成坐标，直到完全在地图范围内，或者超过最大尝试次数
+        while (!validPos && attempts < maxAttempts) {
+            attempts++;
+
+            qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
+            qreal distance = 250 + QRandomGenerator::global()->generateDouble() * 300.0;
+
+            spawnX = px + distance * qCos(angle);
+            spawnY = py + distance * qSin(angle);
+
+            // 检查整个阵型的四条边是否都在地图内
+            // spawnX 和 spawnY 是阵型的中心(0,0)，加上 boundingBox 的边缘值就是真实边缘
+            bool isLeftSafe = (spawnX + formRect.left()) >= 0;
+            bool isRightSafe = (spawnX + formRect.right()) <= mapWidth;
+            bool isTopSafe = (spawnY + formRect.top()) >= 0;
+            bool isBottomSafe = (spawnY + formRect.bottom()) <= mapHeight;
+
+            if (isLeftSafe && isRightSafe && isTopSafe && isBottomSafe) {
+                validPos = true;
+            }
+        }
+
+        // 3. 兜底处理：如果 100 次都没找到合法坐标（比如玩家被堵在墙角）
+        // 我们就强行把阵型的坐标限制（Clamp）在地图的安全边缘，确保它绝对不会出界
+        if (!validPos) {
+            // qBound(min, value, max) 会把 value 强行限制在 min 和 max 之间
+            spawnX = qBound(-formRect.left(), spawnX, mapWidth - formRect.right());
+            spawnY = qBound(-formRect.top(), spawnY, mapHeight - formRect.bottom());
+        }
+
+        // 4. 将坐标赋给阵型，并加入地图
+        formation->setPos(spawnX, spawnY);
+        scene->addItem(formation);
+
+    }
+}
+
 
 void GameView::gameOver() {
     // 1. 停止游戏循环和生成敌人的定时器

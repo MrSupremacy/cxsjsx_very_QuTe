@@ -1,3 +1,5 @@
+// Created by 樊轩楷 & 吉佑安
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "GameView.h"

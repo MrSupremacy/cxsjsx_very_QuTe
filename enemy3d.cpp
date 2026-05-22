@@ -1,3 +1,5 @@
+// Created by 吉佑安
+
 #include "enemy3d.h"
 #include <cmath> // 使用 <cmath> 而不是 <math.h>
 

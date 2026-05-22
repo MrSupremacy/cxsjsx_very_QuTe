@@ -1,3 +1,5 @@
+// Created by 樊轩楷
+
 #include "Enemy.h"
 #include <math.h>
 #include <QGraphicsScene>
@@ -40,6 +42,8 @@ Enemy::Enemy(QGraphicsItem *target) {
 void Enemy::moveTowardsTarget() {
     if (!playerTarget || !this->scene()) return;
 
+    if (inFormation) return; // 在阵型中，就不自主移动
+
     qreal mapWidth = this->scene()->sceneRect().width();
     qreal mapHeight = this->scene()->sceneRect().height();
 
@@ -78,6 +82,8 @@ void Enemy::moveTowardsTarget() {
 
 void Enemy::teleportThroughWall() {
     if(!playerTarget || !this->scene()) return; // 确保有目标且在场景中
+
+    if (inFormation) return; // 在阵型中，就不自主移动
 
     // 获取地图范围
     QRectF mapRect = this->scene()->sceneRect();

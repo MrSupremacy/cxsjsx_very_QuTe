@@ -1,3 +1,5 @@
+// Created by 樊轩楷
+
 #ifndef ABILITY_H
 #define ABILITY_H
 
@@ -13,9 +15,10 @@ class Ability: public QGraphicsEllipseItem {
 public:
     // 构造函数：传入生成位置和玩家指针
     Ability(QPointF spawnPos, QGraphicsItem *target);
+    virtual ~Ability() = default;
 
     // 虚函数：玩家捡起时触发的行为，子类可以重写它实现具体功能
-    virtual void pickUp();
+    virtual void pickUp() = 0;
 
     // 悬浮动画函数：在游戏主循环中调用
     void updateFloating();

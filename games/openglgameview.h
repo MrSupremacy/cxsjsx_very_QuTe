@@ -1,3 +1,5 @@
+// Created by 吉佑安
+
 #ifndef OPENGLGAMEVIEW_H
 #define OPENGLGAMEVIEW_H
 

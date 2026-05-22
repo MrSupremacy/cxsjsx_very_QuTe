@@ -1,3 +1,5 @@
+// Created by 吉佑安
+
 #ifndef WIPEOUT_H
 #define WIPEOUT_H
 

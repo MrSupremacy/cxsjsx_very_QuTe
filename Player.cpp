@@ -1,3 +1,5 @@
+// Created by 樊轩楷 & 吉佑安
+
 #include "Player.h"
 #include <QLineF>
 
@@ -7,6 +9,10 @@ Player::Player()
     setRect(0, 0, 12, 12);
     setBrush(QBrush(Qt::white)); // 基础颜色为白色
     setPen(Qt::NoPen); // 移除边框
+
+    immuneTimer = new QTimer(this);
+    immuneTimer->setSingleShot(true); // 设置为单次触发（只响一次）
+    connect(immuneTimer, &QTimer::timeout, this, &Player::endImmune);
 
     // 光剑技能 配置光剑
     swordItem = new QGraphicsRectItem(0, -1.5, 50, 3, this);
@@ -198,6 +204,19 @@ void Player::mouse3Dmove(const QPointF mouseDiff)
     this->moveBy(dx, dy);
 }
 
+// 无敌相关实现
+void Player::giveImmune(int timeMs) {
+    isImmune = true;
+    // 启动（或重启）计时器。
+    // 如果计时器已经在运行（玩家已经是无敌状态），调用 start 会重新开始计时！
+    // 这完美解决了“吃两个无敌道具时间不叠加”的 Bug。
+    immuneTimer->start(timeMs);
+}
+
+void Player::endImmune() {
+    isImmune = false;
+}
+
 
 // 光剑技能相关实现
 
@@ -240,6 +259,9 @@ void Player::breakShieldAndExplode(int radius, int lifeTime) {
     if (shieldTimer && shieldTimer->isActive()) {
         shieldTimer->stop();
     }
+
+    // 2.5 给玩家32ms无敌帧
+    this->giveImmune(32);
 
     // 3. 生成爆炸类对象
     Explosion* boom = new Explosion(radius, lifeTime);

@@ -15,6 +15,7 @@ INCLUDEPATH += \
 
 SOURCES += \
     Enemy.cpp \
+    Formation.cpp \
     Player.cpp \
     abilities/Ability.cpp \
     enemy3d.cpp \
@@ -24,8 +25,11 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    Arrow.h \
     Enemy.h \
+    Formation.h \
     Player.h \
+    Tetris.h \
     abilities/Ability.h \
     abilities/Bullet.h \
     abilities/BulletPool.h \

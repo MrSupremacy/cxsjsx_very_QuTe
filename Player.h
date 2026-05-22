@@ -1,3 +1,5 @@
+// Created by 樊轩楷 & 吉佑安
+
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -13,7 +15,9 @@
 #include "Explosion.h"
 
 
-class Player: public QGraphicsEllipseItem {
+class Player: public QObject, public QGraphicsEllipseItem {
+    Q_OBJECT
+
 public:
     Player(); // 构造函数
 
@@ -30,9 +34,17 @@ public:
 public:
     double speed = 3.0f;             // 玩家移动速度
     QPointF lastDir = QPointF(1, 0); // 记录最后一次的面朝方向（默认朝右）
+    bool isImmune = false; // 无敌状态
 
+private slots:
+    void endImmune();
 
 public:
+    // 无敌效果
+    QTimer *immuneTimer;
+    void giveImmune(int timeMs);
+    bool getIsImmune() const { return isImmune;}
+
     // 光剑 光剑技能
     QGraphicsRectItem *swordItem;    // 剑的图形
     QTimer *swordTimer;              // 控制剑持续时间的定时器

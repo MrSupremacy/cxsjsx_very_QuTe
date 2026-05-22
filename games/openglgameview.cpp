@@ -1,3 +1,5 @@
+// Created by 吉佑安
+
 #include "openglgameview.h"
 #include <QKeyEvent>
 #include <QRandomGenerator>
