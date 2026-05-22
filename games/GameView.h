@@ -15,7 +15,7 @@ public:
     GameView(const int moveMode); // 构造函数 加载地图 & 启动游戏
 
     // 缩放保持 edge 不变
-    const int edge = 100;
+    // const int edge = 100;
     void resizeEvent(QResizeEvent *event) override;
 
     // 画背景
@@ -41,6 +41,8 @@ private:
 
     int enemySpawnNum = 6; // 敌人生成个数
     int formationSpawnNum = 1; // 阵型生成个数
+
+    const int mapWidth = 800, mapHeight = 500;
 
 
 protected:

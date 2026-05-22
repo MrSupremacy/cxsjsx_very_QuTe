@@ -32,7 +32,7 @@ GameView::GameView(const int moveMode)
 
     // 创建场景
     scene = new QGraphicsScene(this);
-    scene->setSceneRect(edge, edge, width() -edge, height() -edge);
+    scene->setSceneRect(0, 0, mapWidth, mapHeight);
     setScene(scene);
 
     // 创建玩家
@@ -66,7 +66,7 @@ GameView::GameView(const int moveMode)
 void GameView::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
-    scene->setSceneRect(edge, edge, width() -edge, height() -edge);
+    // scene->setSceneRect(edge, edge, width() -edge, height() -edge);
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
@@ -309,8 +309,8 @@ void GameView::spawnEnemy() {
 
             // 检查生成的坐标是否在地图内部
             // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
-            if (spawnX >= edge && spawnX <= scene->width() +edge
-                && spawnY >= edge && spawnY <= scene->height() +edge) {
+            if (spawnX >= 0 && spawnX <= mapWidth
+                && spawnY >= 0 && spawnY <= mapHeight) {
                 validPos = true;
             }
         }
@@ -347,8 +347,8 @@ void GameView::generateAbility() {
 
         // 检查生成的坐标是否在地图内部
         // 如果超出了地图边界，validPos 依然是 false，while 循环会重新生成一次
-        if (spawnX >= edge && spawnX <= scene->width() +edge
-            && spawnY >= edge && spawnY <= scene->height() +edge) {
+        if (spawnX >= 0 && spawnX <= mapWidth
+            && spawnY >= 0 && spawnY <= mapHeight) {
             validPos = true;
         }
     }
