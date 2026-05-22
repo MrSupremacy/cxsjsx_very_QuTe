@@ -98,12 +98,15 @@ MainWindow::MainWindow(QWidget *parent)
     // 滑块
     connect(ui->difficulty, &QSlider::valueChanged, this, [=](int value){
         Difficulty = value;
+        ui->diff_label->setText(QString(" %1 ").arg(value));
     });
     connect(ui->volume, &QSlider::valueChanged, this, [=](int value){
         Volume = value / 100.0;
+        ui->volume_label->setText(QString("%1%").arg(value, 3, 10, QChar(' ')));
     });
     connect(ui->max_seconds, &QSlider::valueChanged, this, [=](int value){
         maxSeconds = value;
+        ui->maxtime_label->setText(QString("%1s").arg(value, 3, 10, QChar(' ')));
     });
 
 

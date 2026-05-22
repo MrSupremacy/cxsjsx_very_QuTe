@@ -350,7 +350,6 @@ void GameView::updateGame() {
             }
             else if (item->data(0).toString() == "enemy") {
                 scores++;
-                qDebug() << scores;
                 scoreRecordBoard->setText(
                     QString("Score: %1").arg(scores, 4, 10, QChar(' '))
                 );

@@ -303,7 +303,7 @@
            <widget class="QWidget" name="widget_2" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <property name="spacing">
-              <number>12</number>
+              <number>0</number>
              </property>
              <property name="leftMargin">
               <number>6</number>
@@ -327,6 +327,20 @@
                </property>
                <property name="text">
                 <string>难度</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="diff_label">
+               <property name="font">
+                <font>
+                 <family>Consolas</family>
+                 <pointsize>16</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string> 1 </string>
                </property>
               </widget>
              </item>
@@ -362,7 +376,7 @@
            <widget class="QWidget" name="widget_5" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <property name="spacing">
-              <number>12</number>
+              <number>0</number>
              </property>
              <property name="leftMargin">
               <number>6</number>
@@ -386,6 +400,20 @@
                </property>
                <property name="text">
                 <string>音量</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="volume_label">
+               <property name="font">
+                <font>
+                 <family>Consolas</family>
+                 <pointsize>16</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>  0%</string>
                </property>
               </widget>
              </item>
@@ -443,6 +471,9 @@
           <item alignment="Qt::AlignmentFlag::AlignLeft">
            <widget class="QWidget" name="widget_3" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -477,6 +508,20 @@
                </property>
                <property name="text">
                 <string>计时模式</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="maxtime_label">
+               <property name="font">
+                <font>
+                 <family>Consolas</family>
+                 <pointsize>14</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string> 30s</string>
                </property>
               </widget>
              </item>
