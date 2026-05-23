@@ -105,8 +105,8 @@ MainWindow::MainWindow(QWidget *parent)
         ui->volume_label->setText(QString("%1%").arg(value, 3, 10, QChar(' ')));
     });
     connect(ui->max_seconds, &QSlider::valueChanged, this, [=](int value){
-        maxSeconds = value;
-        ui->maxtime_label->setText(QString("%1s").arg(value, 3, 10, QChar(' ')));
+        maxSeconds = value *5;
+        ui->maxtime_label->setText(QString("%1s").arg(value *5, 3, 10, QChar(' ')));
     });
 
 
