@@ -23,7 +23,7 @@ public:
     {
         // 1. 设置生成参数
         int numEnemies = 16;       // 16个敌人组成一个大圈
-        double radius = 200.0;     // 初始圆的半径，足够把玩家套在里面
+        double radius = 150.0;     // 初始圆的半径，足够把玩家套在里面
 
         // 2. 极坐标排兵布阵
         for (int i = 0; i < numEnemies; ++i) {
@@ -43,13 +43,13 @@ public:
         this->setTransformOriginPoint(0, 0);
 
         // 修改收缩时的速度
-        Formation::speed = 0.5f;
+        Formation::speed = 0.9f;
 
         // 停用基类的按时自动销毁（由收缩到底部时触发销毁）
         if (lifeTimer) lifeTimer->stop();
 
         // 4. 设定 3 秒后开始收缩
-        QTimer::singleShot(3000, this, [this]() {
+        QTimer::singleShot(2500, this, [this]() {
             if (this->currentState == State::Waiting) {
                 this->currentState = State::Contracting;
             }
@@ -59,11 +59,11 @@ public:
     void rotate() override {
         // 第一阶段：像法阵一样缓慢转动
         if (currentState == State::Waiting) {
-            this->setRotation(this->rotation() + 0.13);
+            this->setRotation(this->rotation() + 0.20);
         }
         // 第二阶段：变成绞肉机快速转动
         else if (currentState == State::Contracting) {
-            this->setRotation(this->rotation() + 0.4);
+            this->setRotation(this->rotation() + 0.45);
         }
     }
 

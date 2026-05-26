@@ -123,7 +123,7 @@ public:
     }
 
 public:
-    inline static const double SPEED = 3.0;
+    double SPEED = 3.0;
 
     QPolygonF m_polygon;
     QRectF m_boundingRect;

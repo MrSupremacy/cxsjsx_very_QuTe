@@ -17,78 +17,97 @@ Enemy::Enemy(QGraphicsItem *target) {
 }
 
 // 常规版本索敌
-// void Enemy::moveTowardsTarget() {
-//     if (!playerTarget) return;
-
-//     // 获取玩家和敌人的坐标
-//     qreal px = playerTarget->x();
-//     qreal py = playerTarget->y();
-//     qreal ex = this->x();
-//     qreal ey = this->y();
-
-//     // 计算差值
-//     qreal dx = px - ex;
-//     qreal dy = py - ey;
-
-//     // 计算距离
-//     qreal distance = sqrt(dx * dx + dy * dy);
-
-//     // 按比例移动 (归一化向量 * 速度)
-//     if (distance > 0) {
-//         qreal moveX = (dx / distance) * speed;
-//         qreal moveY = (dy / distance) * speed;
-
-//         this->moveBy(moveX, moveY);
-//     }
-// }
-
-// 带穿越版本索敌
 void Enemy::moveTowardsTarget() {
     if (inFormation) return; // 阵型中不自主移动
 
-    if (!playerTarget || !this->scene()) return;
+    if (!playerTarget) return;
 
-    // --- 1. 计算原本的追击玩家向量 (你原本的代码) ---
-    qreal ex = this->scenePos().x(); // 建议统一用 scenePos 防止坐标系错乱
-    qreal ey = this->scenePos().y();
-    qreal px = playerTarget->scenePos().x();
-    qreal py = playerTarget->scenePos().y();
+    // 获取玩家和敌人的坐标
+    qreal px = playerTarget->x();
+    qreal py = playerTarget->y();
+    qreal ex = this->x();
+    qreal ey = this->y();
 
-    qreal mapWidth = this->scene()->sceneRect().width();
-    qreal mapHeight = this->scene()->sceneRect().height();
-
+    // 计算差值
     qreal dx = px - ex;
     qreal dy = py - ey;
 
-    if (qAbs(dx) > mapWidth / 2) dx = (dx > 0) ? (dx - mapWidth) : (dx + mapWidth);
-    if (qAbs(dy) > mapHeight / 2) dy = (dy > 0) ? (dy - mapHeight) : (dy + mapHeight);
-
+    // 计算距离
     qreal distance = sqrt(dx * dx + dy * dy);
 
-    // 最终要移动的步长
     qreal finalMoveX = 0;
     qreal finalMoveY = 0;
 
+    // 按比例移动 (归一化向量 * 速度)
     if (distance > 0.1) {
-        finalMoveX = (dx / distance) * speed;
-        finalMoveY = (dy / distance) * speed;
+        qreal moveX = (dx / distance) * speed;
+        qreal moveY = (dy / distance) * speed;
+
+        finalMoveX += moveX;
+        finalMoveY += moveY;
+
+        if (scatterFrames > 0) {
+            finalMoveX += scatterVx;
+            finalMoveY += scatterVy;
+
+            // 模拟物理摩擦力/空气阻力：让散开的速度越来越慢，看起来更自然
+            scatterVx *= 0.9f;
+            scatterVy *= 0.9f;
+
+            scatterFrames--; // 帧数递减
+        }
+
+        this->moveBy(finalMoveX, finalMoveY);
     }
-
-    // --- 2. 核心修改：如果处于散开状态，叠加散开动量 ---
-    if (scatterFrames > 0) {
-        finalMoveX += scatterVx;
-        finalMoveY += scatterVy;
-
-        // 模拟物理摩擦力/空气阻力：让散开的速度越来越慢，看起来更自然
-        scatterVx *= 0.9f;
-        scatterVy *= 0.9f;
-
-        scatterFrames--; // 帧数递减
-    }
-
-    // --- 3. 最终统一移动 ---
-    this->moveBy(finalMoveX, finalMoveY);
 }
+
+// 带穿越版本索敌
+// void Enemy::moveTowardsTarget() {
+//     if (inFormation) return; // 阵型中不自主移动
+
+//     if (!playerTarget || !this->scene()) return;
+
+//     // --- 1. 计算原本的追击玩家向量 (你原本的代码) ---
+//     qreal ex = this->scenePos().x(); // 建议统一用 scenePos 防止坐标系错乱
+//     qreal ey = this->scenePos().y();
+//     qreal px = playerTarget->scenePos().x();
+//     qreal py = playerTarget->scenePos().y();
+
+//     qreal mapWidth = this->scene()->sceneRect().width();
+//     qreal mapHeight = this->scene()->sceneRect().height();
+
+//     qreal dx = px - ex;
+//     qreal dy = py - ey;
+
+//     if (qAbs(dx) > mapWidth / 2) dx = (dx > 0) ? (dx - mapWidth) : (dx + mapWidth);
+//     if (qAbs(dy) > mapHeight / 2) dy = (dy > 0) ? (dy - mapHeight) : (dy + mapHeight);
+
+//     qreal distance = sqrt(dx * dx + dy * dy);
+
+//     // 最终要移动的步长
+//     qreal finalMoveX = 0;
+//     qreal finalMoveY = 0;
+
+//     if (distance > 0.1) {
+//         finalMoveX = (dx / distance) * speed;
+//         finalMoveY = (dy / distance) * speed;
+//     }
+
+//     // --- 2. 核心修改：如果处于散开状态，叠加散开动量 ---
+//     if (scatterFrames > 0) {
+//         finalMoveX += scatterVx;
+//         finalMoveY += scatterVy;
+
+//         // 模拟物理摩擦力/空气阻力：让散开的速度越来越慢，看起来更自然
+//         scatterVx *= 0.9f;
+//         scatterVy *= 0.9f;
+
+//         scatterFrames--; // 帧数递减
+//     }
+
+//     // --- 3. 最终统一移动 ---
+//     this->moveBy(finalMoveX, finalMoveY);
+// }
 
 void Enemy::teleportThroughWall() {
     if(!playerTarget || !this->scene()) return; // 确保有目标且在场景中
