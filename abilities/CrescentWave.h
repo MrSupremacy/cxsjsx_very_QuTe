@@ -43,9 +43,9 @@ public:
         // 局部坐标：从尾部(x=-15) 到 前锋(x=60)
         // 因为坐标系会随 setRotation 自动旋转，所以光影在任何角度下都是正确的！
         m_gradient = QLinearGradient(-15, 0, 60, 0);
-        m_gradient.setColorAt(0.0, QColor(255, 215, 0, 0));     // 尾部边缘：完全透明
-        m_gradient.setColorAt(0.3, QColor(255, 215, 0, 150));   // 尾部过渡：半透明金黄
-        m_gradient.setColorAt(0.8, QColor(255, 215, 0, 255));   // 剑气主体：纯正金黄
+        m_gradient.setColorAt(0.0, QColor(255, 255, 255, 0));     // 尾部边缘：完全透明
+        m_gradient.setColorAt(0.3, QColor(255, 255, 255, 150));   // 尾部过渡：半透明金黄
+        m_gradient.setColorAt(0.8, QColor(255, 255, 255, 255));   // 剑气主体：纯正金黄
         m_gradient.setColorAt(1.0, QColor(255, 255, 255, 255)); // 剑气尖端：高亮白光
 
         // 3. 定时器驱动动画

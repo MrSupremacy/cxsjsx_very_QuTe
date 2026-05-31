@@ -5,13 +5,17 @@
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QOpenGLFunctions>
+#include <QOpenGLWidget>
 #include <QTimer>
 #include <QLabel>
+#include <QSoundEffect>
+#include <QUrl>
 #include "Player.h"
 #include "DataCarrier.h"
 
 
-class GameView: public QGraphicsView {
+class GameView: public QGraphicsView, protected QOpenGLFunctions {
     Q_OBJECT
 public:
     GameView(const DataCarrier& dc); // 构造函数 加载地图 & 启动游戏

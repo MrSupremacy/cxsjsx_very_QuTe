@@ -60,6 +60,8 @@ public:
     PlayerChargeBar *chargeBar;
     double currProgress;
     double deltaP;
+    QGraphicsPixmapItem *tntItem; // TNT 贴图
+
     void startCharging(double time_in_s);
     void onCharging();
     void launchLochunhin();

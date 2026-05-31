@@ -19,6 +19,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void on_btnSkin_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -32,7 +34,7 @@ private:
 
     // 游戏设置
     int Difficulty = 1;  // 1, 2, 3, 4
-    double Volume = 0.0; // [0.00, 1.00]
+    double Volume = 0.5; // [0.00, 1.00]
 
     // 计时模式
     bool timeLimited = false;

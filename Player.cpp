@@ -10,6 +10,8 @@
 #include <QTimer>
 #include <QGraphicsOpacityEffect>
 
+#include "SoundPool.h"
+
 
 Player::Player()
 {
@@ -27,6 +29,7 @@ Player::Player()
     immuneTimer = new QTimer(this);
     immuneTimer->setSingleShot(true); // 设置为单次触发（只响一次）
     connect(immuneTimer, &QTimer::timeout, this, &Player::endImmune);
+
 
     // 光剑技能 配置光剑
     swordItem = new QGraphicsPixmapItem(this); // 改为 PixmapItem
@@ -52,13 +55,23 @@ Player::Player()
     });
     swordTimer->setSingleShot(true); // 设为单次触发模式
 
-    // 咖喱棒技能 配置蓄力条
+
+    // 咖喱棒技能 配置贴图、蓄力条
+    tntItem = new QGraphicsPixmapItem(this);
+    QPixmap tntPic(":/ImageResources/tnt.png");
+
+    tntPic = tntPic.scaled(24, 24, Qt::KeepAspectRatio, Qt::FastTransformation);
+    tntItem->setPixmap(tntPic);
+    tntItem->hide(); // 初始状态隐藏，与护盾一致
+    tntItem->setPos(-12, 12); // 放置在左下侧 (玩家宽度为24)
+
     chargeBar = new PlayerChargeBar(this);
-    chargeBar->setPos({6, 6 - 12});
+    chargeBar->setPos({-16, 6});
     chargeBarTimer = new QTimer(this);
     QObject::connect(chargeBarTimer, &QTimer::timeout, [this](){
         this->onCharging();
     });
+
 
     // 护盾技能 配置护盾及图腾
     shieldItem = new QGraphicsRectItem(-16, -16, 32, 32, this);
@@ -130,11 +143,16 @@ Player::Player()
                     }
                 } catch (...) {
                 }
+
+                // 播放发射音效
+                SoundPool::instance().play("Arrow_shoot");
             }
 
             if (fireTimes > 0) {
                 fireTimer->start(currInterval);
             }
+
+
         }
     });
 }
@@ -349,8 +367,14 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
         opacityEffect->setOpacity(0.85);
         totemLabel->setGraphicsEffect(opacityEffect);
 
-        QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
-        movie->setSpeed(125);
+
+        // 播放音效
+        SoundPool::instance().play("Shield_break");
+
+        // QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
+        QMovie* movie = new QMovie(":/ImageResources/Totem_of_Undying_Animation.gif", QByteArray(), totemLabel);
+        // movie->setSpeed(125);
+        movie->setSpeed(80);
 
         int gifW = 180;
         int gifH = 180;
@@ -382,7 +406,13 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
 }
 
 // 蓄力条 咖喱棒
-void Player::startCharging(double time_in_s) {
+void Player::startCharging(double time_in_s)
+{
+    // 播放音效
+    SoundPool::instance().play("Lochunhin_fuse");
+
+    tntItem->setVisible(true);
+
     currProgress = 1.0;
     deltaP = 0.050 / time_in_s;  // 每50ms更新一次
     chargeBar->setProgress(0.0);
@@ -397,6 +427,7 @@ void Player::onCharging() {
     if (currProgress <= 0.0) {
         chargeBarTimer->stop();
         chargeBar->setVisible(false);
+        tntItem->setVisible(false);
 
         launchLochunhin();
     }
@@ -408,6 +439,9 @@ void Player::launchLochunhin()
     QPointF currentPos = this->pos();
     CrescentWave* temp = new CrescentWave(ang, currentPos);
     this->scene()->addItem(temp);
+
+    // 播放音效
+    SoundPool::instance().play("Lochunhin_launch");
 }
 
 // 导弹
@@ -446,5 +480,8 @@ void Player::launchMissile(int N)
 
         // 将导弹添加到场景中
         sc->addItem(missile);
+
+        // 播放音效
+        SoundPool::instance().play("Missile_launch");
     }
 }
