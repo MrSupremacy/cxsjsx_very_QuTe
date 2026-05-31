@@ -36,8 +36,8 @@ public:
         if (m_soundUrls.contains(name)) return;
 
         m_soundUrls.insert(name, QUrl(path));
-        // 预热（Pre-warm）：预先创建1个实例存入池中，防止第一次播放时产生加载延迟
-        createInstance(name);
+        // 预热
+        for (int i = 0; i < MAX_INSTANCES_PER_SOUND; ++i) createInstance(name);
     }
 
     // 播放音效（核心并发逻辑）
@@ -111,7 +111,6 @@ private:
 
 private:
     // 同一个音效最大允许重叠播放的次数。
-    // 设为 5~8 就足够了，100个敌人同一帧死，人耳听起来其实就是一声巨大的爆炸，不需要100个实例。
     const int MAX_INSTANCES_PER_SOUND = 1;
 
     // 记录音量全局配置

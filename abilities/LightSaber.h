@@ -24,6 +24,9 @@ public:
         // 将父类保存的 QGraphicsItem 指针安全地转换为 Player 指针
         Player *p = dynamic_cast<Player*>(playerTarget);
         if (p) {
+            // 播放音效
+            SoundPool::instance().play("Spear_get");
+
             p->equipSword(6000); // 赋予玩家 6 秒的剑！
         }
     }

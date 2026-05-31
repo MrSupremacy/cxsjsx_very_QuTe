@@ -49,14 +49,19 @@ GameView::GameView(const DataCarrier& dc)
 
     // 音频
     QHash<QString, QString> mySounds = {
-        {"Arrow_hit",       "qrc:/SoundResources/Arrow_hit.wav"},
-        {"Arrow_shoot",     "qrc:/SoundResources/Arrow_shoot.wav"},
-        {"Enemy_die",       "qrc:/SoundResources/Enemy_die.wav"},
-        {"Missile_explode", "qrc:/SoundResources/Missile_explode.wav"},
-        {"Missile_launch",  "qrc:/SoundResources/Missile_launch.wav"},
-        {"Shield_break",    "qrc:/SoundResources/Shield_break.wav"},
-        {"Lochunhin_fuse",    "qrc:/SoundResources/Lochunhin_fuse.wav"},
-        {"Lochunhin_launch",  "qrc:/SoundResources/Lochunhin_launch.wav"}
+        {"Arrow_hit",        "qrc:/SoundResources/Arrow_hit.wav"},
+        {"Arrow_shoot",      "qrc:/SoundResources/Arrow_shoot.wav"},
+        {"Enemy_die",        "qrc:/SoundResources/Enemy_die.wav"},
+        {"Missile_explode",  "qrc:/SoundResources/Missile_explode.wav"},
+        {"Missile_launch",   "qrc:/SoundResources/Missile_launch.wav"},
+        {"Shield_break",     "qrc:/SoundResources/Shield_break.wav"},
+        {"Lochunhin_fuse",   "qrc:/SoundResources/Lochunhin_fuse.wav"},
+        {"Lochunhin_launch", "qrc:/SoundResources/Lochunhin_launch.wav"},
+        {"Shield_get",       "qrc:/SoundResources/Shield_get.wav"},
+        {"Spear_get",        "qrc:/SoundResources/Spear_get.wav"},
+        {"Circle_begin",     "qrc:/SoundResources/Circle_begin.wav"},
+        {"Square_begin",     "qrc:/SoundResources/Square_begin.wav"},
+        {"Triangle_begin",   "qrc:/SoundResources/Triangle_begin.wav"}
     };
     SoundPool::instance().init(mySounds, volume);
 
@@ -498,7 +503,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = 4; /*QRandomGenerator::global()->bounded(5);*/
+    int randomValue = QRandomGenerator::global()->bounded(5);
     Ability* ability = nullptr;
 
     switch (randomValue) {
@@ -614,6 +619,19 @@ void GameView::spawnFormation() {
 
         // 依次出现在屏幕上 (包围圈一个个画圈出现的效果也非常惊艳！)
         formation->beginSequentialSpawn(64);
+
+        // 播放音效
+        switch(randomValue) {
+        case 0:
+            SoundPool::instance().play("Triangle_begin");
+            break;
+        case 1:
+            SoundPool::instance().play("Square_begin");
+            break;
+        case 2:
+            SoundPool::instance().play("Circle_begin");
+            break;
+        }
 
         formation->setPos(spawnX, spawnY);
         scene->addItem(formation);

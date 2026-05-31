@@ -6,6 +6,7 @@
 
 #include <Ability.h>
 #include "Player.h"
+#include "SoundPool.h"
 
 class Shield: public Ability {
 public:
@@ -51,6 +52,9 @@ public:
         // 将父类保存的 QGraphicsItem 指针安全地转换为 Player 指针
         Player *p = dynamic_cast<Player*>(playerTarget);
         if (p) {
+            // 播放音效
+            SoundPool::instance().play("Shield_get");
+
             p->equipShield(6000); // 赋予玩家 6 秒的盾！
         }
     }

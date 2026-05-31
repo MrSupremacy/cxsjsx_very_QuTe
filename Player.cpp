@@ -462,6 +462,9 @@ void Player::launchMissile(int N)
 
     QRandomGenerator* random = QRandomGenerator::global();
 
+    // 播放音效
+    SoundPool::instance().play("Missile_launch");
+
     for (int i = 0; i < N; ++i) {
         // 无论敌人列表是否为空，都随机生成弧度值 (0 到 2*pi 之间)
         double ang = random->bounded(360.0);
@@ -480,8 +483,5 @@ void Player::launchMissile(int N)
 
         // 将导弹添加到场景中
         sc->addItem(missile);
-
-        // 播放音效
-        SoundPool::instance().play("Missile_launch");
     }
 }

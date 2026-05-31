@@ -43,5 +43,10 @@
         <file>ImageResources/tnt.png</file>
         <file>SoundResources/Lochunhin_fuse.wav</file>
         <file>SoundResources/Lochunhin_launch.wav</file>
+        <file>SoundResources/Circle_begin.wav</file>
+        <file>SoundResources/Shield_get.wav</file>
+        <file>SoundResources/Spear_get.wav</file>
+        <file>SoundResources/Square_begin.wav</file>
+        <file>SoundResources/Triangle_begin.wav</file>
     </qresource>
 </RCC>
