@@ -498,7 +498,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = 2 + QRandomGenerator::global()->bounded(2);
+    int randomValue = QRandomGenerator::global()->bounded(5);
     Ability* ability = nullptr;
 
     switch (randomValue) {
