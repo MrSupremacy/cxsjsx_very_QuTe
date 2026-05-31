@@ -4,23 +4,47 @@
 #include <QLineF>
 #include <QRandomGenerator>
 #include <QtMath>   // 用于 std::mt19937 和 std::random_device
+#include <QLabel>
+#include <QMovie>        // === 1. 引入播放动图的头文件 === [1]
+#include <QGraphicsView>
+#include <QTimer>
+#include <QGraphicsOpacityEffect>
 
 
 Player::Player()
 {
-    setRect(0, 0, 12, 12);
-    setBrush(QBrush(Qt::white)); // 基础颜色为白色
-    setPen(Qt::NoPen); // 移除边框
+    // setRect(0, 0, 20, 20);
+    // setBrush(QBrush(Qt::white)); // 基础颜色为白色
+    // setPen(Qt::NoPen); // 移除边框
+
+    QPixmap stevePic(":/ImageResources/steve.jpg");
+    // 玩家可能稍微大一点，比如 40x40
+    stevePic = stevePic.scaled(24, 24, Qt::KeepAspectRatio, Qt::FastTransformation);
+    this->setPixmap(stevePic);
+
+    this->setTransformOriginPoint(12, 12); // 设置中心点
 
     immuneTimer = new QTimer(this);
     immuneTimer->setSingleShot(true); // 设置为单次触发（只响一次）
     connect(immuneTimer, &QTimer::timeout, this, &Player::endImmune);
 
     // 光剑技能 配置光剑
-    swordItem = new QGraphicsRectItem(0, -1.5, 50, 3, this);
-    swordItem->setBrush(Qt::yellow); // 给剑涂成黄色
-    swordItem->hide(); // 初始状态隐藏（没吃到技能时没有剑）
-    swordItem->setPos(6, 6); // 放到中间位置
+    swordItem = new QGraphicsPixmapItem(this); // 改为 PixmapItem
+    QPixmap spearPic(":/ImageResources/diamondspear.png"); // 你的长矛图片路径
+
+    QTransform transform;
+    transform.rotate(135); // 顺时针旋转 135 度
+
+    // 执行旋转（旋转时建议用 Smooth 算法，防止边缘产生难看的锯齿）
+    spearPic = spearPic.transformed(transform, Qt::SmoothTransformation);
+
+    spearPic = spearPic.scaled(90, 90, Qt::KeepAspectRatio, Qt::FastTransformation);
+    swordItem->setPixmap(spearPic);
+
+    swordItem->hide(); // 初始状态隐藏
+    swordItem->setFlag(QGraphicsItem::ItemStacksBehindParent);
+    swordItem->setTransformOriginPoint(0, 45);
+    swordItem->setPos(10, -35);
 
     swordTimer = new QTimer(this);
     QObject::connect(swordTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这把剑
@@ -36,19 +60,29 @@ Player::Player()
         this->onCharging();
     });
 
-    // 护盾技能 配置护盾
-    shieldItem = new QGraphicsEllipseItem(-10, -10, 20, 20, this);
+    // 护盾技能 配置护盾及图腾
+    shieldItem = new QGraphicsRectItem(-16, -16, 32, 32, this);
     shieldItem->setBrush(Qt::NoBrush); // 无填充
-    shieldItem->setPen(QPen(Qt::darkCyan)); // 涂成淡青色
+    shieldItem->setPen(QPen(Qt::green)); // 涂成淡青色
     shieldItem->hide();
-    shieldItem->setPos(6, 6); // 放到中间位置
+    shieldItem->setPos(12, 12); // 放到中间位置
+
+    totemItem = new QGraphicsPixmapItem(this); // 生成图腾实体
+    QPixmap totemPic(":/ImageResources/totemofundying.png"); // 你的图腾图片路径
+    totemPic = totemPic.scaled(26, 26, Qt::KeepAspectRatio, Qt::FastTransformation);
+    totemItem->setPixmap(totemPic);
+    totemItem->hide();
+    totemItem->setPos(10, 12); // 放置到右下侧
 
     shieldTimer = new QTimer(this);
     QObject::connect(shieldTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这个盾
         shieldItem->hide();
-        breakShieldAndExplode(); // 盾自己破也要炸
+        totemItem->hide();
+        breakShieldAndExplode(120, 1000, false); // 盾自己破也要炸
     });
     shieldTimer->setSingleShot(true); // 设为单次触发模式
+
+
 
     // 射击技能 配置射击方法
     fireTimer = new QTimer(this); // 确保 fireTimer 已实例化
@@ -60,28 +94,42 @@ Player::Player()
             double ang = QLineF({0, 0}, lastDir).angle();
             ang = qDegreesToRadians(ang);
 
-            // 生成 currNum 个子弹
+            // 基础移动方向向量
             QPointF dir = {-qCos(ang), qSin(ang)};
             QPointF perp = {-dir.y(), dir.x()};
 
-            // 生成 currNum 个子弹 from 对象池
+            // 生成 currNum 个子弹 (假定 currNum 必为奇数)
             for (int var = 0; var < currNum; ++var) {
-                double offset = (var - (currNum - 1) / 2.0) * distPx;
-                QPointF currentPos = this->pos() + perp *offset;
 
-                // 从对象池获取子弹
-                // Bullet* temp = BulletPool::getInstance().getBullet(-ang, currentPos);
-                Bullet* temp = new Bullet(-ang, currentPos);
+                // 1. 【核心计算】：计算当前子弹相对于中心子弹的偏差索引
+                // 比如 5 颗子弹，var 分别为 0, 1, 2, 3, 4
+                // 计算出的 offsetIndex 分别为: -2, -1, 0, 1, 2 (中心刚好是 0)
+                double offsetIndex = var - (currNum - 1) / 2.0;
+
+                // 2. 计算生成位置
+                // 💡 提示：如果你希望所有子弹像“散弹枪”一样完全从玩家同一个点（枪口）呈扇形喷出，
+                // 可以在主程序中把传入的 distPx 设为 0。
+                // 如果希望它们像原本一样“平行排开后再扇形飞出”，保持你的 distPx 即可。
+                double offset = offsetIndex * distPx;
+                QPointF currentPos = this->pos() + perp * offset;
+
+                // 3. 【核心计算】：计算当前子弹的独立偏转角
+                // 比如每往旁边一颗偏离 5.0 度（你可以通过调整 5.0 这个数值改变散射的宽窄）
+                double angleOffsetDeg = offsetIndex * 4.5;
+                double bulletAng = -ang - qDegreesToRadians(angleOffsetDeg);
+
+                // 4. 生成子弹，传入微调后的独立角度
+                // 我们之前写的 Bullet 构造函数会自动根据这个弧度角旋转图片并计算移动向量！
+                Bullet* temp = new Bullet(bulletAng, currentPos);
                 if (!temp) continue;
 
-                // 如果子弹当前不在场景中，才把它加进去：额外检查，理论不会
+                // 5. 将子弹加入场景
                 try {
                     if (temp->scene() != this->scene()) {
                         this->scene()->addItem(temp);
                     }
                 } catch (...) {
                 }
-
             }
 
             if (fireTimes > 0) {
@@ -89,6 +137,19 @@ Player::Player()
             }
         }
     });
+}
+
+void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    // 1. 先画出 Steve 图片
+    QGraphicsPixmapItem::paint(painter, option, widget);
+
+    // 2. 绘制 Steve 的边框（比如用红石科技感十足的红色，或者经典的黑色）
+    QPen pen(Qt::lightGray, 2);
+    pen.setJoinStyle(Qt::MiterJoin);
+    painter->setPen(pen);
+
+    // 3. 绘制边框
+    painter->drawRect(this->boundingRect().adjusted(1, 1, -1, -1));
 }
 
 void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bool down, bool right) {
@@ -115,7 +176,7 @@ void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bo
         QRectF mapRect = this->scene()->sceneRect();
 
         // 获取玩家自身的范围
-        QRectF playerRect = this->rect();
+        QRectF playerRect = this->boundingRect();
 
         // 限制 X 坐标 (左右碰壁)
         if (nextX < mapRect.left()) {
@@ -140,7 +201,7 @@ void Player::keyboardMove(bool w, bool a, bool s, bool d, bool up, bool left, bo
 
 void Player::mouseMove(const QPointF posInScene) {
     // 1. 手感优化：获取玩家的中心点坐标，而不是左上角
-    QRectF pRect = this->rect();
+    QRectF pRect = this->boundingRect();
     QPointF centerPos = this->scenePos() + QPointF(pRect.width() / 2.0, pRect.height() / 2.0);
 
     // 计算中心点到鼠标的向量
@@ -175,7 +236,7 @@ void Player::mouseMove(const QPointF posInScene) {
     // ================= 新增：边界限制逻辑 =================
     if (this->scene()) {
         QRectF mapRect = this->scene()->sceneRect();
-        QRectF playerRect = this->rect();
+        QRectF playerRect = this->boundingRect();
 
         // 限制 X 坐标 (左右碰壁)
         if (nextX < mapRect.left()) {
@@ -227,7 +288,7 @@ void Player::endImmune() {
 
 // 光剑技能相关实现
 
-QGraphicsRectItem* Player::getSword() {
+QGraphicsPixmapItem* Player::getSword() {
     return swordItem;
 }
 
@@ -247,28 +308,66 @@ void Player::autoFire(int rounds, int interval, int num)
 }
 
 // 护盾技能
-QGraphicsEllipseItem* Player::getShield() {
+QGraphicsRectItem* Player::getShield() {
     return shieldItem;
 }
 
 void Player::equipShield(int durationMs) {
     shieldItem->show();
+    totemItem->show();
     shieldTimer->start(durationMs);
 }
 
-void Player::breakShieldAndExplode(int radius, int lifeTime) {
-    // 1. 隐藏盾牌的图形
-    if(shieldItem) {
-        shieldItem->hide();
-    }
+void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
+    if (shieldItem) shieldItem->hide();
+    if (totemItem) totemItem->hide();
+    if (shieldTimer && shieldTimer->isActive()) shieldTimer->stop();
 
-    // 2. 停止盾牌的倒计时器
-    if (shieldTimer && shieldTimer->isActive()) {
-        shieldTimer->stop();
-    }
-
-    // 2.5 给玩家32ms无敌帧
     this->giveImmune(32);
+
+    if (haveTotem && this->scene() && !this->scene()->views().isEmpty()) {
+        QGraphicsView* view = this->scene()->views().first();
+
+        // 1. 【核心修改】：获取玩家当前的场景绝对坐标
+        QPointF playerScenePos = this->scenePos();
+
+        // 2. 【核心修改】：使用投影函数，将场景坐标转为当前屏幕上的像素坐标！ [4]
+        // 哪怕你的地图相机在滚动，它也能精准算出玩家此时在屏幕上的哪个像素点 [4]
+        QPoint screenPos = view->mapFromScene(playerScenePos);
+
+        QLabel* totemLabel = new QLabel(view);
+        totemLabel->setAttribute(Qt::WA_TranslucentBackground);
+        totemLabel->setWindowFlags(Qt::SubWindow);
+        totemLabel->setAlignment(Qt::AlignCenter);
+        totemLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+        totemLabel->setFocusPolicy(Qt::NoFocus);
+        totemLabel->setAttribute(Qt::WA_ShowWithoutActivating);
+
+        QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(totemLabel);
+
+        // 半透明效果
+        opacityEffect->setOpacity(0.85);
+        totemLabel->setGraphicsEffect(opacityEffect);
+
+        QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
+        movie->setSpeed(125);
+
+        int gifW = 180;
+        int gifH = 180;
+        movie->setScaledSize(QSize(gifW, gifH));
+        totemLabel->setMovie(movie);
+
+        // 3. 【核心修改】：将大动画标签的【中点】对准玩家所在的屏幕投影坐标
+        int startX = screenPos.x() - gifW / 2;
+        int startY = screenPos.y() - gifH / 2;
+        totemLabel->setGeometry(startX, startY, gifW, gifH);
+
+        totemLabel->show();
+        movie->start();
+
+        connect(movie, &QMovie::finished, totemLabel, &QLabel::deleteLater);
+        QTimer::singleShot(2000, totemLabel, &QLabel::deleteLater);
+    }
 
     // 3. 生成爆炸类对象
     Explosion* boom = new Explosion(radius, lifeTime);

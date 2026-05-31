@@ -4,12 +4,27 @@
 #include <math.h>
 #include <QGraphicsScene>
 #include <QDebug>
+#include <QPen>
+#include <QPainter>
 
 Enemy::Enemy(QGraphicsItem *target) {
     playerTarget = target;
-    setRect(0, 0, 8, 8); // 设置敌人大小
-    setBrush(QBrush(Qt::red)); // 基础颜色为红色
-    setPen(Qt::NoPen); // 移除边框
+    // setRect(0, 0, 16, 16); // 设置敌人大小
+    // setBrush(QBrush(Qt::red)); // 基础颜色为红色
+    // setPen(Qt::NoPen); // 移除边框
+
+    // 以你的 drown (溺尸) 为例：
+    // 注意看你的截图，前缀是 / ，文件夹是 ImageResources，所以路径这样写：
+    QPixmap enemyPic(":/ImageResources/drown.png");
+
+    // 把它从 600x600 缩小成你游戏里想要的 32x32 物理大小
+    // 注意：因为是从大图缩小，这里建议用 Qt::SmoothTransformation（平滑缩小），
+    // 否则可能会出现像素丢失导致画面扭曲。
+    enemyPic = enemyPic.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    this->setPixmap(enemyPic);
+    this->setTransformOriginPoint(12, 12); // 旋转中心设为一半
+
 
     this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
@@ -41,6 +56,24 @@ Enemy::Enemy(QGraphicsItem *target) {
 //         this->moveBy(moveX, moveY);
 //     }
 // }
+
+void Enemy::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    // 1. 首先，调用父类默认的绘制函数，把僵尸/溺尸图片画出来
+    QGraphicsPixmapItem::paint(painter, option, widget);
+
+    // 2. 然后，我们用画笔在它的边缘叠加上一个描边方框
+    // 参数1：画笔颜色（僵尸可以用 Qt::black，或者醒目的红色 Qt::red！）
+    // 参数2：画笔粗细，像素风建议 1 或者 2
+    QPen pen(Qt::black, 2);
+
+    // 像素风建议设置成 MiterJoin，这样拐角处是锐利的直角，非常符合 MC 风格
+    pen.setJoinStyle(Qt::MiterJoin);
+    painter->setPen(pen);
+
+    // 3. 绘制边框
+    // 为了防止画笔由于太粗而被图片边缘裁剪，我们将边框往内微调 1 像素 (adjusted)
+    painter->drawRect(this->boundingRect().adjusted(1, 1, -1, -1));
+}
 
 // 带穿越版本索敌
 void Enemy::moveTowardsTarget() {
@@ -80,8 +113,8 @@ void Enemy::moveTowardsTarget() {
         finalMoveY += scatterVy;
 
         // 模拟物理摩擦力/空气阻力：让散开的速度越来越慢，看起来更自然
-        scatterVx *= 0.9f;
-        scatterVy *= 0.9f;
+        scatterVx *= 0.93f;
+        scatterVy *= 0.93f;
 
         scatterFrames--; // 帧数递减
     }
@@ -102,9 +135,9 @@ void Enemy::teleportThroughWall() {
     qreal ex = this->x();
     qreal ey = this->y();
 
-    // 获取自身大小（本地 rect 的宽高是正确的）
-    int selfWidth = this->rect().width();
-    int selfHeight = this->rect().height();
+    // 获取自身大小（使用 boundingRect 获取贴图的实际宽高）
+    qreal selfWidth = this->boundingRect().width();
+    qreal selfHeight = this->boundingRect().height();
 
     // ---------------- 处理 X 轴 ----------------
     // 若接触左壁 (当前 X 小于地图左边缘)

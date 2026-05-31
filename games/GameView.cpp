@@ -21,6 +21,7 @@
 #include "Arrow.h"
 #include "Tetris.h"
 #include "Circle.h"
+#include "DeathVFX.h"
 
 GameView::GameView(const DataCarrier& dc)
     : difficulty(dc.difficulty)
@@ -105,6 +106,11 @@ GameView::GameView(const DataCarrier& dc)
     // 创建场景
     scene = new QGraphicsScene(this);
     scene->setSceneRect(0, 0, mapWidth, mapHeight);
+
+    QPixmap bgPixmap(":/ImageResources/Underwater.png");
+    bgPixmap = bgPixmap.scaled(32, 32, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    scene->setBackgroundBrush(QBrush(bgPixmap));
+
     setScene(scene);
 
     // 创建玩家
@@ -155,7 +161,9 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
 
     // 4. 只在交集区域内填充“场景内部颜色”（例如黑色）
     if (!intersectRect.isEmpty()) {
-        painter->fillRect(intersectRect, QColor(191, 191, 191));
+        painter->setOpacity(0.6);
+        painter->fillRect(intersectRect, scene->backgroundBrush());
+        painter->setOpacity(1.0);
     }
 }
 
@@ -349,11 +357,28 @@ void GameView::updateGame() {
                 delete b;
             }
             else if (item->data(0).toString() == "enemy") {
+                // 1. 获取敌人死前的绝对中心点
+                QPointF deadCenter = item->sceneBoundingRect().center();
+
+                // 2. 【核心修改】：提取该敌人此时真实的贴图
+                // 不管他是僵尸还是溺尸，这一步都会动态抓取到它当前的贴图
+                QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+                QPixmap enemyPixmap;
+                if (pixItem) {
+                    enemyPixmap = pixItem->pixmap();
+                }
+
+                // 3. 【核心修改】：生成死亡红闪 + 冒烟特效 (传入坐标和敌人贴图)
+                DeathVFX* vfx = new DeathVFX(deadCenter, enemyPixmap);
+                scene->addItem(vfx);
+
+                // 4. 增加得分 (保持原样)
                 scores++;
                 scoreRecordBoard->setText(
                     QString("Score: %1").arg(scores, 4, 10, QChar(' '))
-                );
+                    );
 
+                // 5. 销毁敌人 (保持原样)
                 scene->removeItem(item);
                 delete item;
             }
@@ -384,8 +409,8 @@ void GameView::spawnEnemy() {
             // 生成一个 0 到 2π 之间的随机弧度 (相当于 0 到 360 度)
             qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
 
-            // 这样敌人就会刷在距离玩家 150 到 600 的环形区域内
-            qreal distance = 150.0 + QRandomGenerator::global()->generateDouble() * 400.0;
+            // 这样敌人就会刷在距离玩家 300 到 600 的环形区域内
+            qreal distance = 250.0 + QRandomGenerator::global()->generateDouble() * 650.0;
 
             // 根据极坐标公式算出生成的 X 和 Y 坐标
             spawnX = px + distance * qCos(angle);
@@ -423,7 +448,7 @@ void GameView::generateAbility() {
         qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
 
         // 这样技能就会刷在距离玩家 200 到 700 的环形区域内
-        qreal distance = 200.0 + QRandomGenerator::global()->generateDouble() * 500.0;
+        qreal distance = 250.0 + QRandomGenerator::global()->generateDouble() * 650.0;
 
         // 根据极坐标公式算出生成的 X 和 Y 坐标
         spawnX = px + distance * qCos(angle);
@@ -528,7 +553,7 @@ void GameView::spawnFormation() {
                 attempts++;
 
                 qreal angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
-                qreal distance = 250 + QRandomGenerator::global()->generateDouble() * 300.0;
+                qreal distance = 350 + QRandomGenerator::global()->generateDouble() * 450.0;
 
                 spawnX = px + distance * qCos(angle);
                 spawnY = py + distance * qSin(angle);

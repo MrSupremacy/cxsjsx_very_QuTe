@@ -1,0 +1,37 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ImageResources/drown.png</file>
+        <file>ImageResources/smooth_stone.jpg</file>
+        <file>ImageResources/steve.jpg</file>
+        <file>ImageResources/stone.jpg</file>
+        <file>ImageResources/Underwater.png</file>
+        <file>ImageResources/diamondspear.png</file>
+        <file>ImageResources/arrow.png</file>
+        <file>ImageResources/spectralarrow.png</file>
+        <file>ImageResources/firework.png</file>
+        <file>ImageResources/totemofundying.png</file>
+        <file>ImageResources/totem-of-undying-faked-death.gif</file>
+        <file>ImageResources/firework_explosion.gif</file>
+        <file>ImageResources/generic_0.png</file>
+        <file>ImageResources/generic_1.png</file>
+        <file>ImageResources/generic_2.png</file>
+        <file>ImageResources/generic_3.png</file>
+        <file>ImageResources/generic_4.png</file>
+        <file>ImageResources/generic_5.png</file>
+        <file>ImageResources/generic_6.png</file>
+        <file>ImageResources/generic_7.png</file>
+        <file>ImageResources/bow.png</file>
+        <file>ImageResources/Firework_Loaded_Crossbow.png</file>
+        <file>ImageResources/speardisplay.png</file>
+        <file>ImageResources/totemdisplay.gif</file>
+        <file>ImageResources/spark_0.png</file>
+        <file>ImageResources/spark_1.png</file>
+        <file>ImageResources/spark_2.png</file>
+        <file>ImageResources/spark_3.png</file>
+        <file>ImageResources/spark_4.png</file>
+        <file>ImageResources/spark_5.png</file>
+        <file>ImageResources/spark_6.png</file>
+        <file>ImageResources/spark_7.png</file>
+        <file>ImageResources/arrowedbow.png</file>
+    </qresource>
+</RCC>

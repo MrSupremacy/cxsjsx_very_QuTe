@@ -7,7 +7,9 @@
 #include <QBrush>
 #include <QPen>
 #include <QPointF>
-
+#include <QPixmap>
+#include <QMovie>
+#include <QPainter>
 
 
 // 基础技能/增益类
@@ -31,6 +33,7 @@ protected:
     double angle;       // 当前正弦波的角度
     double floatRange;  // 悬浮上下晃动的像素范围
     double floatSpeed;  // 悬浮的速度
+
 };
 
 

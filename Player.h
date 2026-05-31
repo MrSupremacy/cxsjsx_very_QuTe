@@ -16,11 +16,14 @@
 #include "Missile.h"
 
 
-class Player: public QObject, public QGraphicsEllipseItem {
+class Player: public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
 
 public:
     Player(); // 构造函数
+
+    // 重写绘制函数，用于画边框
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void keyboardMove(
         bool w, bool a, bool s, bool d, bool up, bool left, bool down, bool right); // 键盘移动
@@ -33,7 +36,7 @@ public:
 
 
 public:
-    double speed = 3.0f;             // 玩家移动速度
+    double speed = 4.5f;             // 玩家移动速度
     QPointF lastDir = QPointF(1, 0); // 记录最后一次的面朝方向（默认朝右）
     bool isImmune = false; // 无敌状态
 
@@ -47,10 +50,10 @@ public:
     bool getIsImmune() const { return isImmune;}
 
     // 光剑 光剑技能
-    QGraphicsRectItem *swordItem;    // 剑的图形
+    QGraphicsPixmapItem* swordItem;
     QTimer *swordTimer;              // 控制剑持续时间的定时器
     void equipSword(int durationMs); // 装备剑的函数
-    QGraphicsRectItem* getSword();   // 获取剑的指针（用于在 GameView 里做碰撞检测）
+    QGraphicsPixmapItem* getSword();
 
     // 蓄力条 咖喱棒技能
     QTimer *chargeBarTimer;
@@ -62,14 +65,15 @@ public:
     void launchLochunhin();
 
     // 护盾 护盾技能
-    QGraphicsEllipseItem *shieldItem; // 护盾图形
+    QGraphicsRectItem *shieldItem; // 护盾图形
+    QGraphicsPixmapItem *totemItem; // 不死图腾
     QTimer *shieldTimer;              // 控制护盾持续时间的定时器
     void equipShield(int durationMs); // 装备护盾的函数
-    void breakShieldAndExplode(int radius = 60, int lifeTime = 1000); // 销毁护盾并产生爆炸
-    QGraphicsEllipseItem* getShield();   // 获取护盾的指针（用于在 GameView 里做碰撞检测）
+    void breakShieldAndExplode(int radius = 120, int lifeTime = 1000, bool haveTotem = true); // 销毁护盾并产生爆炸
+    QGraphicsRectItem* getShield();   // 获取护盾的指针（用于在 GameView 里做碰撞检测）
 
     // 射击技能
-    const int distPx = 15;
+    const int distPx = 10;
     int fireTimes;     // 记录已射击次数
     int currNum, currInterval;
     QTimer *fireTimer; // 发送射击信号

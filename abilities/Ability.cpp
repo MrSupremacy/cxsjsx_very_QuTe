@@ -11,9 +11,9 @@ Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
     this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
     // 设定一个直径为 20 的圆，圆心位于 (0,0)
-    setRect(-7.5, -7.5, 15, 15);
+    setRect(-16, -16, 32, 32);
     setBrush(QBrush(Qt::yellow)); // 基础颜色为黄色
-    setPen(QPen(Qt::white, 2));   // 白色边框
+    setPen(QPen(Qt::white, 3));   // 白色边框
 
     this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
@@ -22,7 +22,7 @@ Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
 
     // 让每个技能的初始角度随机，这样多个技能同时存在时，不会“神同步”晃动
     angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
-    floatRange = 10.0; // 在锚点上下 10 像素范围内晃动
+    floatRange = 16.0; // 在锚点上下 10 像素范围内晃动
     floatSpeed = 0.05; // 每帧角度增加量
 }
 

@@ -33,7 +33,7 @@ public:
         Enemy* e8 = new Enemy(playerTarget);
         Enemy* e9 = new Enemy(playerTarget);
 
-        double dx = 10.0, dy = 10.0;
+        double dx = 28.0, dy = 28.0;
         e1->setPos(0, 0);
         e2->setPos(dx, 0);
         e3->setPos(2 * dx, 0);
@@ -57,7 +57,7 @@ public:
         this->addToGroup(e9);
 
         // 修改速度 (弹射速度)
-        Formation::speed = 4.0f;
+        Formation::speed = 7.0f;
 
         QTimer::singleShot(1500, this, [this]() {
             if (this->currentState == State::Waiting) {
