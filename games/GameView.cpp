@@ -305,8 +305,8 @@ void GameView::updateGame() {
                     // 标记敌人要删除
                     itemsToRemove.insert(e);
 
-                    // 播放音效
-                    SoundPool::instance().play("Lochunhin_launch");
+                    // // 播放音效
+                    // SoundPool::instance().play("Lochunhin_launch");
                 }
             }
         }
@@ -498,7 +498,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = QRandomGenerator::global()->bounded(5);
+    int randomValue = 4; /*QRandomGenerator::global()->bounded(5);*/
     Ability* ability = nullptr;
 
     switch (randomValue) {

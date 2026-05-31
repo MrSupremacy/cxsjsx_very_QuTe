@@ -42,6 +42,7 @@ public:
 
     // 播放音效（核心并发逻辑）
     inline void play(const QString& name) {
+
         if (!m_soundUrls.contains(name)) {
             qWarning() << "SoundPool: 找不到音效 ->" << name;
             return;
@@ -63,7 +64,7 @@ public:
             if (pool.size() < MAX_INSTANCES_PER_SOUND) {
                 // 策略A：还没达到并发上限，动态创建一个新的 QSoundEffect
                 effectToPlay = createInstance(name);
-                qDebug() << "SoundPool: 动态扩容" << name << "当前实例数:" << pool.size();
+
             } else {
                 // 策略B：达到上限（Voice Stealing）。强行掐断并征用最老的一个实例（索引0）
                 effectToPlay = pool.takeFirst(); // 拿出最老的
@@ -110,8 +111,8 @@ private:
 
 private:
     // 同一个音效最大允许重叠播放的次数。
-    // 设为 5~8 就足够了，10个敌人同一帧死，人耳听起来其实就是一声巨大的爆炸，不需要100个实例。
-    const int MAX_INSTANCES_PER_SOUND = 8;
+    // 设为 5~8 就足够了，100个敌人同一帧死，人耳听起来其实就是一声巨大的爆炸，不需要100个实例。
+    const int MAX_INSTANCES_PER_SOUND = 1;
 
     // 记录音量全局配置
     qreal volume;
