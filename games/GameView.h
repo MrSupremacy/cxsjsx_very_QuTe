@@ -58,7 +58,7 @@ private:
     int enemySpawnNum = 6; // 敌人生成个数
     int formationSpawnNum = 1; // 阵型生成个数
 
-    const int mapWidth = 800, mapHeight = 500;
+    const int mapWidth = 1280, mapHeight = 800;
 
 
 protected:

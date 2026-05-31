@@ -28,6 +28,7 @@ HEADERS += \
     Arrow.h \
     DataCarrier.h \
     Circle.h \
+    DeathVFX.h \
     Enemy.h \
     Formation.h \
     Player.h \
@@ -56,3 +57,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    res.qrc

@@ -355,7 +355,7 @@ void OpenGLGameView::paintEvent(QPaintEvent *event)
     m_program.setUniformValue("screenTexture", 0);
 
     // 1. 获取玩家在其自身坐标系下的中心点
-    QPointF localCenter = player->rect().center();
+    QPointF localCenter = player->boundingRect().center();
     // 2. 将玩家中心点映射到【场景坐标系】(Scene)
     QPointF sceneCenter = player->mapToScene(localCenter);
     // 3. 利用 QGraphicsView 自带的方法，将【场景坐标】精确转换为【视口逻辑坐标】(Viewport)

@@ -30,7 +30,7 @@ public:
         Enemy* e6 = new Enemy(playerTarget);
         Enemy* e7 = new Enemy(playerTarget);
 
-        double dx = 12.0, dy = 7.0;
+        double dx = 24.0, dy = 12.0;
         e1->setPos(0, 0);
         e2->setPos(dx, dy);
         e3->setPos(2 * dx, 2 * dy);
@@ -50,14 +50,14 @@ public:
         this->addToGroup(e7);
 
         // 修改速度 (冲刺速度)
-        Formation::speed = 9.0f; // 可以调快一点体现“猛冲”
+        Formation::speed = 14.0f; // 可以调快一点体现“猛冲”
 
         // --- 核心新增配置 ---
 
         // 1. 设置旋转中心：如果你不设置，阵型会绕着(0,0)也就是e1旋转，看起来很怪
 
         // 所以我们把旋转中心设在图形正中间：
-        this->setTransformOriginPoint(18.0, 21.0);
+        this->setTransformOriginPoint(30.0, 33.0);
 
         // 2. 停用基类的自动销毁计时器（因为我们现在要在碰到墙壁时才解散）
         // 如果基类的生命周期计时器还在，可以在这里把它停掉，比如：

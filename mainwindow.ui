@@ -124,7 +124,7 @@
            </font>
           </property>
           <property name="text">
-           <string>E 9999 / 9999 S</string>
+           <string>E 1000 / 0001 S</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>

@@ -4,6 +4,7 @@
 #define LIGHTSABER_H
 
 #include <Ability.h>
+#include <QPixmap>
 #include "Player.h"
 
 // 光剑技能类
@@ -13,7 +14,10 @@ public:
         : Ability(spawnPos, target)
     {
         // 可以改变这个技能球的颜色，比如变成红色代表是攻击技能
-        setBrush(Qt::red);
+        setBrush(QColor("#D7BDE2"));
+
+        texture.load(":/ImageResources/speardisplay.png");
+        textureRect = QRectF(-12, -12, 24, 24);
     }
 
     void pickUp() override {
@@ -24,6 +28,20 @@ public:
         }
     }
 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
+        // 1. 首先调用基类的 paint，画出红色的圆形背景和白色边框
+        Ability::paint(painter, option, widget);
+
+        // 2. 然后在圆形背景上方，绘制您的贴图
+        if (!texture.isNull()) {
+            painter->setRenderHint(QPainter::SmoothPixmapTransform); // 开启平滑缩放防止锯齿
+            painter->drawPixmap(textureRect, texture, texture.rect());
+        }
+    }
+
+private:
+    QPixmap texture;     // 存储静态贴图
+    QRectF textureRect;  // 用于控制每个技能独有的贴图位置与缩放比例
 };
 
 #endif // LIGHTSABER_H
