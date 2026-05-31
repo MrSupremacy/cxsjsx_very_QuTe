@@ -2,8 +2,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "skinselect.h"
 #include "GameView.h"
-#include "openglgameview.h"
 
 #include "DataCarrier.h"
 #include <QPushButton>
@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
         // 2. 创建并显示游戏界面
         DataCarrier para = {moveMode, Difficulty, Volume, timeLimited, maxSeconds};
         GameView *game = new GameView(para);
-        //OpenGLGameView *game = new OpenGLGameView(moveMode);
 
 
         // 关键设置：当关闭游戏窗口时，自动释放 game 占用的内存，防止内存泄漏
@@ -37,12 +36,13 @@ MainWindow::MainWindow(QWidget *parent)
                 .arg(ed.second, 4, 10, QChar('0'));
             ui->last_score->setText(txt);
         });
-        //connect(game, &OpenGLGameView::gameEnded, this, &MainWindow::show);
 
         connect(game, &GameView::destroyed, this, &MainWindow::show);
 
         // 设置游戏窗口的大小，并显示出来
-        game->resize(900, 600);
+        // game->resize(900, 600);
+        // game->showFullScreen();
+        game->showMaximized();
         game->show();
     });
 
@@ -83,6 +83,10 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    // 皮肤 按钮
+    connect(ui->Skin, &QPushButton::clicked, this, &MainWindow::on_btnSkin_clicked);
+
+
     // 游戏模式切换
     connect(ui->infty_time, &QPushButton::clicked, this, [=]() {
         ui->infty_time->setStyleSheet("background-color: rgb(189, 17, 77);");
@@ -115,6 +119,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->settings->hide();
     ui->modes->hide();
+}
+
+void MainWindow::on_btnSkin_clicked()
+{
+    // 创建局部对象，用 exec() 阻塞运行
+    SkinSelect dialog(this);
+    dialog.setGeometry(this->geometry());
+    dialog.exec();
 }
 
 MainWindow::~MainWindow()

@@ -1,4 +1,4 @@
-QT       += core gui openglwidgets
+QT       += core gui openglwidgets multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,7 +22,8 @@ SOURCES += \
     games/GameView.cpp \
     games/openglgameview.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    skinselect.cpp
 
 HEADERS += \
     Arrow.h \
@@ -32,6 +33,7 @@ HEADERS += \
     Enemy.h \
     Formation.h \
     Player.h \
+    SoundPool.h \
     Tetris.h \
     abilities/Ability.h \
     abilities/Bullet.h \
@@ -48,10 +50,12 @@ HEADERS += \
     enemy3d.h \
     games/GameView.h \
     games/openglgameview.h \
-    mainwindow.h
+    mainwindow.h \
+    skinselect.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    skinselect.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

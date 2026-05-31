@@ -24,28 +24,30 @@ public:
 
     // 规定形状大小
     QRectF boundingRect() const override {
-        return QRectF(0, 0, 50, 8); // 宽50，高8
+        return QRectF(0, 0, wd, ht);
     }
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override {
         Q_UNUSED(option); Q_UNUSED(widget);
 
         // 1. 画外框 (黑色边框，透明或灰色背景)
-        painter->setPen(QPen(Qt::black, 1));
+        painter->setPen(QPen(Qt::white, 1));
         painter->setBrush(Qt::NoBrush);
-        painter->drawRect(0, 0, 50, 8);
+        painter->drawRect(0, 0, wd, ht);
 
         // 2. 画内部进度条 (绿色)
         if (m_progress > 0) {
             painter->setPen(Qt::NoPen);
-            painter->setBrush(QBrush(Qt::green));
-            qreal fillWidth = (50 - 2) * m_progress; // 减去边框宽度
+            painter->setBrush(QBrush(Qt::red));
+            qreal fillWidth = (wd - 2) * m_progress; // 减去边框宽度
             painter->drawRect(1, 1, fillWidth, 6);
         }
     }
 
 private:
     qreal m_progress = 0.0;
+    const int wd = 24;
+    const int ht = 4;
 };
 
 #endif // PLAYERCHARGEBAR_H

@@ -33,5 +33,15 @@
         <file>ImageResources/spark_6.png</file>
         <file>ImageResources/spark_7.png</file>
         <file>ImageResources/arrowedbow.png</file>
+        <file>ImageResources/Totem_of_Undying_Animation.gif</file>
+        <file>SoundResources/Arrow_hit.wav</file>
+        <file>SoundResources/Arrow_shoot.wav</file>
+        <file>SoundResources/Enemy_die.wav</file>
+        <file>SoundResources/Missile_explode.wav</file>
+        <file>SoundResources/Missile_launch.wav</file>
+        <file>SoundResources/Shield_break.wav</file>
+        <file>ImageResources/tnt.png</file>
+        <file>SoundResources/Lochunhin_fuse.wav</file>
+        <file>SoundResources/Lochunhin_launch.wav</file>
     </qresource>
 </RCC>

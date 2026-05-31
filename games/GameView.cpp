@@ -22,6 +22,8 @@
 #include "Tetris.h"
 #include "Circle.h"
 #include "DeathVFX.h"
+#include "SoundPool.h"
+
 
 GameView::GameView(const DataCarrier& dc)
     : difficulty(dc.difficulty)
@@ -31,10 +33,34 @@ GameView::GameView(const DataCarrier& dc)
     , moveMode(dc.moveMode)
 {
     // 基本设置
+    QOpenGLWidget *glWidget = new QOpenGLWidget(this);
+    setViewport(glWidget);
+    glWidget->setMouseTracking(true);
+
     setMouseTracking(true);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    // 另外，关闭抗锯齿可以大幅提升性能（如果不需要特别圆滑的边缘）
+    // 另外，关闭抗锯齿可以大幅提升性能
     // view->setRenderHint(QPainter::Antialiasing, false);
+
+    setWindowTitle("DTRD Game by Qute");
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+
+    // 音频
+    QHash<QString, QString> mySounds = {
+        {"Arrow_hit",       "qrc:/SoundResources/Arrow_hit.wav"},
+        {"Arrow_shoot",     "qrc:/SoundResources/Arrow_shoot.wav"},
+        {"Enemy_die",       "qrc:/SoundResources/Enemy_die.wav"},
+        {"Missile_explode", "qrc:/SoundResources/Missile_explode.wav"},
+        {"Missile_launch",  "qrc:/SoundResources/Missile_launch.wav"},
+        {"Shield_break",    "qrc:/SoundResources/Shield_break.wav"},
+        {"Lochunhin_fuse",    "qrc:/SoundResources/Lochunhin_fuse.wav"},
+        {"Lochunhin_launch",  "qrc:/SoundResources/Lochunhin_launch.wav"}
+    };
+    SoundPool::instance().init(mySounds, volume);
+
+
 
     // 创建 计时板、计分板 & 设置样式
     scoreRecordBoard = new QLabel("Score:    0", this);
@@ -262,6 +288,9 @@ void GameView::updateGame() {
                     // 标记敌人和子弹都要移除
                     itemsToRemove.insert(e);
                     itemsToRemove.insert(bullet);
+
+                    SoundPool::instance().play("Arrow_hit");
+
                     break; // 停止检测这个子弹
                 }
             }
@@ -269,12 +298,15 @@ void GameView::updateGame() {
         // 咖喱棒剑气碰撞检测
         else if (CrescentWave* wave = dynamic_cast<CrescentWave*>(item)) {
             // 已经自己处理移动和碰壁删除了。见 CrescentWave.h
-            // 子弹碰撞检测
+
             QList<QGraphicsItem*> waveCollisions = wave->collidingItems();
             for (QGraphicsItem* colItem : std::as_const(waveCollisions)) {
                 if (Enemy* e = dynamic_cast<Enemy*>(colItem)) {
                     // 标记敌人要删除
                     itemsToRemove.insert(e);
+
+                    // 播放音效
+                    SoundPool::instance().play("Lochunhin_launch");
                 }
             }
         }
@@ -372,6 +404,9 @@ void GameView::updateGame() {
                 DeathVFX* vfx = new DeathVFX(deadCenter, enemyPixmap);
                 scene->addItem(vfx);
 
+                // 播放死亡音效
+                SoundPool::instance().play("Enemy_die");
+
                 // 4. 增加得分 (保持原样)
                 scores++;
                 scoreRecordBoard->setText(
@@ -463,7 +498,7 @@ void GameView::generateAbility() {
     }
 
     // 生成新技能
-    int randomValue = QRandomGenerator::global()->bounded(5);
+    int randomValue = 2 + QRandomGenerator::global()->bounded(2);
     Ability* ability = nullptr;
 
     switch (randomValue) {

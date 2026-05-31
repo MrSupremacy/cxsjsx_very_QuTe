@@ -8,6 +8,7 @@
 #include <QtMath>
 
 #include "Explosion.h"
+#include "SoundPool.h"
 
 // 烟花火箭粒子类
 class MissileTrailSpark : public QGraphicsObject {
@@ -226,6 +227,9 @@ public:
             Explosion* exp = new Explosion(36.0, 500);
             exp->setPos(this->pos());
             sc->addItem(exp);
+
+            // 播放音效
+            SoundPool::instance().play("Missile_explode");
         }
     }
 
