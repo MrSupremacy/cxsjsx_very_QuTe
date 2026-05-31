@@ -61,15 +61,17 @@ public:
 
         // 2. 如果池子里所有的实例都在播放，说明并发太高了
         if (!effectToPlay) {
-            if (pool.size() < MAX_INSTANCES_PER_SOUND) {
-                // 策略A：还没达到并发上限，动态创建一个新的 QSoundEffect
-                effectToPlay = createInstance(name);
+            // 达到上限（Voice Stealing）。强行掐断并征用最老的一个实例（索引0）
+            effectToPlay = pool.takeFirst(); // 拿出最老的
+            pool.append(effectToPlay);       // 放到队尾，把它标记为最新的
+        }
 
-            } else {
-                // 策略B：达到上限（Voice Stealing）。强行掐断并征用最老的一个实例（索引0）
-                effectToPlay = pool.takeFirst(); // 拿出最老的
-                pool.append(effectToPlay);       // 放到队尾，把它标记为最新的
-            }
+        if (effectToPlay->status() == QSoundEffect::Error
+                    || effectToPlay->status() == QSoundEffect::Null) {
+            qDebug() << "检测到失效的音频句柄，正在重建...";
+            QUrl source = effectToPlay->source();
+            effectToPlay->setSource(QUrl()); // 清空
+            effectToPlay->setSource(source); // 重新加载，触发底层重新申请系统音频句柄
         }
 
         // 3. 播放
@@ -111,7 +113,7 @@ private:
 
 private:
     // 同一个音效最大允许重叠播放的次数。
-    const int MAX_INSTANCES_PER_SOUND = 1;
+    const int MAX_INSTANCES_PER_SOUND = 3;
 
     // 记录音量全局配置
     qreal volume;

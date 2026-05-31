@@ -187,7 +187,7 @@
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-image: url(:/ImageResources/Underwater.png);</string>
+                <string notr="true">border-image: url(:/ImageResources/Underwater.png);</string>
                </property>
               </widget>
              </item>
@@ -206,7 +206,7 @@
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-image: url(:/ImageResources/drown.png);</string>
+                <string notr="true">border-image: url(:/ImageResources/drown.png);</string>
                </property>
               </widget>
              </item>
@@ -246,7 +246,7 @@
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-image: url(:/ImageResources/smooth_stone.jpg);</string>
+                <string notr="true">border-image: url(:/ImageResources/smooth_stone.jpg);</string>
                </property>
               </widget>
              </item>
@@ -271,6 +271,19 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QWidget" name="player" native="true">
@@ -356,7 +369,7 @@
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-image: url(:/ImageResources/steve.jpg);</string>
+             <string notr="true">border-image: url(:/ImageResources/steve.jpg);</string>
             </property>
            </widget>
           </item>
@@ -462,6 +475,9 @@
               <height>80</height>
              </size>
             </property>
+            <property name="styleSheet">
+             <string notr="true">border-image: url(:/ImageResources/diamondspear.png);</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -566,6 +582,9 @@
               <height>80</height>
              </size>
             </property>
+            <property name="styleSheet">
+             <string notr="true">border-image: url(:/ImageResources/spectralarrow.png);</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -586,19 +605,6 @@
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
