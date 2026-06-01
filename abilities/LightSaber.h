@@ -16,7 +16,7 @@ public:
         // 可以改变这个技能球的颜色，比如变成红色代表是攻击技能
         setBrush(QColor("#D7BDE2"));
 
-        texture.load(":/ImageResources/speardisplay.png");
+        texture.load(globalSkin::applyChoice("SpearInve"));
         textureRect = QRectF(-12, -12, 24, 24);
     }
 

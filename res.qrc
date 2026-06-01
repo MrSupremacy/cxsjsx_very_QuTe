@@ -48,5 +48,10 @@
         <file>SoundResources/Spear_get.wav</file>
         <file>SoundResources/Square_begin.wav</file>
         <file>SoundResources/Triangle_begin.wav</file>
+        <file>ImageResources/zombie.png</file>
+        <file>ImageResources/alex.png</file>
+        <file>ImageResources/wooden_spear.png</file>
+        <file>ImageResources/Arrow_of_Strength.png</file>
+        <file>ImageResources/wooden_spear_inventory.png</file>
     </qresource>
 </RCC>

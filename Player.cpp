@@ -11,6 +11,7 @@
 #include <QGraphicsOpacityEffect>
 
 #include "SoundPool.h"
+#include "DataCarrier.h"
 
 
 Player::Player()
@@ -19,7 +20,7 @@ Player::Player()
     // setBrush(QBrush(Qt::white)); // 基础颜色为白色
     // setPen(Qt::NoPen); // 移除边框
 
-    QPixmap stevePic(":/ImageResources/steve.jpg");
+    QPixmap stevePic(globalSkin::applyChoice("Player"));
     // 玩家可能稍微大一点，比如 40x40
     stevePic = stevePic.scaled(24, 24, Qt::KeepAspectRatio, Qt::FastTransformation);
     this->setPixmap(stevePic);
@@ -33,7 +34,7 @@ Player::Player()
 
     // 光剑技能 配置光剑
     swordItem = new QGraphicsPixmapItem(this); // 改为 PixmapItem
-    QPixmap spearPic(":/ImageResources/diamondspear.png"); // 你的长矛图片路径
+    QPixmap spearPic(globalSkin::applyChoice("Spear")); // 你的长矛图片路径
 
     QTransform transform;
     transform.rotate(135); // 顺时针旋转 135 度
@@ -111,6 +112,9 @@ Player::Player()
             QPointF dir = {-qCos(ang), qSin(ang)};
             QPointF perp = {-dir.y(), dir.x()};
 
+            // 播放发射音效
+            SoundPool::instance().play("Arrow_shoot");
+
             // 生成 currNum 个子弹 (假定 currNum 必为奇数)
             for (int var = 0; var < currNum; ++var) {
 
@@ -143,9 +147,6 @@ Player::Player()
                     }
                 } catch (...) {
                 }
-
-                // 播放发射音效
-                SoundPool::instance().play("Arrow_shoot");
             }
 
             if (fireTimes > 0) {

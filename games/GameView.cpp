@@ -23,6 +23,7 @@
 #include "Circle.h"
 #include "DeathVFX.h"
 #include "SoundPool.h"
+#include "DataCarrier.h"
 
 
 GameView::GameView(const DataCarrier& dc)
@@ -48,7 +49,7 @@ GameView::GameView(const DataCarrier& dc)
 
 
     // 音频
-    QHash<QString, QString> mySounds = {
+    const QHash<QString, QString> mySounds = {
         {"Arrow_hit",        "qrc:/SoundResources/Arrow_hit.wav"},
         {"Arrow_shoot",      "qrc:/SoundResources/Arrow_shoot.wav"},
         {"Enemy_die",        "qrc:/SoundResources/Enemy_die.wav"},
@@ -138,7 +139,8 @@ GameView::GameView(const DataCarrier& dc)
     scene = new QGraphicsScene(this);
     scene->setSceneRect(0, 0, mapWidth, mapHeight);
 
-    QPixmap bgPixmap(":/ImageResources/Underwater.png");
+    QPixmap bgPixmap(globalSkin::applyChoice("Background"));
+
     bgPixmap = bgPixmap.scaled(32, 32, Qt::IgnoreAspectRatio, Qt::FastTransformation);
     scene->setBackgroundBrush(QBrush(bgPixmap));
 

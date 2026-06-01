@@ -4,6 +4,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMap>
+#include <QVector>
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

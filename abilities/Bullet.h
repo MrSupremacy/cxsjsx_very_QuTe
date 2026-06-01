@@ -10,6 +10,8 @@
 #include <QPen>
 #include <QtMath>
 
+#include "DataCarrier.h"
+
 
 class Bullet: public QObject, public QGraphicsPixmapItem
 {
@@ -27,7 +29,7 @@ public:
         , speedV(SPEED * QPointF(qCos(ang), qSin(ang)))
         , lifeFrames(LIFE)
     {
-        QPixmap arrowPic(":/ImageResources/spectralarrow.png");
+        QPixmap arrowPic(globalSkin::applyChoice("Arrow"));
 
         // MC 的箭矢通常是向右上方 45° 倾斜的。
         // 我们顺时针旋转 45 度，使箭尖水平向右，作为 0 度的基准方向

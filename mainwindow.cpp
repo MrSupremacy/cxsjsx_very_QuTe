@@ -7,6 +7,8 @@
 
 #include "DataCarrier.h"
 #include <QPushButton>
+#include <QFile>
+#include <QDataStream>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,12 +18,34 @@ MainWindow::MainWindow(QWidget *parent)
     // ui 初始化
     ui->setupUi(this);
 
+    // 初始化单例 globalSkin
+    // 初始化读取信息：音量，模式，计时时长，皮肤Map，难度
+    QFile readFile("data.bin");
+    if (readFile.open(QIODevice::ReadOnly)) {
+        QDataStream in(&readFile);
+        in.setVersion(QDataStream::Qt_6_10); // 读取时版本号必须与写入时一致
+        in
+            >> globalSkin::instance().currChoice
+            >> Volume
+            >> timeLimited
+            >> maxSeconds
+            >> Difficulty;
+        readFile.close();
+    }
+
+
     connect(ui->start_game, &QPushButton::clicked, this, [=](){
         // 1. 隐藏当前的主菜单界面
         this->hide();
 
         // 2. 创建并显示游戏界面
-        DataCarrier para = {moveMode, Difficulty, Volume, timeLimited, maxSeconds};
+        DataCarrier para = {
+            moveMode
+            , Difficulty
+            , Volume
+            , timeLimited
+            , maxSeconds
+        };
         GameView *game = new GameView(para);
 
 
@@ -119,6 +143,25 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->settings->hide();
     ui->modes->hide();
+
+
+    // 设置初始化
+    ui->max_seconds->setValue(maxSeconds /5);
+    ui->maxtime_label->setText(QString("%1s").arg(maxSeconds, 3, 10, QChar(' ')));
+
+    ui->difficulty->setValue(Difficulty);
+    ui->diff_label->setText(QString(" %1 ").arg(Difficulty));
+
+    ui->volume->setValue((int)(Volume *100));
+    ui->volume_label->setText(QString("%1%").arg((int)(Volume *100), 3, 10, QChar(' ')));
+
+    if (timeLimited) {
+        ui->limit_time->setStyleSheet("background-color: rgb(189, 17, 77);");
+        ui->infty_time->setStyleSheet("");
+    } else {
+        ui->infty_time->setStyleSheet("background-color: rgb(189, 17, 77);");
+        ui->limit_time->setStyleSheet("");
+    }
 }
 
 void MainWindow::on_btnSkin_clicked()
@@ -131,5 +174,20 @@ void MainWindow::on_btnSkin_clicked()
 
 MainWindow::~MainWindow()
 {
+    // 保存数据
+    QFile writeFile("data.bin");
+    if (writeFile.open(QIODevice::WriteOnly)) {
+        QDataStream out(&writeFile);
+        // 设置版本号，确保未来跨 Qt 版本读取时的兼容性
+        out.setVersion(QDataStream::Qt_6_10);
+        out
+            << globalSkin::instance().currChoice
+            << Volume
+            << timeLimited
+            << maxSeconds
+            << Difficulty;
+        writeFile.close();
+    }
+
     delete ui;
 }

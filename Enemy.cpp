@@ -7,15 +7,17 @@
 #include <QPen>
 #include <QPainter>
 
+#include "DataCarrier.h"
+
+
 Enemy::Enemy(QGraphicsItem *target) {
     playerTarget = target;
     // setRect(0, 0, 16, 16); // 设置敌人大小
     // setBrush(QBrush(Qt::red)); // 基础颜色为红色
     // setPen(Qt::NoPen); // 移除边框
 
-    // 以你的 drown (溺尸) 为例：
     // 注意看你的截图，前缀是 / ，文件夹是 ImageResources，所以路径这样写：
-    QPixmap enemyPic(":/ImageResources/drown.png");
+    QPixmap enemyPic(globalSkin::applyChoice("Enemy"));
 
     // 把它从 600x600 缩小成你游戏里想要的 32x32 物理大小
     // 注意：因为是从大图缩小，这里建议用 Qt::SmoothTransformation（平滑缩小），
