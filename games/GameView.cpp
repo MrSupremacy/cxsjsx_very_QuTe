@@ -7,6 +7,8 @@
 #include <QtMath> // 提供 qSin, qCos 和 M_PI
 #include <QMessageBox>
 #include <QColor>
+#include <QOpenGLContext>
+#include <QOpenGLPaintDevice>
 
 #include "BulletPool.h"
 #include "Enemy.h"
@@ -180,6 +182,139 @@ void GameView::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
     // scene->setSceneRect(edge, edge, width() -edge, height() -edge);
+}
+
+void GameView::initializeShader() {
+    initializeOpenGLFunctions();
+
+    // 顶点着色器：直接把全屏矩形画在屏幕上
+    const char *vsrc = R"(
+#version 440 core
+layout (location = 0) in vec4 aPosTex;
+out vec2 TexCoords;
+void main() {
+    gl_Position = vec4(aPosTex.x, aPosTex.y, 0.0, 1.0);
+    TexCoords = vec2(aPosTex.z, aPosTex.w);
+}
+    )";
+
+    const char *fsrc = R"(
+#version 440 core
+out vec4 FragColor;
+in vec2 TexCoords;
+
+uniform sampler2D screenTexture;
+uniform vec2 Pp;
+
+void main() {
+    vec4 col = texture(screenTexture, TexCoords);
+    // col.rgb = vec3(1.0) - col.rgb;
+    FragColor = col;
+}
+    )";
+
+    m_program.addShaderFromSourceCode(QOpenGLShader::Vertex, vsrc);
+    m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fsrc);
+    m_program.link();
+
+    // 准备一个覆盖全屏的矩形 (x, y, u, v)
+    float quadVertices[] = {
+        // 位置 (x,y)   // 纹理坐标 (u,v)
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f
+    };
+
+    m_vao.create();
+    m_vao.bind();
+    m_vbo.create();
+    m_vbo.bind();
+    m_vbo.allocate(quadVertices, sizeof(quadVertices));
+
+    m_program.bind();
+    m_program.enableAttributeArray(0);
+    m_program.setAttributeBuffer(0, GL_FLOAT, 0, 4, 4 * sizeof(float));
+    m_program.release();
+    m_vao.release();
+
+    m_glInitialized = true;
+}
+
+void GameView::paintEvent(QPaintEvent *event)
+{
+    // 保持使用真实的 dpr 计算高清物理尺寸
+    const qreal dpr = viewport()->devicePixelRatioF();
+    QSize physicalSize = viewport()->size() * dpr;
+
+    QPainter painter(viewport());
+    painter.beginNativePainting(); // 暂停 QPainter，接管 OpenGL 底层
+
+    // 1. 初始化 Shader 和缓冲
+    if (!m_glInitialized) {
+        initializeShader();
+    }
+
+    // 2. 动态维护 FBO 的尺寸（窗口改变大小时重新生成）
+    if (!m_fbo || m_fbo->size() != physicalSize) {
+        if (m_fbo) delete m_fbo;
+        QOpenGLFramebufferObjectFormat format;
+        format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+        m_fbo = new QOpenGLFramebufferObject(physicalSize, format);
+    }
+
+    // ==========================================
+    // 第一阶段：让 CPU 发出指令，GPU 把场景画到 FBO
+    // ==========================================
+    m_fbo->bind();
+    glViewport(0, 0, physicalSize.width(), physicalSize.height());
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    QOpenGLPaintDevice device(m_fbo->size());
+    QPainter fboPainter(&device);
+    fboPainter.setRenderHint(QPainter::Antialiasing, false);
+
+    // 此时 this->render 会自动将逻辑视口等比放大填满物理尺寸的 FBO
+    this->render(&fboPainter);
+
+    fboPainter.end();
+    m_fbo->release();
+
+    // ==========================================
+    // 第二阶段：把 FBO 当作纹理，喂给你的自定义 Shader
+    // ==========================================
+    glViewport(0, 0, physicalSize.width(), physicalSize.height());
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_program.bind();
+    // Uniform IS HERE
+    m_program.setUniformValue("screenTexture", 0);
+
+    // 1. 获取玩家在其自身坐标系下的中心点
+    QPointF localCenter = player->boundingRect().center();
+    // 2. 将玩家中心点映射到【场景坐标系】(Scene)
+    QPointF sceneCenter = player->mapToScene(localCenter);
+    // 3. 利用 QGraphicsView 自带的方法，将【场景坐标】精确转换为【视口逻辑坐标】(Viewport)
+    // 这步会自动扣除 edge 以及任何视口的偏移
+    QPointF viewportCenter = mapFromScene(sceneCenter);
+    // 4. 将【视口逻辑坐标】乘以 dpr，转换为【OpenGL 物理像素坐标】
+    QPointF physicalCenter = viewportCenter * dpr;
+    // 5. 翻转 Y 轴以匹配 OpenGL 坐标系 (左下角为原点)
+    physicalCenter.setY(physicalSize.height() - physicalCenter.y());
+    m_program.setUniformValue("Pp", physicalCenter);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_fbo->texture());
+
+    m_vao.bind();
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // 画出全屏矩形
+    m_vao.release();
+
+    m_program.release();
+
+    painter.endNativePainting(); // 归还控制权
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
@@ -431,6 +566,9 @@ void GameView::updateGame() {
             }
         }
     }
+
+    // 更新
+    viewport()->update();
 }
 
 void GameView::spawnEnemy() {

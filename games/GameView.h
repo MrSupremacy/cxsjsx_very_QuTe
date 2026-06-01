@@ -11,6 +11,13 @@
 #include <QLabel>
 #include <QSoundEffect>
 #include <QUrl>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+
 #include "Player.h"
 #include "DataCarrier.h"
 
@@ -24,13 +31,23 @@ public:
     // const int edge = 100;
     void resizeEvent(QResizeEvent *event) override;
 
-    // 画背景
-    void drawBackground(QPainter *painter, const QRectF &rect) override;
+    // 别忘了在 updateGame() 里还有 viewport()->update();
+    void initializeShader(); // 初始化着色器
+    void paintEvent(QPaintEvent *event) override; // 在这里执行 FBO 渲染和 Shader 后处理
+    void drawBackground(QPainter *painter, const QRectF &rect) override; // 画背景，逻辑不变
 
 signals: // 定义信号的关键字
     void gameEnded(EndData ed); // 声明一个游戏结束的信号
 
 private:
+    // OpenGL 相关的成员变量
+    bool m_glInitialized = false;
+    QOpenGLFramebufferObject* m_fbo = nullptr;
+    QOpenGLShaderProgram m_program;
+    QOpenGLVertexArrayObject m_vao;
+    QOpenGLBuffer m_vbo;
+
+
     QGraphicsScene *scene; // 存储地图实体 & 处理碰撞检测
 
     // 游戏设置 (以及 moveMode)

@@ -173,4 +173,3 @@ void Enemy::applyScatter(qreal vx, qreal vy, int frames) {
     this->scatterVy = vy;
     this->scatterFrames = frames;
 }
-
