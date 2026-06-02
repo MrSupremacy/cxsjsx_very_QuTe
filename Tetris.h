@@ -59,7 +59,7 @@ public:
         // 修改速度 (弹射速度)
         Formation::speed = 7.0f;
 
-        QTimer::singleShot(1500, this, [this]() {
+        QTimer::singleShot(2000, this, [this]() {
             if (this->currentState == State::Waiting) {
                 this->currentState = State::Bouncing;
             }

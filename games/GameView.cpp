@@ -63,8 +63,22 @@ GameView::GameView(const DataCarrier& dc)
         {"Square_begin",     "qrc:/SoundResources/Square_begin.wav"},
         {"Triangle_begin",   "qrc:/SoundResources/Triangle_begin.wav"}
     };
+
     SoundPool::instance().init(mySounds, volume);
 
+    SoundPool::instance().setSoundWeight("Arrow_hit",        0.4);
+    SoundPool::instance().setSoundWeight("Arrow_shoot",      0.15);
+    SoundPool::instance().setSoundWeight("Enemy_die",        0.7);
+    SoundPool::instance().setSoundWeight("Missile_explode",  1.0);
+    SoundPool::instance().setSoundWeight("Missile_launch",   1.0);
+    SoundPool::instance().setSoundWeight("Shield_break",     1.0);
+    SoundPool::instance().setSoundWeight("Lochunhin_fuse",   1.0);
+    SoundPool::instance().setSoundWeight("Lochunhin_launch", 1.0);
+    SoundPool::instance().setSoundWeight("Shield_get",       1.0);
+    SoundPool::instance().setSoundWeight("Spear_get",        1.0);
+    SoundPool::instance().setSoundWeight("Circle_begin",     0.85);
+    SoundPool::instance().setSoundWeight("Square_begin",     1.0);
+    SoundPool::instance().setSoundWeight("Triangle_begin",   1.0);
 
 
     // 创建 计时板、计分板 & 设置样式
@@ -623,10 +637,10 @@ void GameView::spawnFormation() {
         // 播放音效
         switch(randomValue) {
         case 0:
-            SoundPool::instance().play("Triangle_begin");
+            SoundPool::instance().play("Circle_begin", 2500);
             break;
         case 1:
-            SoundPool::instance().play("Square_begin");
+            SoundPool::instance().play("Circle_begin", 2500);
             break;
         case 2:
             SoundPool::instance().play("Circle_begin");
