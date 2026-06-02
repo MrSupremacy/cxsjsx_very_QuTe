@@ -368,10 +368,6 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
         opacityEffect->setOpacity(0.85);
         totemLabel->setGraphicsEffect(opacityEffect);
 
-
-        // 播放音效
-        SoundPool::instance().play("Shield_break");
-
         // QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
         QMovie* movie = new QMovie(":/ImageResources/Totem_of_Undying_Animation.gif", QByteArray(), totemLabel);
         // movie->setSpeed(125);
@@ -392,6 +388,10 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
 
         connect(movie, &QMovie::finished, totemLabel, &QLabel::deleteLater);
         QTimer::singleShot(2000, totemLabel, &QLabel::deleteLater);
+
+        // 播放音效
+        SoundPool::instance().play("Shield_break");
+        SoundPool::instance().duckOthers("Shield_break", 1000, 0.2);
     }
 
     // 3. 生成爆炸类对象
