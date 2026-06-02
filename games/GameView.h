@@ -8,6 +8,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QLabel>
 #include <QSoundEffect>
 #include <QUrl>
@@ -46,6 +47,11 @@ private:
     QOpenGLShaderProgram m_program;
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_vbo;
+
+    // 用于计算 FPS 的变量
+    QElapsedTimer m_fpsTimer;
+    int m_frameCount = 0;
+    int m_currentFps = 0;
 
 
     QGraphicsScene *scene; // 存储地图实体 & 处理碰撞检测
