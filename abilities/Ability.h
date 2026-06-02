@@ -11,6 +11,8 @@
 #include <QMovie>
 #include <QPainter>
 
+#include "DataCarrier.h"
+
 
 // 基础技能/增益类
 class Ability: public QGraphicsEllipseItem {

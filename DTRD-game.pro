@@ -18,7 +18,6 @@ SOURCES += \
     Formation.cpp \
     Player.cpp \
     abilities/Ability.cpp \
-    enemy3d.cpp \
     games/GameView.cpp \
     games/openglgameview.cpp \
     main.cpp \
@@ -47,7 +46,6 @@ HEADERS += \
     abilities/PlayerChargeBar.h \
     abilities/Shield.h \
     abilities/WipeOut.h \
-    enemy3d.h \
     games/GameView.h \
     games/openglgameview.h \
     mainwindow.h \
@@ -64,3 +62,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     res.qrc
+
+DISTFILES +=
