@@ -29,7 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
             >> Volume
             >> timeLimited
             >> maxSeconds
-            >> Difficulty;
+            >> Difficulty
+            >> maxScore;
         readFile.close();
     }
 
@@ -55,9 +56,12 @@ MainWindow::MainWindow(QWidget *parent)
         // 当 game 发出 gameEnded 信号时，执行主界面的 show() 函数重新显示出来
         connect(game, &GameView::gameEnded, this, [this](EndData ed) {
             this->show();
-            QString txt = QString("E %1 / %2 S")
-                .arg(ed.score, 4, 10, QChar('0'))
-                .arg(ed.second, 4, 10, QChar('0'));
+
+            maxScore = std::max(maxScore, ed.score);
+
+            QString txt = QString("BEST:%1 - LAST:%2")
+                .arg(maxScore, 4, 10, QChar(' '))
+                .arg(ed.score, 4, 10, QChar(' '));
             ui->last_score->setText(txt);
         });
 
@@ -113,13 +117,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 游戏模式切换
     connect(ui->infty_time, &QPushButton::clicked, this, [=]() {
-        ui->infty_time->setStyleSheet("background-color: rgb(189, 17, 77);");
-        ui->limit_time->setStyleSheet("");
+        ui->infty_time->setStyleSheet(buttonOn);
+        ui->limit_time->setStyleSheet(buttonOff);
         timeLimited = false;
     });
     connect(ui->limit_time, &QPushButton::clicked, this, [=]() {
-        ui->limit_time->setStyleSheet("background-color: rgb(189, 17, 77);");
-        ui->infty_time->setStyleSheet("");
+        ui->limit_time->setStyleSheet(buttonOn);
+        ui->infty_time->setStyleSheet(buttonOff);
         timeLimited = true;
     });
 
@@ -136,6 +140,14 @@ MainWindow::MainWindow(QWidget *parent)
         maxSeconds = value *5;
         ui->maxtime_label->setText(QString("%1s").arg(value *5, 3, 10, QChar(' ')));
     });
+
+    // 随机文本
+    textSize = randomTexts.size();
+    randTextTimer = new QTimer(this);
+    connect(randTextTimer, &QTimer::timeout, this, &MainWindow::updateLabelText);
+    randTextTimer->start(4000);
+
+    updateLabelText();
 
 
     // 弃用键盘移动
@@ -156,11 +168,20 @@ MainWindow::MainWindow(QWidget *parent)
     ui->volume_label->setText(QString("%1%").arg((int)(Volume *100), 3, 10, QChar(' ')));
 
     if (timeLimited) {
-        ui->limit_time->setStyleSheet("background-color: rgb(189, 17, 77);");
-        ui->infty_time->setStyleSheet("");
+        ui->limit_time->setStyleSheet(buttonOn);
+        ui->infty_time->setStyleSheet(buttonOff);
     } else {
-        ui->infty_time->setStyleSheet("background-color: rgb(189, 17, 77);");
-        ui->limit_time->setStyleSheet("");
+        ui->infty_time->setStyleSheet(buttonOn);
+        ui->limit_time->setStyleSheet(buttonOff);
+    }
+
+    ui->random_text->setRotationAngle(-20, false);
+    ui->last_score->setRotationAngle(10, true);
+
+    {
+        QString txt = QString("BEST:%1 - LAST:   0")
+            .arg(maxScore, 4, 10, QChar(' '));
+        ui->last_score->setText(txt);
     }
 }
 
@@ -170,6 +191,15 @@ void MainWindow::on_btnSkin_clicked()
     SkinSelect dialog(this);
     dialog.setGeometry(this->geometry());
     dialog.exec();
+}
+
+void MainWindow::updateLabelText() {
+    // if (!this->isVisible()) return;
+
+    randTextCurr++;
+    randTextCurr %= textSize;
+
+    ui->random_text->setText(randomTexts[randTextCurr]);
 }
 
 MainWindow::~MainWindow()
@@ -185,7 +215,8 @@ MainWindow::~MainWindow()
             << Volume
             << timeLimited
             << maxSeconds
-            << Difficulty;
+            << Difficulty
+            << maxScore;
         writeFile.close();
     }
 

@@ -60,6 +60,12 @@
         <file>ImageResources/stone_2x.png</file>
         <file>ImageResources/MainPoster.png</file>
         <file>ImageResources/title.png</file>
-        <file>ImageResources/mp2.png</file>
+        <file>ImageResources/button_off.png</file>
+        <file>ImageResources/button_on.png</file>
+        <file>ImageResources/button_off_hover.png</file>
+        <file>ImageResources/button_off_press.png</file>
+        <file>ImageResources/button_on_hover.png</file>
+        <file>ImageResources/button_on_press.png</file>
+        <file>ImageResources/cha_o.png</file>
     </qresource>
 </RCC>

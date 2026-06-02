@@ -39,6 +39,15 @@ private:
     int Difficulty = 1;  // 1, 2, 3, 4
     double Volume = 0.5; // [0.00, 1.00]
 
+    // 游戏记录
+    int maxScore = 0;
+
+    // 随机文本当前值
+    QTimer* randTextTimer;
+    int textSize;
+    int randTextCurr = -1;
+    void updateLabelText();
+
     // 计时模式
     bool timeLimited = false;
     int maxSeconds = 30; // [30, 300]

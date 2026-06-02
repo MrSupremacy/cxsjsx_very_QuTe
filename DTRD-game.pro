@@ -32,6 +32,7 @@ HEADERS += \
     Enemy.h \
     Formation.h \
     Player.h \
+    RotatedLabel.h \
     SoundPool.h \
     Tetris.h \
     abilities/Ability.h \

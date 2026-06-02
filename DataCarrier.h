@@ -79,4 +79,47 @@ public:
     };
 };
 
+
+const QString buttonOn = R"(
+    QPushButton {
+        border-image: url(:/ImageResources/button_on.png);
+        padding: 4px;
+    }
+    QPushButton:hover {
+        border-image: url(:/ImageResources/button_on_hover.png);
+        padding: 4px;
+    }
+    QPushButton:pressed {
+        border-image: url(:/ImageResources/button_on_press.png);
+        padding: 4px;
+    }
+)";
+
+const QString buttonOff = R"(
+    QPushButton {
+        border-image: url(:/ImageResources/button_off.png);
+        padding: 4px;
+    }
+    QPushButton:hover {
+        border-image: url(:/ImageResources/button_off_hover.png);
+        padding: 4px;
+    }
+    QPushButton:pressed {
+        border-image: url(:/ImageResources/button_off_press.png);
+        padding: 4px;
+    }
+)";
+
+
+const QVector<QString> randomTexts = {
+    "what can I say?\nIt's just a random text."
+    , "Last one reached the length limit."
+    , "Be careful."
+    , "I hate the square hitbox."
+    , "Pro sound effects. Who made them?"
+    , "UI is nice\n--written by me, the designer."
+};
+
+
+
 #endif // DATACARRIER_H
