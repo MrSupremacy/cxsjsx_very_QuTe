@@ -19,7 +19,7 @@ public:
 
     const QString ActDeact[2] = {
         "border: 3px solid #000; border-radius: 0px;",
-        "border: 3px solid #fff; border-radius: 0px;"
+        "border: 3px solid #ff0; border-radius: 0px;"
     };
 
 private:

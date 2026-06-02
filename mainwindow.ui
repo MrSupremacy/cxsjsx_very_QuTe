@@ -25,6 +25,11 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow{
+border-image: url(:/ImageResources/MainPoster.png);
+}</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <property name="minimumSize">
     <size>
@@ -62,11 +67,23 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>40</y>
-         <width>421</width>
-         <height>131</height>
+         <x>110</x>
+         <y>-20</y>
+         <width>680</width>
+         <height>340</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="font">
         <font>
@@ -76,40 +93,23 @@
          <bold>true</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">border-image: url(:/ImageResources/title.png);</string>
+       </property>
        <property name="text">
-        <string>BULA BULA</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>150</y>
-         <width>371</width>
-         <height>131</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Freestyle Script</family>
-         <pointsize>57</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string> LABU LABU</string>
-       </property>
-      </widget>
       <widget class="QWidget" name="widget_4" native="true">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>200</y>
-         <width>229</width>
-         <height>91</height>
+         <x>700</x>
+         <y>80</y>
+         <width>150</width>
+         <height>270</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -123,7 +123,7 @@
            </font>
           </property>
           <property name="text">
-           <string>-- Last Score --</string>
+           <string>Last Score</string>
           </property>
          </widget>
         </item>
@@ -136,7 +136,7 @@
            </font>
           </property>
           <property name="text">
-           <string>E 1000 / 0001 S</string>
+           <string>aaa</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -152,7 +152,7 @@
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>280</height>
+        <height>300</height>
        </size>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0">
@@ -171,6 +171,9 @@
        <item alignment="Qt::AlignmentFlag::AlignBottom">
         <widget class="QWidget" name="menu" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>10</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -187,13 +190,13 @@
            <widget class="QPushButton" name="start_game">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
@@ -204,7 +207,15 @@
              </font>
             </property>
             <property name="styleSheet">
-             <string notr="true"/>
+             <string notr="true">QPushButton {
+        border-image: url(:/ImageResources/blank_sign.png);
+    }
+    QPushButton:hover {
+	    border-image: url(:/ImageResources/blank_sign_hover.png);
+    }
+    QPushButton:pressed {
+	    border-image: url(:/ImageResources/blank_sign_press.png);
+    }</string>
             </property>
             <property name="text">
              <string>开始游戏</string>
@@ -215,13 +226,13 @@
            <widget class="QPushButton" name="Set">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
@@ -230,6 +241,17 @@
               <pointsize>15</pointsize>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+        border-image: url(:/ImageResources/blank_sign.png);
+    }
+    QPushButton:hover {
+	    border-image: url(:/ImageResources/blank_sign_hover.png);
+    }
+    QPushButton:pressed {
+	    border-image: url(:/ImageResources/blank_sign_press.png);
+    }</string>
             </property>
             <property name="text">
              <string>设置</string>
@@ -240,13 +262,13 @@
            <widget class="QPushButton" name="Skin">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
@@ -255,6 +277,17 @@
               <pointsize>15</pointsize>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+        border-image: url(:/ImageResources/blank_sign.png);
+    }
+    QPushButton:hover {
+	    border-image: url(:/ImageResources/blank_sign_hover.png);
+    }
+    QPushButton:pressed {
+	    border-image: url(:/ImageResources/blank_sign_press.png);
+    }</string>
             </property>
             <property name="text">
              <string>皮肤选择</string>
@@ -265,13 +298,13 @@
            <widget class="QPushButton" name="Mod">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>130</width>
+              <width>150</width>
               <height>50</height>
              </size>
             </property>
@@ -280,6 +313,17 @@
               <pointsize>15</pointsize>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+        border-image: url(:/ImageResources/blank_sign.png);
+    }
+    QPushButton:hover {
+	    border-image: url(:/ImageResources/blank_sign_hover.png);
+    }
+    QPushButton:pressed {
+	    border-image: url(:/ImageResources/blank_sign_press.png);
+    }</string>
             </property>
             <property name="text">
              <string>模式选择</string>
@@ -458,7 +502,7 @@
               <widget class="QSlider" name="volume">
                <property name="minimumSize">
                 <size>
-                 <width>120</width>
+                 <width>108</width>
                  <height>0</height>
                 </size>
                </property>
@@ -569,7 +613,7 @@
               <widget class="QSlider" name="max_seconds">
                <property name="minimumSize">
                 <size>
-                 <width>120</width>
+                 <width>100</width>
                  <height>0</height>
                 </size>
                </property>
@@ -629,13 +673,13 @@
         <widget class="QPushButton" name="move_mode">
          <property name="minimumSize">
           <size>
-           <width>130</width>
+           <width>30</width>
            <height>50</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>130</width>
+           <width>30</width>
            <height>50</height>
           </size>
          </property>

@@ -53,5 +53,13 @@
         <file>ImageResources/wooden_spear.png</file>
         <file>ImageResources/Arrow_of_Strength.png</file>
         <file>ImageResources/wooden_spear_inventory.png</file>
+        <file>ImageResources/blank_sign.png</file>
+        <file>ImageResources/blank_sign_hover.png</file>
+        <file>ImageResources/blank_sign_press.png</file>
+        <file>ImageResources/stone.png</file>
+        <file>ImageResources/stone_2x.png</file>
+        <file>ImageResources/MainPoster.png</file>
+        <file>ImageResources/title.png</file>
+        <file>ImageResources/mp2.png</file>
     </qresource>
 </RCC>

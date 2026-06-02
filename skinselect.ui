@@ -13,9 +13,20 @@
   <property name="windowTitle">
    <string>Skin Select</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+background-color: rgb(46, 48, 52);
+}
+QFrame{
+background-color: none;
+}</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -48,10 +59,18 @@
         <widget class="QWidget" name="style" native="true">
          <property name="styleSheet">
           <string notr="true">QWidget{
+	border-image: url(:/ImageResources/stone_2x.png);
 border-radius: 10px;
-background-color: rgb(72, 72, 72);
 color: rgb(255, 255, 255);
-}</string>
+}
+QFrame{
+border-image: none;
+background-color: #333;
+}
+QLabel{
+background-color: transparent;
+}
+</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="spacing">
@@ -71,6 +90,10 @@ color: rgb(255, 255, 255);
           </property>
           <item>
            <widget class="QWidget" name="style_l" native="true">
+            <property name="styleSheet">
+             <string notr="true">border-image: none;
+background-color: none;</string>
+            </property>
             <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
              <property name="spacing">
               <number>5</number>
@@ -160,7 +183,7 @@ border-radius: 0px;</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <property name="spacing">
-              <number>10</number>
+              <number>5</number>
              </property>
              <property name="leftMargin">
               <number>2</number>
@@ -231,7 +254,7 @@ border-radius: 0px;</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <property name="spacing">
-              <number>10</number>
+              <number>5</number>
              </property>
              <property name="leftMargin">
               <number>2</number>
@@ -332,9 +355,12 @@ border-radius: 0px;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">QWidget{
+	border-image: url(:/ImageResources/stone.png);
 border-radius: 10px;
-background-color: rgb(72, 72, 72);
 color: rgb(255, 255, 255);
+}
+QFrame{
+border-image: none;
 }</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -373,6 +399,9 @@ color: rgb(255, 255, 255);
               <italic>true</italic>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border-image: none;</string>
             </property>
             <property name="text">
              <string>Player</string>
@@ -539,9 +568,12 @@ border: none;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">QWidget{
+	border-image: url(:/ImageResources/stone.png);
 border-radius: 10px;
-background-color: rgb(72, 72, 72);
 color: rgb(255, 255, 255);
+}
+QFrame{
+border-image: none;
 }</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -746,9 +778,12 @@ border: none;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">QWidget{
+	border-image: url(:/ImageResources/stone.png);
 border-radius: 10px;
-background-color: rgb(72, 72, 72);
 color: rgb(255, 255, 255);
+}
+QFrame{
+border-image: none;
 }</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
