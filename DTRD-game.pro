@@ -64,4 +64,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     res.qrc
 
-DISTFILES +=
+DISTFILES += \
+    mainicon.ico
+
+RC_ICONS = mainicon.ico

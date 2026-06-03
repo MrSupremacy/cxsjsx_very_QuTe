@@ -70,7 +70,7 @@ GameView::GameView(const DataCarrier& dc)
         {"Triangle_begin",   "qrc:/SoundResources/Triangle_begin.wav"}
     };
 
-    SoundPool::instance().init(mySounds, volume);
+    SoundPool::instance().init(mySounds, volume * 0.9);
 
     SoundPool::instance().setSoundWeight("Arrow_hit",        0.4);
     SoundPool::instance().setSoundWeight("Arrow_shoot",      0.15);
@@ -82,10 +82,19 @@ GameView::GameView(const DataCarrier& dc)
     SoundPool::instance().setSoundWeight("Lochunhin_launch", 1.0);
     SoundPool::instance().setSoundWeight("Shield_get",       1.0);
     SoundPool::instance().setSoundWeight("Spear_get",        1.0);
-    SoundPool::instance().setSoundWeight("Circle_begin",     0.85);
-    SoundPool::instance().setSoundWeight("Square_begin",     1.0);
-    SoundPool::instance().setSoundWeight("Triangle_begin",   1.0);
+    SoundPool::instance().setSoundWeight("Circle_begin",     0.63);
+    SoundPool::instance().setSoundWeight("Square_begin",     0.7);
+    SoundPool::instance().setSoundWeight("Triangle_begin",   0.7);
 
+
+    m_bgmPlayer = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+
+    m_bgmPlayer->setAudioOutput(audioOutput);
+    m_bgmPlayer->setSource(QUrl("qrc:/bgm.ogg"));
+    m_bgmPlayer->setLoops(QMediaPlayer::Infinite);
+    audioOutput->setVolume(volume * 2.0);
+    m_bgmPlayer->play();
 
 
     // 难度设置
@@ -911,6 +920,9 @@ void GameView::gameOver() {
     abilitySpawnTimer->stop();
     formationSpawnTimer->stop();
     secondTimer->stop();
+
+    SoundPool::instance().stopAll();
+    m_bgmPlayer->stop();
 
     // 2. 弹出一个提示框告诉玩家游戏结束（体验更好，不会死得太突兀）
     QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
