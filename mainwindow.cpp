@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
             maxScore = std::max(maxScore, ed.score);
 
-            QString txt = QString("BEST:%1 - LAST:%2")
+            QString txt = QString("⚔️ BEST:%1 - LAST:%2")
                 .arg(maxScore, 4, 10, QChar(' '))
                 .arg(ed.score, 4, 10, QChar(' '));
             ui->last_score->setText(txt);
@@ -179,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->last_score->setRotationAngle(10, true);
 
     {
-        QString txt = QString("BEST:%1 - LAST:   0")
+        QString txt = QString("⚔️ BEST:%1 - LAST:   0")
             .arg(maxScore, 4, 10, QChar(' '));
         ui->last_score->setText(txt);
     }

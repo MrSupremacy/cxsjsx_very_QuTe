@@ -112,12 +112,15 @@ const QString buttonOff = R"(
 
 
 const QVector<QString> randomTexts = {
-    "what can I say?\nIt's just a random text."
-    , "Last one reached the length limit."
+      "what can I say?\nIt's just a random text."
+    , "Swing your spear."
     , "Be careful."
     , "I hate the square hitbox."
     , "Pro sound effects. Who made them?"
     , "UI is nice\n--written by me, the designer."
+    , "TNT doesn't work as you thought."
+    , "Difficulty 4 is too hard."
+    , "I can play difficulty one\nfor a year."
 };
 
 
