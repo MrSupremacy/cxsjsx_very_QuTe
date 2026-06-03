@@ -56,8 +56,6 @@
         <file>ImageResources/blank_sign.png</file>
         <file>ImageResources/blank_sign_hover.png</file>
         <file>ImageResources/blank_sign_press.png</file>
-        <file>ImageResources/stone.png</file>
-        <file>ImageResources/stone_2x.png</file>
         <file>ImageResources/MainPoster.png</file>
         <file>ImageResources/title.png</file>
         <file>ImageResources/button_off.png</file>
@@ -67,5 +65,8 @@
         <file>ImageResources/button_on_hover.png</file>
         <file>ImageResources/button_on_press.png</file>
         <file>ImageResources/cha_o.png</file>
+        <file>ImageResources/skinBG.png</file>
+        <file>ImageResources/stone.png</file>
+        <file>ImageResources/stone_2x.png</file>
     </qresource>
 </RCC>

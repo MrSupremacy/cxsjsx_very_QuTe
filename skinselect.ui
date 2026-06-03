@@ -15,18 +15,21 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget{
-background-color: rgb(46, 48, 52);
+	border-image: url(:/ImageResources/skinBG.png);
+
 }
 QFrame{
-background-color: none;
-}</string>
+	background-color: rgba(13, 13, 13, 128);
+}
+QLabel{
+	background-color: none;
+
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
     <widget class="QScrollArea" name="scrollArea">
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -35,8 +38,8 @@ background-color: none;
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>880</width>
-        <height>580</height>
+        <width>882</width>
+        <height>582</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
