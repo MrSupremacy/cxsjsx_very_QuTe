@@ -87,6 +87,11 @@ GameView::GameView(const DataCarrier& dc)
     SoundPool::instance().setSoundWeight("Triangle_begin",   1.0);
 
 
+
+    // 难度设置
+    initFromDifficulty();
+
+
     // 创建 计时板、计分板 & 设置样式
     scoreRecordBoard = new QLabel("Score:    0", this);
     scoreRecordBoard->setStyleSheet(R"(
@@ -181,18 +186,18 @@ GameView::GameView(const DataCarrier& dc)
     // 敌人生成 计时器
     enemySpawnTimer = new QTimer(this);
     connect(enemySpawnTimer, &QTimer::timeout, this, &GameView::spawnEnemy);
-    enemySpawnTimer->start(5000);
+    enemySpawnTimer->start(enemyIntv);
 
     // 技能生成 计时器
     abilitySpawnTimer = new QTimer(this);
     connect(abilitySpawnTimer, &QTimer::timeout, this, &GameView::generateAbility);
-    abilitySpawnTimer->start(8000);
+    abilitySpawnTimer->start(abilityIntv);
 
 
     // 阵型生成计时器
     formationSpawnTimer = new QTimer(this);
     connect(formationSpawnTimer, &QTimer::timeout, this, &GameView::spawnFormation);
-    formationSpawnTimer->start(10000);
+    formationSpawnTimer->start(formationIntv);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)
@@ -470,6 +475,37 @@ void GameView::keyReleaseEvent(QKeyEvent *event) {
     }
 
     QGraphicsView::keyReleaseEvent(event);
+}
+
+void GameView::initFromDifficulty()
+{
+    switch (difficulty)
+    {
+    case 1:
+        enemyIntv = 6000;
+        abilityIntv = 6000;
+        formationIntv = 12000;
+        enemySpawnNum = 5;
+        break;
+    case 2:
+        enemyIntv = 5000;
+        abilityIntv = 6800;
+        formationIntv = 11000;
+        enemySpawnNum = 5;
+        break;
+    case 3:
+        enemyIntv = 4400;
+        abilityIntv = 7400;
+        formationIntv = 10000;
+        enemySpawnNum = 6;
+        break;
+    case 4:
+        enemyIntv = 4400;
+        abilityIntv = 8000;
+        formationIntv = 9000;
+        enemySpawnNum = 7;
+        break;
+    }
 }
 
 void GameView::updateGame() {

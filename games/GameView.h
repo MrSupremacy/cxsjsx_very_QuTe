@@ -65,6 +65,15 @@ private:
     QTimer *secondTimer;
     int scores = 0;  // 已得分数
 
+    // 难度
+    void initFromDifficulty();
+
+    int enemyIntv = 5000;
+    int abilityIntv = 8000;
+    int formationIntv = 10000;
+    int enemySpawnNum = 6; // 敌人生成个数
+    int formationSpawnNum = 1; // 阵型生成个数
+
     // 计时板、计分板
     QLabel *timeRecordBoard;
     QLabel *scoreRecordBoard;
@@ -82,8 +91,7 @@ private:
     const int moveMode;
     QPointF mousePos = {0.0, 0.0};
 
-    int enemySpawnNum = 6; // 敌人生成个数
-    int formationSpawnNum = 1; // 阵型生成个数
+
 
     const int mapWidth = 1280, mapHeight = 800;
 
