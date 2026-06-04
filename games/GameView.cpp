@@ -207,7 +207,7 @@ GameView::GameView(const DataCarrier& dc)
     formationSpawnTimer->start(formationIntv);
 
     // 传送门 Pool
-    PortalPool::instance().init(scene, ":/ImageResources/np.png", 20, 33);
+    PortalPool::instance().init(scene, ":/ImageResources/np.png", 30, 33, 25);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)
@@ -424,29 +424,46 @@ void GameView::paintEvent(QPaintEvent *event)
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
-    // 1. 首先用“外部颜色”（例如灰色）填充整个需要绘制的区域
+    // 1. 首先用深灰色填充地图外的灰色虚无区 [2]
     painter->fillRect(rect, QColor(128, 128, 128));
 
-    // 2. 获取场景的边界
-    QRectF sRect = sceneRect();
+    if (scene) {
+        // 2. 【核心】：获取地图（场景）的正中心点坐标！ (由 mapWidth/2, mapHeight/2 决定)
+        QRectF sRect = sceneRect();
+        QPointF centerPoint = sRect.center();
 
-    // 3. 计算当前绘制区域与场景区域的交集
-    QRectF intersectRect = rect.intersected(sRect);
+        // 3. 只在地图区域内填充平滑石背景 [2]
+        QRectF intersectRect = rect.intersected(sRect);
+        if (!intersectRect.isEmpty()) {
+            painter->fillRect(intersectRect, scene->backgroundBrush());
+        }
 
-    // 4. 只在交集区域内填充“场景内部颜色”（例如黑色）
-    if (!intersectRect.isEmpty()) {
-        painter->setOpacity(0.6);
-        painter->fillRect(intersectRect, scene->backgroundBrush());
-        painter->setOpacity(1.0);
-    }
-    static QPixmap framePic(":/ImageResources/oceantheme.png");
-    if (framePic.isNull()) {
-        qDebug() << "边框图片加载失败！";
-    } else {
-        // 将画框强行缩放到和你地图（mapWidth x mapHeight）完全一致的大小 [2]
-        // framePic = framePic.scaled(1280, 800, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        // 刚好绘制在地图边界 (0,0) 到 (mapWidth, mapHeight) 的矩形上 [2]
-        painter->drawPixmap(-328, -257, 2040, 1275, framePic);
+        // === 🛠️ 核心修改：绝对居中、等比例绘制海底神殿画框 ===
+        static QPixmap framePic(":/ImageResources/plaintheme.png");
+
+        if (framePic.isNull()) {
+            qDebug() << "边框图片加载失败！";
+        } else {
+            // 获取画框原图的真实比例
+            qreal origW = framePic.width();
+            qreal origH = framePic.height();
+
+            // 【大小调节开关】：设定你想要的画框总宽度
+            // 你可以随意修改这个数字（比如 1600、1800、2000）
+            // 无论调多大或多小，画框都会自动等比缩放，且【永远保持在屏幕正中心】！
+            qreal drawW = 1934;
+
+            // 自动计算高度（绝对不拉伸变形）
+            qreal drawH = drawW * (origH / origW);
+
+            // 【核心数学公式】：自动计算居中的 X 和 Y 坐标！
+            // 原理：用地图的中心点坐标，减去画框大小的一半
+            qreal drawX = centerPoint.x() - drawW / 2.0;
+            qreal drawY = centerPoint.y() - drawH / 2.0;
+
+            // 绘制不失真、完美居中的画框！ [4]
+            painter->drawPixmap(drawX, drawY + 18, drawW, drawH, framePic);
+        }
     }
 }
 

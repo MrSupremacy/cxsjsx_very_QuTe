@@ -21,14 +21,45 @@ public:
     PortalPiece(const QString& imagePath,
                 int frameIntervalMs,
                 int lifeFrame,
+                int brightnessOffset = 0, // 新增：亮度偏移参数，默认为0 (不修改)
                 QGraphicsItem* parent = nullptr)
         : QGraphicsObject(parent)
         , m_currentFrame(0)
         , m_frameIntervalMs(frameIntervalMs)
         , m_lifeFrame(lifeFrame)
     {
-        // 加载精灵图大图
-        m_spriteSheet.load(imagePath);
+        // ----------------- 修改开始：加载并调整亮度 -----------------
+        if (brightnessOffset == 0) {
+            // 如果不需要调亮度，直接按普通方式加载，最快
+            m_spriteSheet.load(imagePath);
+        } else {
+            // 1. 使用 QImage 加载图片，因为 QPixmap 存在于显存，不方便操作像素
+            QImage img(imagePath);
+
+            // 确保格式包含透明通道（Alpha），方便读取和修改
+            img = img.convertToFormat(QImage::Format_ARGB32);
+
+            // 2. 遍历所有像素，修改 RGB 值
+            for (int y = 0; y < img.height(); ++y) {
+                QRgb *line = (QRgb *)img.scanLine(y); // 获取当前行的内存指针（非常高效）
+                for (int x = 0; x < img.width(); ++x) {
+                    int alpha = qAlpha(line[x]);
+                    if (alpha == 0) continue; // 纯透明的背景像素直接跳过，提高效率
+
+                    // 提取原像素的 R, G, B，加上亮度偏移，并用 qBound 限制在 0~255 之间
+                    int r = qBound(0, qRed(line[x]) + brightnessOffset, 255);
+                    int g = qBound(0, qGreen(line[x]) + brightnessOffset, 255);
+                    int b = qBound(0, qBlue(line[x]) + brightnessOffset, 255);
+
+                    // 将新的颜色写回像素，保持原有的透明度(alpha)不变
+                    line[x] = qRgba(r, g, b, alpha);
+                }
+            }
+
+            // 3. 将修改好的 QImage 转换为 QPixmap 供绘制使用
+            m_spriteSheet = QPixmap::fromImage(img);
+        }
+        // ----------------- 修改结束 -----------------
 
         // 1. 初始化控制动画帧率的定时器（初始不启动）
         m_frameTimer = new QTimer(this);

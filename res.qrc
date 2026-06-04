@@ -71,7 +71,6 @@
         <file>ImageResources/activeredstone.png</file>
         <file>ImageResources/inactiveredstone.png</file>
         <file>ImageResources/enemybirth.png</file>
-        <file>ImageResources/oceantheme.png</file>
         <file>ImageResources/plank.png</file>
         <file>ImageResources/EntitySprite_efe.png</file>
         <file>ImageResources/EntitySprite_kai.png</file>
@@ -95,5 +94,8 @@
         <file>skinicon.ico</file>
         <file>bgm.ogg</file>
         <file>ImageResources/np.png</file>
+        <file>ImageResources/oceanthemenew.png</file>
+        <file>ImageResources/deserttheme.png</file>
+        <file>ImageResources/plaintheme.png</file>
     </qresource>
 </RCC>

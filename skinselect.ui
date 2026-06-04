@@ -38,8 +38,8 @@ QLabel{
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>882</width>
-        <height>582</height>
+        <width>888</width>
+        <height>588</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -178,77 +178,6 @@ border-radius: 0px;</string>
            </spacer>
           </item>
           <item>
-           <widget class="QFrame" name="style_1">
-            <property name="styleSheet">
-             <string notr="true">border: 3px solid #fff;
-border-radius: 0px;</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <property name="spacing">
-              <number>5</number>
-             </property>
-             <property name="leftMargin">
-              <number>2</number>
-             </property>
-             <property name="topMargin">
-              <number>2</number>
-             </property>
-             <property name="rightMargin">
-              <number>2</number>
-             </property>
-             <property name="bottomMargin">
-              <number>2</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="ba_1">
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-image: url(:/ImageResources/Underwater.png);
-border-radius: 0px;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="en_1">
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-image: url(:/ImageResources/drown.png);
-border-radius: 0px;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
            <widget class="QFrame" name="style_2">
             <property name="styleSheet">
              <string notr="true">border: 3px solid #fff;
@@ -309,6 +238,77 @@ border-radius: 0px;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">border-image: url(:/ImageResources/zombie.png);
+border-radius: 0px;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="style_1">
+            <property name="styleSheet">
+             <string notr="true">border: 3px solid #fff;
+border-radius: 0px;</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="ba_1">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-image: url(:/ImageResources/Underwater.png);
+border-radius: 0px;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="en_1">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-image: url(:/ImageResources/drown.png);
 border-radius: 0px;</string>
                </property>
                <property name="text">
@@ -818,6 +818,70 @@ border-radius: 0px;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QFrame" name="spf_4">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 3px solid #fff;
+border-radius: 0px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="spear_4">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-radius: 0px;
+border-image: url(:/ImageResources/Invicon_Netherite_Spear.png);
+border: none;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
            <widget class="QFrame" name="spf_1">
             <property name="minimumSize">
              <size>
@@ -871,70 +935,6 @@ border-radius: 0px;</string>
                <property name="styleSheet">
                 <string notr="true">border-image: url(:/ImageResources/speardisplay.png);
 border-radius: 0px;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="spf_2">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border: 3px solid #fff;
-border-radius: 0px;</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="spear_2">
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-radius: 0px;
-border-image: url(:/ImageResources/wooden_spear_inventory.png);
 border: none;</string>
                </property>
                <property name="text">
@@ -1010,7 +1010,7 @@ border: none;</string>
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="spf_4">
+           <widget class="QFrame" name="spf_7">
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -1033,7 +1033,7 @@ border-radius: 0px;</string>
             <property name="frameShadow">
              <enum>QFrame::Shadow::Raised</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <layout class="QHBoxLayout" name="horizontalLayout_23">
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -1047,7 +1047,7 @@ border-radius: 0px;</string>
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="spear_4">
+              <widget class="QPushButton" name="spear_7">
                <property name="minimumSize">
                 <size>
                  <width>70</width>
@@ -1062,71 +1062,7 @@ border-radius: 0px;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">border-radius: 0px;
-border-image: url(:/ImageResources/Invicon_Netherite_Spear.png);
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="spf_5">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border: 3px solid #fff;
-border-radius: 0px;</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_16">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="spear_5">
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-radius: 0px;
-border-image: url(:/ImageResources/Invicon_Stone_Spear.png);
+border-image: url(:/ImageResources/Invicon_Copper_Spear.png);
 border: none;</string>
                </property>
                <property name="text">
@@ -1202,7 +1138,7 @@ border: none;</string>
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="spf_7">
+           <widget class="QFrame" name="spf_5">
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -1225,7 +1161,7 @@ border-radius: 0px;</string>
             <property name="frameShadow">
              <enum>QFrame::Shadow::Raised</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <layout class="QHBoxLayout" name="horizontalLayout_16">
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -1239,7 +1175,7 @@ border-radius: 0px;</string>
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="spear_7">
+              <widget class="QPushButton" name="spear_5">
                <property name="minimumSize">
                 <size>
                  <width>70</width>
@@ -1254,7 +1190,71 @@ border-radius: 0px;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">border-radius: 0px;
-border-image: url(:/ImageResources/Invicon_Copper_Spear.png);
+border-image: url(:/ImageResources/Invicon_Stone_Spear.png);
+border: none;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="spf_2">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 3px solid #fff;
+border-radius: 0px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="spear_2">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-radius: 0px;
+border-image: url(:/ImageResources/wooden_spear_inventory.png);
 border: none;</string>
                </property>
                <property name="text">
@@ -1457,70 +1457,6 @@ border-radius: 0px;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">border-image: url(:/ImageResources/Arrow_of_Strength.png);
-border-radius: 0px;
-border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="arf_3">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>80</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border: 3px solid #fff;
-border-radius: 0px;</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_18">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="arrow_3">
-               <property name="minimumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>70</width>
-                 <height>70</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border-image: url(:/ImageResources/Invicon_Arrow.png);
 border-radius: 0px;
 border: none;</string>
                </property>
@@ -1777,6 +1713,70 @@ border-radius: 0px;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">border-image: url(:/ImageResources/Invicon_Arrow_of_the_Turtle_Master.png);
+border-radius: 0px;
+border: none;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="arf_3">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 3px solid #fff;
+border-radius: 0px;</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="arrow_3">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>70</width>
+                 <height>70</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-image: url(:/ImageResources/Invicon_Arrow.png);
 border-radius: 0px;
 border: none;</string>
                </property>
