@@ -365,16 +365,17 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
         QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(totemLabel);
 
         // 半透明效果
-        opacityEffect->setOpacity(0.85);
+        opacityEffect->setOpacity(0.77);
         totemLabel->setGraphicsEffect(opacityEffect);
 
-        // QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
-        QMovie* movie = new QMovie(":/ImageResources/Totem_of_Undying_Animation.gif", QByteArray(), totemLabel);
-        // movie->setSpeed(125);
-        movie->setSpeed(80);
+        QMovie* movie = new QMovie(":/ImageResources/totem-of-undying-faked-death.gif", QByteArray(), totemLabel);
+        movie->setSpeed(130);
 
-        int gifW = 180;
-        int gifH = 180;
+        // QMovie* movie = new QMovie(":/ImageResources/Totem_of_Undying_Animation.gif", QByteArray(), totemLabel);
+        // movie->setSpeed(80);
+
+        int gifW = 140;
+        int gifH = 140;
         movie->setScaledSize(QSize(gifW, gifH));
         totemLabel->setMovie(movie);
 
