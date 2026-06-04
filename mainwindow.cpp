@@ -34,10 +34,21 @@ MainWindow::MainWindow(QWidget *parent)
         readFile.close();
     }
 
+    // BGM
+    m_bgmPlayer = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+
+    m_bgmPlayer->setAudioOutput(audioOutput);
+    m_bgmPlayer->setSource(QUrl("qrc:/menugm.ogg"));
+    m_bgmPlayer->setLoops(QMediaPlayer::Infinite);
+    audioOutput->setVolume(Volume);
+    m_bgmPlayer->play();
+
 
     connect(ui->start_game, &QPushButton::clicked, this, [=](){
         // 1. 隐藏当前的主菜单界面
         this->hide();
+        m_bgmPlayer->stop();
 
         // 2. 创建并显示游戏界面
         DataCarrier para = {
@@ -56,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
         // 当 game 发出 gameEnded 信号时，执行主界面的 show() 函数重新显示出来
         connect(game, &GameView::gameEnded, this, [this](EndData ed) {
             this->show();
+            m_bgmPlayer->play();
 
             maxScore = std::max(maxScore, ed.score);
 
@@ -135,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->volume, &QSlider::valueChanged, this, [=](int value){
         Volume = value / 100.0;
         ui->volume_label->setText(QString("%1%").arg(value, 3, 10, QChar(' ')));
+        audioOutput->setVolume(Volume);
     });
     connect(ui->max_seconds, &QSlider::valueChanged, this, [=](int value){
         maxSeconds = value *5;
