@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QPen>
 #include <QPainter>
+#include <QVector>
 
 #include "DataCarrier.h"
 
@@ -22,10 +23,10 @@ Enemy::Enemy(QGraphicsItem *target) {
     // 把它从 600x600 缩小成你游戏里想要的 32x32 物理大小
     // 注意：因为是从大图缩小，这里建议用 Qt::SmoothTransformation（平滑缩小），
     // 否则可能会出现像素丢失导致画面扭曲。
-    enemyPic = enemyPic.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    enemyPic = enemyPic.scaled(selfHt, selfWd, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     this->setPixmap(enemyPic);
-    this->setTransformOriginPoint(12, 12); // 旋转中心设为一半
+    this->setTransformOriginPoint(selfHt /2, selfWd /2); // 旋转中心设为一半
 
 
     this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
@@ -125,47 +126,52 @@ void Enemy::moveTowardsTarget() {
     this->moveBy(finalMoveX, finalMoveY);
 }
 
-void Enemy::teleportThroughWall() {
-    if(!playerTarget || !this->scene()) return; // 确保有目标且在场景中
+QVector<qreal> Enemy::teleportThroughWall() {
+    // 默认返回 5 个 0，最后一位 0 表示未传送
+    if(!playerTarget || !this->scene() || inFormation) {
+        return {0, 0, 0, 0, 0};
+    }
 
-    if (inFormation) return; // 在阵型中，就不自主移动
-
-    // 获取地图范围
     QRectF mapRect = this->scene()->sceneRect();
-
-    // 获取自身在地图上的绝对坐标
     qreal ex = this->x();
     qreal ey = this->y();
+    qreal tx = ex; // 目标 X 坐标
+    qreal ty = ey; // 目标 Y 坐标
 
-    // 获取自身大小（使用 boundingRect 获取贴图的实际宽高）
-    qreal selfWidth = this->boundingRect().width();
-    qreal selfHeight = this->boundingRect().height();
+    bool teleported = false;
 
-    // ---------------- 处理 X 轴 ----------------
-    // 若接触左壁 (当前 X 小于地图左边缘)
+    // 使用 if-else if 结构，确保单一维度传送，防止对角线同时传送导致坐标错位
+    // ---------------- 处理 X 轴（左右传送） ----------------
     if(ex < mapRect.left()) {
-        // 传送到右侧：地图右边缘坐标 - 自身宽度
-        this->setPos(mapRect.right() - selfWidth, ey);
+        tx = mapRect.right() - selfWd; // 右边界对齐
+        ty = ey;                          // 确保 Y 轴（垂直方向）不发生改变
+        teleported = true;
     }
-    // 若接触右壁 (当前 X + 自身宽度 大于地图右边缘)
-    else if(ex + selfWidth > mapRect.right()) {
-        // 传送到左侧
-        this->setPos(mapRect.left(), ey);
+    else if(ex + selfWd > mapRect.right()) {
+        tx = mapRect.left();              // 左边界对齐
+        ty = ey;                          // 确保 Y 轴（垂直方向）不发生改变
+        teleported = true;
+    }
+    // ---------------- 处理 Y 轴（上下传送） ----------------
+    else if(ey < mapRect.top()) {
+        ty = mapRect.bottom() - selfHt; // 下边界对齐
+        tx = ex;                            // 确保 X 轴（水平方向）不发生改变
+        teleported = true;
+    }
+    else if(ey + selfHt > mapRect.bottom()) {
+        ty = mapRect.top();                 // 上边界对齐
+        tx = ex;                            // 确保 X 轴（水平方向）不发生改变
+        teleported = true;
     }
 
-    // 重新获取一下现在的坐标（防止因为上面 X 轴传送了，下面的 ex 还是老数据）
-    ex = this->x();
-    ey = this->y();
+    if (teleported) {
+        this->setPos(tx, ty);
+        // 返回 [前X, 前Y, 后X, 后Y, 1]
+        return {ex, ey, tx, ty, 1.0};
+    }
 
-    // ---------------- 处理 Y 轴 ----------------
-    // 若接触上壁
-    if(ey < mapRect.top()) {
-        this->setPos(ex, mapRect.bottom() - selfHeight);
-    }
-    // 若接触下壁
-    else if(ey + selfHeight > mapRect.bottom()) {
-        this->setPos(ex, mapRect.top());
-    }
+    // 没有传送，最后一位返回 0.0
+    return {ex, ey, ex, ey, 0.0};
 }
 
 void Enemy::applyScatter(qreal vx, qreal vy, int frames) {

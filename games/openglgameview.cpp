@@ -9,7 +9,6 @@
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
 
-#include "BulletPool.h"
 #include "Enemy.h"
 #include "Ability.h"
 #include "LightSaber.h"
@@ -203,8 +202,6 @@ OpenGLGameView::OpenGLGameView(const int moveMode)
     player = new Player();
     player->setPos(400, 250);
     scene->addItem(player);
-
-    BulletPool::getInstance().addToScene(scene);
 
     // 计时器设置
     gameTimer = new QTimer(this);

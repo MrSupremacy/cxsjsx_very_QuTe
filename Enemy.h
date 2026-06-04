@@ -10,7 +10,7 @@ class Enemy : public QGraphicsPixmapItem {
 public:
     Enemy(QGraphicsItem *target); // 传入玩家作为目标
     void moveTowardsTarget(); // 朝玩家移动
-    void teleportThroughWall(); // 通过边界墙瞬移
+    QVector<qreal> teleportThroughWall(); // 通过边界墙瞬移
     void setInFormation(bool state) { inFormation = state; } // 修改阵型状态
     bool isInFormation() const { return inFormation; }
     void applyScatter(qreal vx, qreal vy, int frames); // 接收动量函数
@@ -25,6 +25,9 @@ private:
     qreal scatterVx = 0.0; // 动量x分量
     qreal scatterVy = 0.0; // 动量y分量
     int scatterFrames = 0; // 持续帧数
+
+    const int selfHt = 24;
+    const int selfWd = 24;
 };
 
 #endif // ENEMY_H

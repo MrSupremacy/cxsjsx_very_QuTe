@@ -10,7 +10,6 @@
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
 
-#include "BulletPool.h"
 #include "Enemy.h"
 #include "Ability.h"
 #include "LightSaber.h"
@@ -26,6 +25,7 @@
 #include "DeathVFX.h"
 #include "SoundPool.h"
 #include "DataCarrier.h"
+#include "PortalPool.h"
 
 
 GameView::GameView(const DataCarrier& dc)
@@ -184,9 +184,6 @@ GameView::GameView(const DataCarrier& dc)
     player->setPos(400, 250); // 放在地图中间
     scene->addItem(player);
 
-    // 初始化 BulletPool
-    BulletPool::getInstance().addToScene(scene);
-
     // 主循环 计时器 60 FPS
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &GameView::updateGame);
@@ -207,6 +204,9 @@ GameView::GameView(const DataCarrier& dc)
     formationSpawnTimer = new QTimer(this);
     connect(formationSpawnTimer, &QTimer::timeout, this, &GameView::spawnFormation);
     formationSpawnTimer->start(formationIntv);
+
+    // 传送门 Pool
+    PortalPool::instance().init(scene, ":/ImageResources/nether_portal.png", 50, 2000);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)
@@ -290,6 +290,8 @@ void main() {
 
 void GameView::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event);
+
     // FPS 相关计算
     m_frameCount++;
     if (m_fpsTimer.elapsed() >= 1000) { // 如果经过了 1000 毫秒 (1秒)
@@ -539,7 +541,18 @@ void GameView::updateGame() {
         // 敌人移动
         if (Enemy *enemy = dynamic_cast<Enemy*>(item)) {
             enemy->moveTowardsTarget();
-            enemy->teleportThroughWall();
+            QVector<qreal> teleInfo = enemy->teleportThroughWall();
+            if (teleInfo[4] > 0.5) {
+                PortalPiece* tp = PortalPool::instance().getHiddenPiece();
+                if (tp) {
+                    tp->showPiece({teleInfo[0], teleInfo[1]});
+                }
+
+                tp = PortalPool::instance().getHiddenPiece();
+                if (tp) {
+                    tp->showPiece({teleInfo[2], teleInfo[3]});
+                }
+            }
         }
         // 阵型移动
         else if (Formation *formation = dynamic_cast<Formation*>(item)) {
@@ -659,8 +672,6 @@ void GameView::updateGame() {
         if (item->scene() == scene) {
             // 类型判断
             if (Bullet* b = dynamic_cast<Bullet*>(item)) {
-                // 如果是子弹，不要 delete，把它交还给对象池
-                // BulletPool::getInstance().recycle(b);
                 scene->removeItem(b);
                 delete b;
             }

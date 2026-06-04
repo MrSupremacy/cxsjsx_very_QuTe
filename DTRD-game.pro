@@ -32,12 +32,13 @@ HEADERS += \
     Enemy.h \
     Formation.h \
     Player.h \
+    PortalPiece.h \
+    PortalPool.h \
     RotatedLabel.h \
     SoundPool.h \
     Tetris.h \
     abilities/Ability.h \
     abilities/Bullet.h \
-    abilities/BulletPool.h \
     abilities/CrescentWave.h \
     abilities/IntelligentWipeOut.h \
     abilities/Explosion.h \

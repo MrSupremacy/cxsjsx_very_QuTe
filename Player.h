@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QPointF>
 #include "Bullet.h"
-#include "BulletPool.h"
 #include "CrescentWave.h"
 #include "PlayerChargeBar.h"
 #include "Explosion.h"
