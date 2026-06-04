@@ -10,7 +10,7 @@ class Enemy : public QGraphicsPixmapItem {
 public:
     Enemy(QGraphicsItem *target); // 传入玩家作为目标
     void moveTowardsTarget(); // 朝玩家移动
-    void teleportThroughWall(); // 通过边界墙瞬移
+    QVector<qreal> teleportThroughWall(); // 通过边界墙瞬移
     void setInFormation(bool state) {
         inFormation = state;
         this->update();
