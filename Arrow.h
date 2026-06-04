@@ -30,7 +30,7 @@ public:
         Enemy* e6 = new Enemy(playerTarget);
         Enemy* e7 = new Enemy(playerTarget);
 
-        double dx = 24.0, dy = 12.0;
+        double dx = 26.0, dy = 13.0;
         e1->setPos(0, 0);
         e2->setPos(dx, dy);
         e3->setPos(2 * dx, 2 * dy);

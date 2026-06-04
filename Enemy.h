@@ -11,7 +11,10 @@ public:
     Enemy(QGraphicsItem *target); // 传入玩家作为目标
     void moveTowardsTarget(); // 朝玩家移动
     void teleportThroughWall(); // 通过边界墙瞬移
-    void setInFormation(bool state) { inFormation = state; } // 修改阵型状态
+    void setInFormation(bool state) {
+        inFormation = state;
+        this->update();
+    } // 修改阵型状态
     bool isInFormation() const { return inFormation; }
     void applyScatter(qreal vx, qreal vy, int frames); // 接收动量函数
 

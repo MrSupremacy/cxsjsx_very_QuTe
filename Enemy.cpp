@@ -22,10 +22,10 @@ Enemy::Enemy(QGraphicsItem *target) {
     // 把它从 600x600 缩小成你游戏里想要的 32x32 物理大小
     // 注意：因为是从大图缩小，这里建议用 Qt::SmoothTransformation（平滑缩小），
     // 否则可能会出现像素丢失导致画面扭曲。
-    enemyPic = enemyPic.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    enemyPic = enemyPic.scaled(28, 28, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     this->setPixmap(enemyPic);
-    this->setTransformOriginPoint(12, 12); // 旋转中心设为一半
+    this->setTransformOriginPoint(14, 14); // 旋转中心设为一半
 
 
     this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
@@ -66,7 +66,8 @@ void Enemy::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     // 2. 然后，我们用画笔在它的边缘叠加上一个描边方框
     // 参数1：画笔颜色（僵尸可以用 Qt::black，或者醒目的红色 Qt::red！）
     // 参数2：画笔粗细，像素风建议 1 或者 2
-    QPen pen(Qt::black, 2);
+    QColor borderColor = inFormation ? QColor(160, 0, 0) : Qt::black;
+    QPen pen(borderColor, 2);
 
     // 像素风建议设置成 MiterJoin，这样拐角处是锐利的直角，非常符合 MC 风格
     pen.setJoinStyle(Qt::MiterJoin);

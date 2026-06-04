@@ -26,6 +26,7 @@
 #include "DeathVFX.h"
 #include "SoundPool.h"
 #include "DataCarrier.h"
+#include "SpawnIndicator.h"
 
 
 GameView::GameView(const DataCarrier& dc)
@@ -427,6 +428,15 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
         painter->fillRect(intersectRect, scene->backgroundBrush());
         painter->setOpacity(1.0);
     }
+    static QPixmap framePic(":/ImageResources/oceantheme.png");
+    if (framePic.isNull()) {
+        qDebug() << "边框图片加载失败！";
+    } else {
+        // 将画框强行缩放到和你地图（mapWidth x mapHeight）完全一致的大小 [2]
+        // framePic = framePic.scaled(1280, 800, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        // 刚好绘制在地图边界 (0,0) 到 (mapWidth, mapHeight) 的矩形上 [2]
+        painter->drawPixmap(-328, -257, 2040, 1275, framePic);
+    }
 }
 
 void GameView::mouseMoveEvent(QMouseEvent *event) {
@@ -729,10 +739,26 @@ void GameView::spawnEnemy() {
             }
         }
 
-        // 在合法坐标处生成并添加敌人
-        Enemy *enemy = new Enemy(player);
-        enemy->setPos(spawnX, spawnY); // 使用刚刚算出的安全坐标
-        scene->addItem(enemy);
+        // 间隔 200ms。如果你觉得太慢/太快，只需调整这个 200 即可
+        int delayMs = i * 100;
+
+        // 2. 延迟 delayMs 毫秒后：在地图上亮起预警红叉
+        QTimer::singleShot(delayMs, this, [this, spawnX, spawnY]() {
+            if (!this->scene) return;
+            SpawnIndicator* indicator = new SpawnIndicator(QPointF(spawnX, spawnY));
+            this->scene->addItem(indicator);
+        });
+
+        QTimer::singleShot(1300, this, [this, spawnX, spawnY]() {
+            // 安全检查：确保游戏还在进行，玩家还没死
+            if (!this->scene || !this->player) return;
+
+            // 预警结束，真正的僵尸降临！
+            Enemy *enemy = new Enemy(this->player);
+            enemy->setPos(spawnX, spawnY);
+            this->scene->addItem(enemy);
+        });
+
         validPos = false;
     }
 }

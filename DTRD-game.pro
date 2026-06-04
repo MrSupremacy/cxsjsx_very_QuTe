@@ -34,6 +34,7 @@ HEADERS += \
     Player.h \
     RotatedLabel.h \
     SoundPool.h \
+    SpawnIndicator.h \
     Tetris.h \
     abilities/Ability.h \
     abilities/Bullet.h \
