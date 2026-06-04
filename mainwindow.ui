@@ -221,12 +221,15 @@ color: #0f0;</string>
             <property name="styleSheet">
              <string notr="true">QPushButton {
         border-image: url(:/ImageResources/blank_sign.png);
+color: #fff;
     }
     QPushButton:hover {
 	    border-image: url(:/ImageResources/blank_sign_hover.png);
+color: #fff;
     }
     QPushButton:pressed {
 	    border-image: url(:/ImageResources/blank_sign_press.png);
+color: #fff;
     }</string>
             </property>
             <property name="text">
@@ -257,12 +260,15 @@ color: #0f0;</string>
             <property name="styleSheet">
              <string notr="true">QPushButton {
         border-image: url(:/ImageResources/blank_sign.png);
+color: #fff;
     }
     QPushButton:hover {
 	    border-image: url(:/ImageResources/blank_sign_hover.png);
+color: #fff;
     }
     QPushButton:pressed {
 	    border-image: url(:/ImageResources/blank_sign_press.png);
+color: #fff;
     }</string>
             </property>
             <property name="text">
@@ -293,12 +299,15 @@ color: #0f0;</string>
             <property name="styleSheet">
              <string notr="true">QPushButton {
         border-image: url(:/ImageResources/blank_sign.png);
+color: #fff;
     }
     QPushButton:hover {
 	    border-image: url(:/ImageResources/blank_sign_hover.png);
+color: #fff;
     }
     QPushButton:pressed {
 	    border-image: url(:/ImageResources/blank_sign_press.png);
+color: #fff;
     }</string>
             </property>
             <property name="text">
@@ -329,12 +338,15 @@ color: #0f0;</string>
             <property name="styleSheet">
              <string notr="true">QPushButton {
         border-image: url(:/ImageResources/blank_sign.png);
+color: #fff;
     }
     QPushButton:hover {
 	    border-image: url(:/ImageResources/blank_sign_hover.png);
+color: #fff;
     }
     QPushButton:pressed {
 	    border-image: url(:/ImageResources/blank_sign_press.png);
+color: #fff;
     }</string>
             </property>
             <property name="text">
@@ -398,6 +410,9 @@ border-image: none;
               <underline>false</underline>
              </font>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: #fff;</string>
+            </property>
             <property name="text">
              <string>SETTINGS</string>
             </property>
@@ -432,6 +447,9 @@ border-image: none;
                  <bold>true</bold>
                 </font>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;</string>
+               </property>
                <property name="text">
                 <string>难度</string>
                </property>
@@ -445,6 +463,9 @@ border-image: none;
                  <pointsize>16</pointsize>
                  <bold>true</bold>
                 </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;</string>
                </property>
                <property name="text">
                 <string> 1 </string>
@@ -508,6 +529,9 @@ border-image: none;
                  <bold>true</bold>
                 </font>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;</string>
+               </property>
                <property name="text">
                 <string>音量</string>
                </property>
@@ -521,6 +545,9 @@ border-image: none;
                  <pointsize>16</pointsize>
                  <bold>true</bold>
                 </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;</string>
                </property>
                <property name="text">
                 <string> 50%</string>
@@ -593,6 +620,9 @@ border-image: none;
               <bold>true</bold>
              </font>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: #fff;</string>
+            </property>
             <property name="text">
              <string>MODES</string>
             </property>
@@ -641,7 +671,8 @@ border-image: none;
                </property>
                <property name="styleSheet">
                 <string notr="true">border-image: url(:/ImageResources/button_off.png);
-padding: 4px;</string>
+padding: 4px;
+color: #fff;</string>
                </property>
                <property name="text">
                 <string>计时模式</string>
@@ -656,6 +687,9 @@ padding: 4px;</string>
                  <pointsize>14</pointsize>
                  <bold>true</bold>
                 </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: #fff;</string>
                </property>
                <property name="text">
                 <string> 30s</string>
@@ -713,7 +747,8 @@ padding: 4px;</string>
             </property>
             <property name="styleSheet">
              <string notr="true">border-image: url(:/ImageResources/button_on.png);
-padding: 4px;</string>
+padding: 4px;
+color: #fff;</string>
             </property>
             <property name="text">
              <string>无尽模式</string>
