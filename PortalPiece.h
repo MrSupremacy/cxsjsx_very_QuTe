@@ -110,8 +110,8 @@ private:
     QPixmap m_spriteSheet;  // 完整的精灵图
     const int Wd = 128;     // 单帧宽度
     const int Ht = 128;     // 单帧高度
-    const int targetWd = 24;
-    const int targetHt = 24;
+    const int targetWd = 28;
+    const int targetHt = 28;
     const int frameN = 32;  // 动画总帧数
     int m_currentFrame;     // 当前帧索引
 

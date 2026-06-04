@@ -29,8 +29,8 @@ private:
     qreal scatterVy = 0.0; // 动量y分量
     int scatterFrames = 0; // 持续帧数
 
-    const int selfHt = 24;
-    const int selfWd = 24;
+    const int selfHt = 28;
+    const int selfWd = 28;
 };
 
 #endif // ENEMY_H
