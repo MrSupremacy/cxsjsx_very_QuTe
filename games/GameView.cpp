@@ -9,6 +9,10 @@
 #include <QColor>
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QGraphicsProxyWidget>
+#include <QPropertyAnimation>
 
 #include "Enemy.h"
 #include "Ability.h"
@@ -226,20 +230,17 @@ void GameView::resizeEvent(QResizeEvent *event)
 void GameView::initializeShader() {
     initializeOpenGLFunctions();
 
-    // 顶点着色器：接收两套纹理坐标
+    // 顶点着色器：现在只需要全屏顶点和对应纹理坐标
     const char *vsrc = R"(
 #version 440 core
 layout (location = 0) in vec2 aPos;        // NDC 坐标
 layout (location = 1) in vec2 aFboTex;     // 采样屏幕 FBO 的全屏坐标
-layout (location = 2) in vec2 aSceneTex;   // 专门针对 Scene 的 0~1 坐标
 
 out vec2 FboTexCoords;
-out vec2 SceneTexCoords;
 
 void main() {
     gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
     FboTexCoords = aFboTex;
-    SceneTexCoords = aSceneTex;
 }
     )";
 
@@ -248,20 +249,27 @@ void main() {
 out vec4 FragColor;
 
 in vec2 FboTexCoords;
-in vec2 SceneTexCoords;
 
 uniform sampler2D screenTexture;
 uniform vec2 Pp;
-uniform vec2 iResolution; // Scene的实际物理像素大小
+uniform vec2 iResolution; // 屏幕全局物理像素分辨率
+uniform vec4 sceneRect;   // Scene的矩形信息 (x, y, width, height)，基于左上角
+uniform float colScale;
 
 void main() {
-    // 1. 必须使用 FboTexCoords 才能在 FBO 的正确位置抠出像素
+    // 采样当前屏幕全貌
     vec4 col = texture(screenTexture, FboTexCoords);
 
-    // ============================================
-    // SceneTexCoords 严格从 (0,0) 对应 Scene 左下角到 (1,1) 对应右上角
-    // 如果你需要类似 ShaderToy 的像素坐标：vec2 fragCoord = SceneTexCoords * iResolution;
-    // ============================================
+    // 【全局屏幕坐标】 (相对屏幕左上角)
+    vec2 screenCoord = vec2(FboTexCoords.x, 1.0 - FboTexCoords.y) * iResolution;
+
+    // 【相对Scene坐标】 (相对 Scene 左上角)
+    vec2 sceneCoord = screenCoord - sceneRect.xy;
+
+    bool inScene = (0 < sceneCoord.x) && (sceneCoord.x < sceneRect.z)
+                && (0 < sceneCoord.y) && (sceneCoord.y < sceneRect.w);
+
+    col *= vec4(vec3(colScale), 1.0);
 
     FragColor = col;
 }
@@ -271,24 +279,28 @@ void main() {
     m_program.addShaderFromSourceCode(QOpenGLShader::Fragment, fsrc);
     m_program.link();
 
-    // 初始化空的 VAO 和 VBO (因为每一帧我们要动态写入坐标)
+    // 构建一个静态的“全屏矩形”，不需要每帧计算了
+    float vertices[] = {
+        // aPos(x, y)   aFboTex(u, v)
+        -1.0f,  1.0f,   0.0f, 1.0f,   // 左上角
+        -1.0f, -1.0f,   0.0f, 0.0f,   // 左下角
+        1.0f,  1.0f,   1.0f, 1.0f,   // 右上角
+        1.0f, -1.0f,   1.0f, 0.0f    // 右下角
+    };
+
     m_vao.create();
     m_vao.bind();
     m_vbo.create();
     m_vbo.bind();
-    // 预先分配足以存放4个顶点（每个顶点 2+2+2=6 个 float）的内存
-    m_vbo.allocate(4 * 6 * sizeof(float));
+    m_vbo.allocate(vertices, sizeof(vertices)); // 静态分配并写入一次即可
 
     m_program.bind();
     // Layout 0: aPos
     m_program.enableAttributeArray(0);
-    m_program.setAttributeBuffer(0, GL_FLOAT, 0, 2, 6 * sizeof(float));
+    m_program.setAttributeBuffer(0, GL_FLOAT, 0, 2, 4 * sizeof(float));
     // Layout 1: aFboTex
     m_program.enableAttributeArray(1);
-    m_program.setAttributeBuffer(1, GL_FLOAT, 2 * sizeof(float), 2, 6 * sizeof(float));
-    // Layout 2: aSceneTex
-    m_program.enableAttributeArray(2);
-    m_program.setAttributeBuffer(2, GL_FLOAT, 4 * sizeof(float), 2, 6 * sizeof(float));
+    m_program.setAttributeBuffer(1, GL_FLOAT, 2 * sizeof(float), 2, 4 * sizeof(float));
 
     m_program.release();
     m_vao.release();
@@ -302,12 +314,11 @@ void GameView::paintEvent(QPaintEvent *event)
 
     // FPS 相关计算
     m_frameCount++;
-    if (m_fpsTimer.elapsed() >= 1000) { // 如果经过了 1000 毫秒 (1秒)
-        m_currentFps = m_frameCount;    // 记录上一秒的帧数
-        m_frameCount = 0;               // 计数器清零
-        m_fpsTimer.restart();           // 重新计时
+    if (m_fpsTimer.elapsed() >= 1000) {
+        m_currentFps = m_frameCount;
+        m_frameCount = 0;
+        m_fpsTimer.restart();
     }
-
 
     const qreal dpr = viewport()->devicePixelRatioF();
     QSize physicalSize = viewport()->size() * dpr;
@@ -344,77 +355,41 @@ void GameView::paintEvent(QPaintEvent *event)
     // ==========================================
     // 中间阶段：计算 Scene 的物理坐标和大小
     // ==========================================
-    // 获取场景的矩形，并将其转换为视口的逻辑坐标
     QRectF logicalSceneRect = mapFromScene(sceneRect()).boundingRect();
-    // 转换为 OpenGL 的物理像素坐标
+
+    // Qt 的 mapFromScene 返回的本来就是相对于 View 左上角的逻辑坐标，直接乘 dpr 即可
     QRectF physSceneRect(logicalSceneRect.x() * dpr,
                          logicalSceneRect.y() * dpr,
                          logicalSceneRect.width() * dpr,
                          logicalSceneRect.height() * dpr);
 
-    // OpenGL 的 Y 轴是从下往上，而 Qt 是从上往下，需要翻转 Y 轴
-    float glY = physicalSize.height() - (physSceneRect.y() + physSceneRect.height());
-
-    // 提取宽高给后面使用
-    float X = physSceneRect.x();
-    float Y = glY;
-    float W_sc = physSceneRect.width();
-    float H_sc = physSceneRect.height();
-    float W_fb = physicalSize.width();
-    float H_fb = physicalSize.height();
-
     // ==========================================
-    // 第二阶段：还原背景，并只在 Scene 区域跑 Shader
+    // 第二阶段：直接全屏绘制 Shader（移除了动态顶点和冗余Blit）
     // ==========================================
-    // 【关键1】恢复默认帧缓冲后，先把 FBO "原样" 拷贝到屏幕上。
-    // 这保证了 Scene 外面的背景不会黑屏，而是保留 drawBackground 画出的原本样子。
-    QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_fbo, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-    // 开启 Shader 接管
     m_program.bind();
     m_program.setUniformValue("screenTexture", 0);
 
-    // 设置 iResolution (Scene 的物理像素尺寸)
-    m_program.setUniformValue("iResolution", QVector2D(W_sc, H_sc));
+    // 设置 iResolution 为全屏尺寸
+    m_program.setUniformValue("iResolution", QVector2D(physicalSize.width(), physicalSize.height()));
 
-    // (设置你原有的 Pp 逻辑)
+    // 传入 Scene 所在屏幕位置 (x, y, w, h)，供 Shader 计算 sceneCoord
+    m_program.setUniformValue("sceneRect", QVector4D(physSceneRect.x(), physSceneRect.y(), physSceneRect.width(), physSceneRect.height()));
+
+    m_program.setUniformValue("colScale", uniformColorRate);
+
+    // (你原有的 Pp 逻辑不变)
     QPointF localCenter = player->boundingRect().center();
     QPointF sceneCenter = player->mapToScene(localCenter);
     QPointF viewportCenter = mapFromScene(sceneCenter);
     QPointF physicalCenter = viewportCenter * dpr;
-    physicalCenter.setY(physicalSize.height() - physicalCenter.y());
+    physicalCenter.setY(physicalSize.height() - physicalCenter.y()); // 如果在Shader里依然采用OpenGL底侧原点需要保持反转，具体看你的Pp需求
     m_program.setUniformValue("Pp", physicalCenter);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_fbo->texture());
 
-    // 【关键2】动态计算仅仅覆盖 Scene 区域的 Quad
-    // 1. 计算 NDC 坐标 (-1 到 1)
-    float nx1 = (X / W_fb) * 2.0f - 1.0f;
-    float ny1 = (Y / H_fb) * 2.0f - 1.0f;
-    float nx2 = ((X + W_sc) / W_fb) * 2.0f - 1.0f;
-    float ny2 = ((Y + H_sc) / H_fb) * 2.0f - 1.0f;
-
-    // 2. 计算在 FBO 上的采样坐标 (0 到 1)
-    float fu1 = X / W_fb;
-    float fv1 = Y / H_fb;
-    float fu2 = (X + W_sc) / W_fb;
-    float fv2 = (Y + H_sc) / H_fb;
-
-    // 3. 构建顶点数组：Pos(2), FboUV(2), SceneUV(2)
-    float vertices[] = {
-        // Pos(x, y)   FboTex(u, v)  SceneTex(u, v)
-        nx1, ny2,      fu1, fv2,     0.0f, 1.0f,   // 左上角
-        nx1, ny1,      fu1, fv1,     0.0f, 0.0f,   // 左下角
-        nx2, ny2,      fu2, fv2,     1.0f, 1.0f,   // 右上角
-        nx2, ny1,      fu2, fv1,     1.0f, 0.0f    // 右下角
-    };
-
-    // 更新 VBO 数据并绘制
+    // 绑定 VAO 直接画全屏矩形，0开销
     m_vao.bind();
-    m_vbo.bind();
-    m_vbo.write(0, vertices, sizeof(vertices)); // 动态更新顶点数据
-
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     m_vao.release();
@@ -422,11 +397,9 @@ void GameView::paintEvent(QPaintEvent *event)
 
     painter.endNativePainting();
 
-
     // 绘制 FPS
-    painter.setPen(Qt::green); // 设为绿色字体，比较醒目
-    painter.setFont(QFont("Arial", 16, QFont::Bold)); // 设置字体大小
-    // 画在视口左上角，坐标是 Qt 的逻辑坐标
+    painter.setPen(Qt::green);
+    painter.setFont(QFont("Arial", 16, QFont::Bold));
     painter.drawText(200, 30, QString("FPS: %1").arg(m_currentFps));
 }
 
@@ -551,6 +524,12 @@ void GameView::initFromDifficulty()
 }
 
 void GameView::updateGame() {
+
+    if (gameEnds) {
+        viewport()->update();
+        return;
+    }
+
     // 移动玩家
     if (moveMode == 0) {
         player->keyboardMove(keyW, keyA, keyS, keyD, keyUp, keyLeft, keyDown, keyRight);
@@ -973,7 +952,8 @@ void GameView::spawnFormation() {
 
 void GameView::gameOver() {
     // 停止定时器
-    gameTimer->stop();
+    gameEnds = true;
+    // gameTimer->stop();
     enemySpawnTimer->stop();
     abilitySpawnTimer->stop();
     formationSpawnTimer->stop();
@@ -982,12 +962,78 @@ void GameView::gameOver() {
     SoundPool::instance().stopAll();
     m_bgmPlayer->stop();
 
-    // 2. 弹出一个提示框告诉玩家游戏结束（体验更好，不会死得太突兀）
-    QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
+    uniformColorRate = 0.6;
+    viewport()->update();
 
-    // 3. 发出“游戏结束”的信号！
-    emit gameEnded({scores, seconds});
+    // QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
 
-    // 4. 关闭当前游戏窗口（因为我们之前设置了 WA_DeleteOnClose，这里 close() 会自动释放内存）
-    this->close();
+    // 1. 临时拼凑 UI 面板
+    QWidget* panel = new QWidget();
+    panel->setFixedSize(300, 150);
+    panel->setStyleSheet("background: #222; border: 2px solid red; border-radius: 8px;");
+
+    QVBoxLayout* layout = new QVBoxLayout(panel);
+    QPushButton* exitBtn = new QPushButton("EXIT", panel);
+    exitBtn->setStyleSheet(R"(
+    QPushButton {
+        background-color: #D32F2F;  /* 现代感的红色 */
+        color: white;
+        padding: 8px 18px;          /* 调整内边距，使比例更协调 */
+        font-weight: bold;
+        font-size: 13px;
+        border-radius: 6px;         /* 增加微小的圆角 */
+        border: none;               /* 去掉默认的立体边框 */
+    }
+    QPushButton:hover {
+        background-color: #E53935;  /* 鼠标悬浮时颜色稍微变亮 */
+    }
+    QPushButton:pressed {
+        background-color: #B71C1C;  /* 鼠标按下时颜色变暗 */
+    }
+)");
+
+    QLabel* label = new QLabel(
+        QString("YOU DIED. Score %1").arg(scores)
+    , panel);
+    label->setStyleSheet("color: red; font-size: 24px; border: none;");
+    label->setAlignment(Qt::AlignCenter);
+
+    layout->addWidget(label);
+    layout->addWidget(exitBtn);
+
+    // 2. 把 UI 塞进场景
+    QGraphicsProxyWidget* proxy = scene->addWidget(panel);
+    proxy->setZValue(9999); // 确保在最顶层
+    proxy->setFocus();      // 抢夺焦点，拦截WASD等键盘事件
+
+    // 3. 精准计算中心位置 (利用当前视图的视口中心映射到场景，比 sceneRect 更稳妥)
+    QPointF viewCenterInScene = mapToScene(viewport()->rect().center());
+    QPointF endPos = viewCenterInScene - QPointF(panel->width() / 2.0, panel->height() / 2.0);
+    QPointF startPos = endPos - QPointF(0, 400); // 从中心点往上偏 400 像素飞下来
+
+    // 4. 设置初始位置
+    proxy->setPos(startPos);
+
+    // 5. 播放快速动画
+    QPropertyAnimation* anim = new QPropertyAnimation(proxy, "pos", this); // 绑定 this 防止内存泄露
+    anim->setDuration(500); // 0.5秒
+    anim->setStartValue(startPos); // !!! 必须显式设置 StartValue
+    anim->setEndValue(endPos);
+    anim->setEasingCurve(QEasingCurve::OutBack); // 带回弹效果
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+    // 6. 绑定退出按钮 (通过值捕获 [this, proxy] 避免野指针崩溃)
+    // 传入 this 作为上下文参数，保证安全关联
+    QObject::connect(exitBtn, &QPushButton::clicked, this, [this, proxy]() {
+        // 安全地从场景移除
+        if (scene && proxy) {
+            scene->removeItem(proxy);
+        }
+
+        // 假设 scores 和 seconds 是 GameView 的成员变量，通过 this 访问
+        emit gameEnded({this->scores, this->seconds});
+
+        // 关闭当前游戏窗口
+        this->close();
+    });
 }

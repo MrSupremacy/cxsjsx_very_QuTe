@@ -47,6 +47,9 @@ private:
     QMediaPlayer *m_bgmPlayer;
     QAudioOutput *audioOutput;
 
+    // 游戏
+    bool gameEnds = false;
+
 
     // OpenGL 相关的成员变量
     bool m_glInitialized = false;
@@ -65,6 +68,7 @@ private:
     QGraphicsScene *scene; // 存储地图实体 & 处理碰撞检测
     QPixmap borderPixmap;
     QList<int> borderParas;
+    float uniformColorRate = 1.0;  // 用于 GameOver 遮罩
 
     // 游戏设置 (以及 moveMode)
     const int difficulty;   // 难度

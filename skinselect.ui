@@ -38,8 +38,8 @@ QLabel{
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>888</width>
-        <height>588</height>
+        <width>882</width>
+        <height>582</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -111,8 +111,9 @@ background-color: none;</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>20</pointsize>
-                 <italic>true</italic>
+                 <family>Agency FB</family>
+                 <pointsize>26</pointsize>
+                 <italic>false</italic>
                  <bold>true</bold>
                 </font>
                </property>
@@ -121,7 +122,7 @@ background-color: none;</string>
 border-radius: 0px;</string>
                </property>
                <property name="text">
-                <string>Background </string>
+                <string>BACKGROUND</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -144,8 +145,9 @@ border-radius: 0px;</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>20</pointsize>
-                 <italic>true</italic>
+                 <family>Agency FB</family>
+                 <pointsize>26</pointsize>
+                 <italic>false</italic>
                  <bold>true</bold>
                 </font>
                </property>
@@ -154,7 +156,7 @@ border-radius: 0px;</string>
 border-radius: 0px;</string>
                </property>
                <property name="text">
-                <string>Enemy </string>
+                <string>ENEMY</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -457,8 +459,9 @@ border-image: none;
             </property>
             <property name="font">
              <font>
-              <pointsize>20</pointsize>
-              <italic>true</italic>
+              <family>Agency FB</family>
+              <pointsize>26</pointsize>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -467,7 +470,7 @@ border-image: none;
 border-radius: 0px;</string>
             </property>
             <property name="text">
-             <string>Player </string>
+             <string>PLAYER</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -787,8 +790,9 @@ border-image: none;
             </property>
             <property name="font">
              <font>
-              <pointsize>20</pointsize>
-              <italic>true</italic>
+              <family>Agency FB</family>
+              <pointsize>26</pointsize>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -797,7 +801,7 @@ border-image: none;
 border-radius: 0px;</string>
             </property>
             <property name="text">
-             <string>Spear </string>
+             <string>SPEAR</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -1309,8 +1313,9 @@ border-image: none;
             </property>
             <property name="font">
              <font>
-              <pointsize>20</pointsize>
-              <italic>true</italic>
+              <family>Agency FB</family>
+              <pointsize>26</pointsize>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
             </property>
@@ -1320,7 +1325,7 @@ border-radius: 0px;
 </string>
             </property>
             <property name="text">
-             <string>Arrow </string>
+             <string>ARROW</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignmentFlag::AlignCenter</set>
