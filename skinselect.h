@@ -25,10 +25,10 @@ public:
 private:
     Ui::SkinSelect *ui;
 
-    void activateStyle(int a, int b);
-    void activatePlayer(int a, int b);
-    void activateSpear(int a, int b);
-    void activateArrow(int a, int b);
+    void activateStyle(int i);
+    void activatePlayer(int i);
+    void activateSpear(int i);
+    void activateArrow(int i);
 
     void initActive();
 };

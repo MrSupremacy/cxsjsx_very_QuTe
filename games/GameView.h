@@ -18,6 +18,8 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 #include "Player.h"
 #include "DataCarrier.h"
@@ -41,6 +43,11 @@ signals: // 定义信号的关键字
     void gameEnded(EndData ed); // 声明一个游戏结束的信号
 
 private:
+    // BGM
+    QMediaPlayer *m_bgmPlayer;
+    QAudioOutput *audioOutput;
+
+
     // OpenGL 相关的成员变量
     bool m_glInitialized = false;
     QOpenGLFramebufferObject* m_fbo = nullptr;

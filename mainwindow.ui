@@ -114,7 +114,7 @@ border-image: url(:/ImageResources/MainPoster.png);
        </property>
        <property name="font">
         <font>
-         <family>Microsoft YaHei UI</family>
+         <family>Microsoft YaHei</family>
          <pointsize>14</pointsize>
          <italic>false</italic>
          <bold>true</bold>
@@ -125,7 +125,7 @@ border-image: url(:/ImageResources/MainPoster.png);
 color: #0f0;</string>
        </property>
        <property name="text">
-        <string>⚔️ Best 999  Last 111</string>
+        <string>⚔️ Best 999 - Last 111</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -355,7 +355,7 @@ color: #0f0;</string>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>10</width>
+           <width>5</width>
            <height>20</height>
           </size>
          </property>
@@ -376,30 +376,30 @@ border-image: none;
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <property name="leftMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="rightMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <item>
            <widget class="QLabel" name="label_3">
             <property name="font">
              <font>
-              <family>Freestyle Script</family>
-              <pointsize>35</pointsize>
+              <family>Agency FB</family>
+              <pointsize>26</pointsize>
               <italic>false</italic>
               <bold>true</bold>
               <underline>false</underline>
              </font>
             </property>
             <property name="text">
-             <string> Settings</string>
+             <string>SETTINGS</string>
             </property>
            </widget>
           </item>
@@ -455,7 +455,7 @@ border-image: none;
               <widget class="QSlider" name="difficulty">
                <property name="minimumSize">
                 <size>
-                 <width>127</width>
+                 <width>131</width>
                  <height>0</height>
                 </size>
                </property>
@@ -531,7 +531,7 @@ border-image: none;
               <widget class="QSlider" name="volume">
                <property name="minimumSize">
                 <size>
-                 <width>115</width>
+                 <width>119</width>
                  <height>0</height>
                 </size>
                </property>
@@ -576,25 +576,25 @@ border-image: none;
            <number>10</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="rightMargin">
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>16</number>
           </property>
           <item>
            <widget class="QLabel" name="label_6">
             <property name="font">
              <font>
-              <family>Freestyle Script</family>
-              <pointsize>35</pointsize>
+              <family>Agency FB</family>
+              <pointsize>26</pointsize>
               <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string> Modes</string>
+             <string>MODES</string>
             </property>
            </widget>
           </item>
@@ -605,7 +605,7 @@ border-image: none;
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="spacing">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="leftMargin">
               <number>0</number>
@@ -623,19 +623,19 @@ border-image: none;
               <widget class="QPushButton" name="limit_time">
                <property name="minimumSize">
                 <size>
-                 <width>90</width>
+                 <width>80</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>90</width>
+                 <width>80</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>14</pointsize>
+                 <pointsize>13</pointsize>
                  <bold>true</bold>
                 </font>
                </property>
@@ -694,20 +694,20 @@ padding: 4px;</string>
            <widget class="QPushButton" name="infty_time">
             <property name="minimumSize">
              <size>
-              <width>90</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>90</width>
+              <width>80</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="font">
              <font>
               <family>Microsoft YaHei UI</family>
-              <pointsize>14</pointsize>
+              <pointsize>13</pointsize>
               <bold>true</bold>
              </font>
             </property>

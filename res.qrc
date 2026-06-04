@@ -72,5 +72,27 @@
         <file>ImageResources/inactiveredstone.png</file>
         <file>ImageResources/enemybirth.png</file>
         <file>ImageResources/oceantheme.png</file>
+        <file>ImageResources/plank.png</file>
+        <file>ImageResources/EntitySprite_efe.png</file>
+        <file>ImageResources/EntitySprite_kai.png</file>
+        <file>ImageResources/Held_Copper_Spear.png</file>
+        <file>ImageResources/Held_Golden_Spear.png</file>
+        <file>ImageResources/Held_Iron_Spear.png</file>
+        <file>ImageResources/Held_Netherite_Spear.png</file>
+        <file>ImageResources/Held_Stone_Spear.png</file>
+        <file>ImageResources/HuskFace.png</file>
+        <file>ImageResources/Invicon_Arrow.png</file>
+        <file>ImageResources/Invicon_Arrow_of_Healing.png</file>
+        <file>ImageResources/Invicon_Arrow_of_Swiftness.png</file>
+        <file>ImageResources/Invicon_Arrow_of_the_Turtle_Master.png</file>
+        <file>ImageResources/Invicon_Arrow_of_Wind_Charging.png</file>
+        <file>ImageResources/Invicon_Copper_Spear.png</file>
+        <file>ImageResources/Invicon_Golden_Spear.png</file>
+        <file>ImageResources/Invicon_Iron_Spear.png</file>
+        <file>ImageResources/Invicon_Netherite_Spear.png</file>
+        <file>ImageResources/Invicon_Stone_Spear.png</file>
+        <file>ImageResources/sandstone_top.png</file>
+        <file>skinicon.ico</file>
+        <file>bgm.ogg</file>
     </qresource>
 </RCC>
