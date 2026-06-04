@@ -94,6 +94,6 @@
         <file>ImageResources/sandstone_top.png</file>
         <file>skinicon.ico</file>
         <file>bgm.ogg</file>
-        <file>ImageResources/nether_portal.png</file>
+        <file>ImageResources/np.png</file>
     </qresource>
 </RCC>

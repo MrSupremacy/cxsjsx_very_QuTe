@@ -207,7 +207,7 @@ GameView::GameView(const DataCarrier& dc)
     formationSpawnTimer->start(formationIntv);
 
     // 传送门 Pool
-    PortalPool::instance().init(scene, ":/ImageResources/nether_portal.png", 50, 500);
+    PortalPool::instance().init(scene, ":/ImageResources/np.png", 20, 33);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)

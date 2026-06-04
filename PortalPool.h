@@ -19,7 +19,7 @@ public:
     /**
      * @brief 初始化对象池，生成20个对象并加入到指定的场景中
      */
-    void init(QGraphicsScene* scene, const QString& imagePath, int frameIntervalMs, int lifeTimeMs)
+    void init(QGraphicsScene* scene, const QString& imagePath, int frameIntervalMs, int lifeFrame)
     {
         if (!scene) return;
 
@@ -27,7 +27,7 @@ public:
         clear();
 
         for (int i = 0; i < NP; ++i) {
-            PortalPiece* piece = new PortalPiece(imagePath, frameIntervalMs, lifeTimeMs);
+            PortalPiece* piece = new PortalPiece(imagePath, frameIntervalMs, lifeFrame);
             scene->addItem(piece); // 将其加入场景
             m_pool.append(piece);
         }

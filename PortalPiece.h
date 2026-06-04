@@ -20,12 +20,12 @@ public:
      */
     PortalPiece(const QString& imagePath,
                 int frameIntervalMs,
-                int lifeTimeMs,
+                int lifeFrame,
                 QGraphicsItem* parent = nullptr)
         : QGraphicsObject(parent)
         , m_currentFrame(0)
         , m_frameIntervalMs(frameIntervalMs)
-        , m_lifeTimeMs(lifeTimeMs)
+        , m_lifeFrame(lifeFrame)
     {
         // 加载精灵图大图
         m_spriteSheet.load(imagePath);
@@ -74,7 +74,7 @@ public:
      */
     void showPiece(const QPointF& pos)
     {
-        QPointF p = pos - QPointF(4, 4);
+        QPointF p = pos - QPointF(6, 6);
         setPos(p);
         setVisible(true);
         m_currentFrame = 0;
@@ -83,8 +83,8 @@ public:
         m_frameTimer->start(m_frameIntervalMs);
 
         // 开启定时隐藏
-        if (m_lifeTimeMs > 0) {
-            m_lifeTimer->start(m_lifeTimeMs);
+        if (m_lifeFrame > 0) {
+            m_lifeTimer->start(m_lifeFrame * m_frameIntervalMs);
         }
         update();
     }
@@ -111,15 +111,15 @@ private:
     QPixmap m_spriteSheet;  // 完整的精灵图
     const int Wd = 128;     // 单帧宽度
     const int Ht = 128;     // 单帧高度
-    const int targetWd = 36;
-    const int targetHt = 36;
+    const int targetWd = 40;
+    const int targetHt = 40;
     const int frameN = 32;  // 动画总帧数
     int m_currentFrame;     // 当前帧索引
 
     QTimer* m_frameTimer;   // 帧控制计时器
     QTimer* m_lifeTimer;    // 定时隐藏计时器
     int m_frameIntervalMs;  // 帧间隔
-    int m_lifeTimeMs;       // 生存时间
+    int m_lifeFrame;       // 生存时间
 };
 
 #endif // PORTALPIECE_H
