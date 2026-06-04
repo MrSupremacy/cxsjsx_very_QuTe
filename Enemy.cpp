@@ -146,22 +146,26 @@ QVector<qreal> Enemy::teleportThroughWall() {
     if(ex < mapRect.left()) {
         tx = mapRect.right() - selfWd; // 右边界对齐
         ty = ey;                          // 确保 Y 轴（垂直方向）不发生改变
+        ex = mapRect.left();
         teleported = true;
     }
     else if(ex + selfWd > mapRect.right()) {
         tx = mapRect.left();              // 左边界对齐
         ty = ey;                          // 确保 Y 轴（垂直方向）不发生改变
+        ex = mapRect.right() - selfWd;
         teleported = true;
     }
     // ---------------- 处理 Y 轴（上下传送） ----------------
     else if(ey < mapRect.top()) {
         ty = mapRect.bottom() - selfHt; // 下边界对齐
         tx = ex;                            // 确保 X 轴（水平方向）不发生改变
+        ey = mapRect.top();
         teleported = true;
     }
     else if(ey + selfHt > mapRect.bottom()) {
         ty = mapRect.top();                 // 上边界对齐
         tx = ex;                            // 确保 X 轴（水平方向）不发生改变
+        ey = mapRect.bottom() - selfHt;
         teleported = true;
     }
 

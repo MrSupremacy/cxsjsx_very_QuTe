@@ -234,7 +234,7 @@ public:
     }
 
 public:
-    inline static const double SPEED = 3.4;
+    inline static const double SPEED = 4.0;
 
     QPolygonF m_polygon;
 

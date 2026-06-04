@@ -74,7 +74,8 @@ public:
      */
     void showPiece(const QPointF& pos)
     {
-        setPos(pos);
+        QPointF p = pos - QPointF(4, 4);
+        setPos(p);
         setVisible(true);
         m_currentFrame = 0;
 
@@ -110,8 +111,8 @@ private:
     QPixmap m_spriteSheet;  // 完整的精灵图
     const int Wd = 128;     // 单帧宽度
     const int Ht = 128;     // 单帧高度
-    const int targetWd = 28;
-    const int targetHt = 28;
+    const int targetWd = 36;
+    const int targetHt = 36;
     const int frameN = 32;  // 动画总帧数
     int m_currentFrame;     // 当前帧索引
 

@@ -23,7 +23,7 @@ void Formation::beginSequentialSpawn(int timeMs) {
     QList<QGraphicsItem*> children = this->childItems();
 
     // 2. 将它们按顺序全部隐藏，并加入等待队列
-    for (QGraphicsItem* item : children) {
+    for (QGraphicsItem* item : std::as_const(children)) {
         item->hide();
         unspawnedQueue.enqueue(item);
     }
@@ -91,6 +91,8 @@ void Formation::deformation() {
             enemy->setPos(absolutePos);
             // 告诉敌人它自由了，恢复自主移动状态
             enemy->setInFormation(false);
+            enemy->resetTransform();
+
             // 赋予向外动量60帧
             enemy->applyScatter(svx, svy, 60);
         }
