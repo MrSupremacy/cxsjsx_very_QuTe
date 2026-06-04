@@ -68,6 +68,10 @@
         <file>ImageResources/skinBG.png</file>
         <file>ImageResources/stone.png</file>
         <file>ImageResources/stone_2x.png</file>
+        <file>ImageResources/activeredstone.png</file>
+        <file>ImageResources/inactiveredstone.png</file>
+        <file>ImageResources/enemybirth.png</file>
+        <file>ImageResources/oceantheme.png</file>
         <file>ImageResources/plank.png</file>
         <file>ImageResources/EntitySprite_efe.png</file>
         <file>ImageResources/EntitySprite_kai.png</file>

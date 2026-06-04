@@ -22,10 +22,10 @@ Player::Player()
 
     QPixmap stevePic(globalSkin::applyChoice("Player"));
     // 玩家可能稍微大一点，比如 40x40
-    stevePic = stevePic.scaled(24, 24, Qt::KeepAspectRatio, Qt::FastTransformation);
+    stevePic = stevePic.scaled(28, 28, Qt::KeepAspectRatio, Qt::FastTransformation);
     this->setPixmap(stevePic);
 
-    this->setTransformOriginPoint(12, 12); // 设置中心点
+    this->setTransformOriginPoint(14, 14); // 设置中心点
 
     immuneTimer = new QTimer(this);
     immuneTimer->setSingleShot(true); // 设置为单次触发（只响一次）
@@ -48,7 +48,7 @@ Player::Player()
     swordItem->hide(); // 初始状态隐藏
     swordItem->setFlag(QGraphicsItem::ItemStacksBehindParent);
     swordItem->setTransformOriginPoint(0, 45);
-    swordItem->setPos(10, -35);
+    swordItem->setPos(12, -35);
 
     swordTimer = new QTimer(this);
     QObject::connect(swordTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这把剑
@@ -61,10 +61,10 @@ Player::Player()
     tntItem = new QGraphicsPixmapItem(this);
     QPixmap tntPic(":/ImageResources/tnt.png");
 
-    tntPic = tntPic.scaled(24, 24, Qt::KeepAspectRatio, Qt::FastTransformation);
+    tntPic = tntPic.scaled(25, 25, Qt::KeepAspectRatio, Qt::FastTransformation);
     tntItem->setPixmap(tntPic);
     tntItem->hide(); // 初始状态隐藏，与护盾一致
-    tntItem->setPos(-12, 12); // 放置在左下侧 (玩家宽度为24)
+    tntItem->setPos(-13, 13); // 放置在左下侧 (玩家宽度为24)
 
     chargeBar = new PlayerChargeBar(this);
     chargeBar->setPos({-16, 6});
@@ -75,18 +75,18 @@ Player::Player()
 
 
     // 护盾技能 配置护盾及图腾
-    shieldItem = new QGraphicsRectItem(-16, -16, 32, 32, this);
+    shieldItem = new QGraphicsRectItem(-18, -18, 36, 36, this);
     shieldItem->setBrush(Qt::NoBrush); // 无填充
     shieldItem->setPen(QPen(Qt::green)); // 涂成淡青色
     shieldItem->hide();
-    shieldItem->setPos(12, 12); // 放到中间位置
+    shieldItem->setPos(14, 14); // 放到中间位置
 
     totemItem = new QGraphicsPixmapItem(this); // 生成图腾实体
     QPixmap totemPic(":/ImageResources/totemofundying.png"); // 你的图腾图片路径
     totemPic = totemPic.scaled(26, 26, Qt::KeepAspectRatio, Qt::FastTransformation);
     totemItem->setPixmap(totemPic);
     totemItem->hide();
-    totemItem->setPos(10, 12); // 放置到右下侧
+    totemItem->setPos(11, 13); // 放置到右下侧
 
     shieldTimer = new QTimer(this);
     QObject::connect(shieldTimer, &QTimer::timeout, [=](){ // 当定时器时间到，隐藏这个盾

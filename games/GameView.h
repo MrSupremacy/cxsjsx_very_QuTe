@@ -101,7 +101,7 @@ private:
 
 
 
-    const int mapWidth = 1280, mapHeight = 800;
+    const int mapWidth = 750 * 1.84, mapHeight = 750 * (double)(1.84 / 1.90);
 
 
 protected:
