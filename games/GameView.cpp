@@ -46,6 +46,9 @@ GameView::GameView(const DataCarrier& dc)
     // 另外，关闭抗锯齿可以大幅提升性能
     // view->setRenderHint(QPainter::Antialiasing, false);
 
+    // 缓存优化
+    this->setCacheMode(QGraphicsView::CacheBackground);
+
     // 启动 FPS 计时器
     m_fpsTimer.start();
 
@@ -177,6 +180,10 @@ GameView::GameView(const DataCarrier& dc)
 
     bgPixmap = bgPixmap.scaled(32, 32, Qt::IgnoreAspectRatio, Qt::FastTransformation);
     scene->setBackgroundBrush(QBrush(bgPixmap));
+
+    // 场景边框
+    borderPixmap = QPixmap(globalSkin::applyChoice("GroundBorder"));
+    borderParas = globalSkin::instance().applyBorderParas();
 
     setScene(scene);
 
@@ -438,20 +445,17 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
             painter->fillRect(intersectRect, scene->backgroundBrush());
         }
 
-        // === 🛠️ 核心修改：绝对居中、等比例绘制海底神殿画框 ===
-        static QPixmap framePic(":/ImageResources/plaintheme.png");
-
-        if (framePic.isNull()) {
+        if (borderPixmap.isNull()) {
             qDebug() << "边框图片加载失败！";
         } else {
             // 获取画框原图的真实比例
-            qreal origW = framePic.width();
-            qreal origH = framePic.height();
+            qreal origW = borderPixmap.width();
+            qreal origH = borderPixmap.height();
 
             // 【大小调节开关】：设定你想要的画框总宽度
             // 你可以随意修改这个数字（比如 1600、1800、2000）
             // 无论调多大或多小，画框都会自动等比缩放，且【永远保持在屏幕正中心】！
-            qreal drawW = 1934;
+            qreal drawW = borderParas[0];
 
             // 自动计算高度（绝对不拉伸变形）
             qreal drawH = drawW * (origH / origW);
@@ -462,7 +466,7 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
             qreal drawY = centerPoint.y() - drawH / 2.0;
 
             // 绘制不失真、完美居中的画框！ [4]
-            painter->drawPixmap(drawX, drawY + 18, drawW, drawH, framePic);
+            painter->drawPixmap(drawX, drawY + borderParas[1], drawW, drawH, borderPixmap);
         }
     }
 }

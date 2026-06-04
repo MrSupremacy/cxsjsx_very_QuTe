@@ -49,9 +49,14 @@ public:
         return skinChoices[type].at(instance().currChoice[type]);
     }
 
+    static const QList<int>& applyBorderParas() {
+        return groundBorderPara.at(instance().currChoice["GroundBorder"]);
+    }
+
 public:
     QMap<QString, int> currChoice = {
         {"Background", 0},
+        {"GroundBorder", 0},
         {"Enemy", 0},
         {"Player", 0},
         {"Spear", 0}, {"SpearInve", 0},
@@ -62,6 +67,10 @@ public:
         {"Background", {":/ImageResources/Underwater.png",
                         ":/ImageResources/smooth_stone.jpg",
                         ":/ImageResources/sandstone_top.png"}},
+
+        {"GroundBorder", {":/ImageResources/oceanthemenew.png",
+                          ":/ImageResources/plaintheme.png",
+                          ":/ImageResources/deserttheme.png"}},
 
         {"Enemy", {":/ImageResources/drown.png",
                     ":/ImageResources/zombie.png",
@@ -95,6 +104,12 @@ public:
                    ":/ImageResources/Invicon_Arrow_of_Swiftness.png",
                    ":/ImageResources/Invicon_Arrow_of_the_Turtle_Master.png",
                    ":/ImageResources/Invicon_Arrow_of_Wind_Charging.png"}}
+    };
+
+    inline static const QList<QList<int>> groundBorderPara = {
+        {1920, 10}    // Ocean
+        , {1934, 18}  // Plain
+        , {1510, 0}   // Desert
     };
 };
 
@@ -141,6 +156,7 @@ const QVector<QString> randomTexts = {
     , "Difficulty 4 is too hard."
     , "I can play difficulty one\nfor a year."
 };
+
 
 
 

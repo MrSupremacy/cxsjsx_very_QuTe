@@ -61,7 +61,10 @@ private:
     int m_currentFps = 0;
 
 
+    // 地图
     QGraphicsScene *scene; // 存储地图实体 & 处理碰撞检测
+    QPixmap borderPixmap;
+    QList<int> borderParas;
 
     // 游戏设置 (以及 moveMode)
     const int difficulty;   // 难度

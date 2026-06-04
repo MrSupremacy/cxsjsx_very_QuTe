@@ -103,6 +103,7 @@ void SkinSelect::activateStyle(int i) {
     ui->style_3->setStyleSheet(ActDeact[i == 2]);
 
     globalSkin::instance().currChoice["Background"] = i;
+    globalSkin::instance().currChoice["GroundBorder"] = i;
     globalSkin::instance().currChoice["Enemy"] = i;
 }
 void SkinSelect::activatePlayer(int i) {
