@@ -182,7 +182,7 @@ GameView::GameView(const DataCarrier& dc)
 
     QPixmap bgPixmap(globalSkin::applyChoice("Background"));
 
-    bgPixmap = bgPixmap.scaled(32, 32, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    bgPixmap = bgPixmap.scaled(1250, 720, Qt::IgnoreAspectRatio, Qt::FastTransformation);
     scene->setBackgroundBrush(QBrush(bgPixmap));
 
     // 场景边框
@@ -218,7 +218,7 @@ GameView::GameView(const DataCarrier& dc)
     formationSpawnTimer->start(formationIntv);
 
     // 传送门 Pool
-    PortalPool::instance().init(scene, ":/ImageResources/np.png", 30, 33, 25);
+    PortalPool::instance().init(scene, ":/ImageResources/np.png", 33, 33, 25);
 }
 
 void GameView::resizeEvent(QResizeEvent *event)
@@ -416,6 +416,7 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
         QRectF intersectRect = rect.intersected(sRect);
         if (!intersectRect.isEmpty()) {
             painter->fillRect(intersectRect, scene->backgroundBrush());
+            painter->fillRect(intersectRect, QColor(255, 255, 255, 50));
         }
 
         if (borderPixmap.isNull()) {
@@ -769,7 +770,7 @@ void GameView::spawnEnemy() {
             this->scene->addItem(indicator);
         });
 
-        QTimer::singleShot(1300, this, [this, spawnX, spawnY]() {
+        QTimer::singleShot(delayMs / 2 + 1300, this, [this, spawnX, spawnY]() {
             // 安全检查：确保游戏还在进行，玩家还没死
             if (!this->scene || !this->player) return;
 

@@ -64,8 +64,8 @@ public:
     };
 
     inline static const QMap<QString, QVector<QString>> skinChoices = {
-        {"Background", {":/ImageResources/Underwater.png",
-                        ":/ImageResources/smooth_stone.jpg",
+        {"Background", {":/ImageResources/ocean.png",
+                        ":/ImageResources/plain.png",
                         ":/ImageResources/sandstone_top.png"}},
 
         {"GroundBorder", {":/ImageResources/oceanthemenew.png",

@@ -98,5 +98,9 @@
         <file>ImageResources/oceanthemenew.png</file>
         <file>ImageResources/deserttheme.png</file>
         <file>ImageResources/plaintheme.png</file>
+        <file>ImageResources/plain.png</file>
+        <file>ImageResources/plain1.png</file>
+        <file>ImageResources/desert.png</file>
+        <file>ImageResources/ocean.png</file>
     </qresource>
 </RCC>

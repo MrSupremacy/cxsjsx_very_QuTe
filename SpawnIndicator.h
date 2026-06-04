@@ -34,10 +34,10 @@ public:
             m_show = !m_show;
             update(); // 触发重绘
         });
-        flashTimer->start(900);
+        flashTimer->start(950);
 
         // 2. 寿命控制：1000 毫秒 (1秒) 后，预警结束，自动从地图上销毁
-        QTimer::singleShot(1000, this, [this]() {
+        QTimer::singleShot(1100, this, [this]() {
             if (this->scene()) {
                 this->scene()->removeItem(this);
             }
