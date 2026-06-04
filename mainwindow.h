@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QVector>
 #include <QString>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -38,6 +40,10 @@ private:
     // 游戏设置
     int Difficulty = 1;  // 1, 2, 3, 4
     double Volume = 0.5; // [0.00, 1.00]
+
+    // BGM
+    QMediaPlayer *m_bgmPlayer;
+    QAudioOutput *audioOutput;
 
     // 游戏记录
     int maxScore = 0;
