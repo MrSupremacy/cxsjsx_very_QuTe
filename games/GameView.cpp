@@ -113,35 +113,39 @@ GameView::GameView(const DataCarrier& dc)
     scoreRecordBoard = new QLabel("Score:    0", this);
     scoreRecordBoard->setStyleSheet(R"(
         QLabel {
-           color: white;
+           color: #1A1A1A;                  /* 深灰色/黑色文字 */
            font-family: 'Consolas';
-           font-size: 16px;
+           font-size: 22px;
            font-weight: bold;
-           background-color: rgba(0, 0, 0, 95);
-           border-radius: 5px;
-           padding: 5px;
+           background-color: #FFFFFF;       /* 白色背景板 */
+           border: 4px double #1A1A1A;      /* 4px 双重黑框 */
+           border-radius: 2px;              /* 双线边框下圆角不宜过大，微圆角或直角视觉效果更好 */
+           padding: 4px 4px;               /* 适当微调内边距 */
         }
     )");
 
     QString initT = timeLimited
-        ? QString("%1:%2")
-            .arg(maxSeconds / 60, 2, 10, QChar('0'))
-            .arg(maxSeconds % 60, 2, 10, QChar('0'))
-        : "00:00";
+                        ? QString("%1:%2")
+                              .arg(maxSeconds / 60, 2, 10, QChar('0'))
+                              .arg(maxSeconds % 60, 2, 10, QChar('0'))
+                        : "00:00";
     timeRecordBoard = new QLabel(initT, this);
     timeRecordBoard->setStyleSheet(R"(
         QLabel {
-           color: white;
+           color: #1A1A1A;
            font-family: 'Consolas';
-           font-size: 16px;
+           font-size: 22px;
            font-weight: bold;
-           background-color: rgba(0, 0, 0, 95);
-           border-radius: 5px;
-           padding: 5px;
+           background-color: #FFFFFF;
+           border: 4px double #1A1A1A;
+           border-radius: 2px;
+           padding: 4px 4px;
         }
     )");
 
-    scoreRecordBoard->setGeometry(10, 10, 120, 30);
+    scoreRecordBoard->move(10, 10);
+    scoreRecordBoard->adjustSize(); // 自动计算并设置合适的大小
+
     // 计时 Timer
     secondTimer = new QTimer(this);
     // 绑定
@@ -173,7 +177,9 @@ GameView::GameView(const DataCarrier& dc)
     });
     // 启动
     secondTimer->start(1000);
-    timeRecordBoard->setGeometry(130, 10, 60, 30);
+    int nextX = scoreRecordBoard->geometry().right() + 12;
+    timeRecordBoard->move(nextX, 10);
+    timeRecordBoard->adjustSize();
 
 
     // 创建场景
@@ -313,12 +319,12 @@ void GameView::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
 
     // FPS 相关计算
-    m_frameCount++;
-    if (m_fpsTimer.elapsed() >= 1000) {
-        m_currentFps = m_frameCount;
-        m_frameCount = 0;
-        m_fpsTimer.restart();
-    }
+    // m_frameCount++;
+    // if (m_fpsTimer.elapsed() >= 1000) {
+    //     m_currentFps = m_frameCount;
+    //     m_frameCount = 0;
+    //     m_fpsTimer.restart();
+    // }
 
     const qreal dpr = viewport()->devicePixelRatioF();
     QSize physicalSize = viewport()->size() * dpr;
@@ -398,9 +404,9 @@ void GameView::paintEvent(QPaintEvent *event)
     painter.endNativePainting();
 
     // 绘制 FPS
-    painter.setPen(Qt::green);
-    painter.setFont(QFont("Arial", 16, QFont::Bold));
-    painter.drawText(200, 30, QString("FPS: %1").arg(m_currentFps));
+    // painter.setPen(Qt::green);
+    // painter.setFont(QFont("Arial", 16, QFont::Bold));
+    // painter.drawText(200, 30, QString("FPS: %1").arg(m_currentFps));
 }
 
 void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
