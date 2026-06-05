@@ -125,6 +125,7 @@ protected:
 
     void spawnFormation(); // 生成阵型
 
+    void timeOutGameOver();
     void gameOver(); // 游戏结束
 
 };

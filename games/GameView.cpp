@@ -169,7 +169,8 @@ GameView::GameView(const DataCarrier& dc)
             secondTimer->stop();
 
             // 弹出一个提示框告诉玩家游戏结束
-            QMessageBox::information(this, "Game Over", "计时结束！\n点击确定返回主菜单。");
+            // QMessageBox::information(this, "Game Over", "计时结束！\n点击确定返回主菜单。");
+            timeOutGameOver();
 
             emit gameEnded({scores, seconds});
             this->close();
@@ -970,9 +971,7 @@ void GameView::gameOver() {
     m_bgmPlayer->stop();
 
     uniformColorRate = 0.6;
-    viewport()->update();
 
-    // QMessageBox::information(this, "Game Over", "你被敌人抓住了！\n点击确定返回主菜单。");
 
     // 1. 临时拼凑 UI 面板
     QWidget* panel = new QWidget();
@@ -1004,6 +1003,114 @@ void GameView::gameOver() {
     , panel);
     label->setStyleSheet("color: red; font-size: 24px; border: none;");
     label->setAlignment(Qt::AlignCenter);
+
+    layout->addWidget(label);
+    layout->addWidget(exitBtn);
+
+    // 2. 把 UI 塞进场景
+    QGraphicsProxyWidget* proxy = scene->addWidget(panel);
+    proxy->setZValue(9999); // 确保在最顶层
+    proxy->setFocus();      // 抢夺焦点，拦截WASD等键盘事件
+
+    // 3. 精准计算中心位置 (利用当前视图的视口中心映射到场景，比 sceneRect 更稳妥)
+    QPointF viewCenterInScene = mapToScene(viewport()->rect().center());
+    QPointF endPos = viewCenterInScene - QPointF(panel->width() / 2.0, panel->height() / 2.0);
+    QPointF startPos = endPos - QPointF(0, 400); // 从中心点往上偏 400 像素飞下来
+
+    // 4. 设置初始位置
+    proxy->setPos(startPos);
+
+    // 5. 播放快速动画
+    QPropertyAnimation* anim = new QPropertyAnimation(proxy, "pos", this); // 绑定 this 防止内存泄露
+    anim->setDuration(500); // 0.5秒
+    anim->setStartValue(startPos); // !!! 必须显式设置 StartValue
+    anim->setEndValue(endPos);
+    anim->setEasingCurve(QEasingCurve::OutBack); // 带回弹效果
+    anim->start(QAbstractAnimation::DeleteWhenStopped);
+
+    // 6. 绑定退出按钮 (通过值捕获 [this, proxy] 避免野指针崩溃)
+    // 传入 this 作为上下文参数，保证安全关联
+    QObject::connect(exitBtn, &QPushButton::clicked, this, [this, proxy]() {
+        // 安全地从场景移除
+        if (scene && proxy) {
+            scene->removeItem(proxy);
+        }
+
+        // 假设 scores 和 seconds 是 GameView 的成员变量，通过 this 访问
+        emit gameEnded({this->scores, this->seconds});
+
+        // 关闭当前游戏窗口
+        this->close();
+    });
+}
+
+void GameView::timeOutGameOver()
+{
+    // 停止定时器
+    gameEnds = true;
+    // gameTimer->stop();
+    enemySpawnTimer->stop();
+    abilitySpawnTimer->stop();
+    formationSpawnTimer->stop();
+    secondTimer->stop();
+
+    SoundPool::instance().stopAll();
+    m_bgmPlayer->stop();
+
+    // 1. 临时拼凑 UI 面板
+    QWidget* panel = new QWidget();
+    panel->setFixedSize(300, 150);
+    // 给面板设置 ObjectName，防止子控件（如 Label）错误继承面板的背景和边框样式
+    panel->setObjectName("timeoutPanel");
+    panel->setStyleSheet(R"(
+        QWidget#timeoutPanel {
+            background-color: #FCFCFC;            /* 柔和的偏白背景 */
+            border: 4px double #1A1A1A;          /* 双线黑边框 */
+            border-radius: 8px;                  /* 轻微圆角 */
+        }
+    )");
+
+    QVBoxLayout* layout = new QVBoxLayout(panel);
+    // 调整边距与间距，使视觉分布更匀称
+    layout->setContentsMargins(24, 20, 24, 20);
+    layout->setSpacing(15);
+
+    // 2. 计时结束文本标签
+    QLabel* label = new QLabel(
+        QString("TIME OUT. Score %1").arg(scores),
+        panel
+        );
+    label->setStyleSheet(R"(
+        QLabel {
+            color: #1A1A1A;                      /* 深色字，避免使用红色 */
+            font-size: 20px;
+            font-weight: bold;
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            border: none;
+            background: transparent;
+        }
+    )");
+    label->setAlignment(Qt::AlignCenter);
+
+    // 3. 退出按钮（采用高对比度的极简黑色设计）
+    QPushButton* exitBtn = new QPushButton("EXIT", panel);
+    exitBtn->setStyleSheet(R"(
+        QPushButton {
+            background-color: #1A1A1A;          /* 纯深色背景 */
+            color: #FFFFFF;                     /* 白色文字 */
+            padding: 8px 18px;
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 4px;                 /* 略微锐利的圆角，匹配整体几何感 */
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: #404040;          /* 悬浮时变为深灰 */
+        }
+        QPushButton:pressed {
+            background-color: #000000;          /* 按下时变为纯黑反馈 */
+        }
+    )");
 
     layout->addWidget(label);
     layout->addWidget(exitBtn);
