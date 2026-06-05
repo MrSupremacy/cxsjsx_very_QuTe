@@ -181,6 +181,7 @@ GameView::GameView(const DataCarrier& dc)
     timeRecordBoard->move(nextX, 10);
     timeRecordBoard->adjustSize();
 
+    borderParas = globalSkin::instance().applyBorderParas();
 
     // 创建场景
     scene = new QGraphicsScene(this);
@@ -188,12 +189,11 @@ GameView::GameView(const DataCarrier& dc)
 
     QPixmap bgPixmap(globalSkin::applyChoice("Background"));
 
-    bgPixmap = bgPixmap.scaled(1250, 720, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    bgPixmap = bgPixmap.scaled(borderParas[2], borderParas[3], Qt::IgnoreAspectRatio, Qt::FastTransformation);
     scene->setBackgroundBrush(QBrush(bgPixmap));
 
     // 场景边框
     borderPixmap = QPixmap(globalSkin::applyChoice("GroundBorder"));
-    borderParas = globalSkin::instance().applyBorderParas();
 
     setScene(scene);
 
@@ -422,7 +422,7 @@ void GameView::drawBackground(QPainter *painter, const QRectF &rect) {
         QRectF intersectRect = rect.intersected(sRect);
         if (!intersectRect.isEmpty()) {
             painter->fillRect(intersectRect, scene->backgroundBrush());
-            painter->fillRect(intersectRect, QColor(255, 255, 255, 50));
+            painter->fillRect(intersectRect, QColor(255, 255, 255, borderParas[4]));
         }
 
         if (borderPixmap.isNull()) {

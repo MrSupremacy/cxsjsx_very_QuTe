@@ -107,9 +107,9 @@ public:
     };
 
     inline static const QList<QList<int>> groundBorderPara = {
-        {1920, 10}    // Ocean
-        , {1934, 18}  // Plain
-        , {1510, 0}   // Desert
+        {1920, 10, 1250, 720, 50}    // Ocean
+        , {1934, 18, 833, 480, 40}  // Plain
+        , {1510, 0, 32, 32, 0}   // Desert
     };
 };
 
