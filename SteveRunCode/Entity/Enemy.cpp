@@ -17,12 +17,11 @@ Enemy::Enemy(QGraphicsItem *target) {
     // setBrush(QBrush(Qt::red)); // 基础颜色为红色
     // setPen(Qt::NoPen); // 移除边框
 
-    // 注意看你的截图，前缀是 / ，文件夹是 ImageResources，所以路径这样写：
+
     QPixmap enemyPic(globalSkin::applyChoice("Enemy"));
 
     // 把它从 600x600 缩小成你游戏里想要的 32x32 物理大小
-    // 注意：因为是从大图缩小，这里建议用 Qt::SmoothTransformation（平滑缩小），
-    // 否则可能会出现像素丢失导致画面扭曲。
+
     enemyPic = enemyPic.scaled(selfHt, selfWd, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     this->setPixmap(enemyPic);
@@ -65,17 +64,16 @@ void Enemy::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     QGraphicsPixmapItem::paint(painter, option, widget);
 
     // 2. 然后，我们用画笔在它的边缘叠加上一个描边方框
-    // 参数1：画笔颜色（僵尸可以用 Qt::black，或者醒目的红色 Qt::red！）
-    // 参数2：画笔粗细，像素风建议 1 或者 2
+
     QColor borderColor = inFormation ? QColor(180, 0, 0) : Qt::black;
     QPen pen(borderColor, 2);
 
-    // 像素风建议设置成 MiterJoin，这样拐角处是锐利的直角，非常符合 MC 风格
+
     pen.setJoinStyle(Qt::MiterJoin);
     painter->setPen(pen);
 
     // 3. 绘制边框
-    // 为了防止画笔由于太粗而被图片边缘裁剪，我们将边框往内微调 1 像素 (adjusted)
+    // 为了防止画笔由于太粗而被图片边缘裁剪，将边框往内微调 1 像素 (adjusted)
     painter->drawRect(this->boundingRect().adjusted(1, 1, -1, -1));
 }
 
@@ -85,8 +83,8 @@ void Enemy::moveTowardsTarget() {
 
     if (!playerTarget || !this->scene()) return;
 
-    // --- 1. 计算原本的追击玩家向量 (你原本的代码) ---
-    qreal ex = this->scenePos().x(); // 建议统一用 scenePos 防止坐标系错乱
+
+    qreal ex = this->scenePos().x();
     qreal ey = this->scenePos().y();
     qreal px = playerTarget->scenePos().x();
     qreal py = playerTarget->scenePos().y();
@@ -111,7 +109,7 @@ void Enemy::moveTowardsTarget() {
         finalMoveY = (dy / distance) * speed;
     }
 
-    // --- 2. 核心修改：如果处于散开状态，叠加散开动量 ---
+
     if (scatterFrames > 0) {
         finalMoveX += scatterVx;
         finalMoveY += scatterVy;
@@ -123,7 +121,7 @@ void Enemy::moveTowardsTarget() {
         scatterFrames--; // 帧数递减
     }
 
-    // --- 3. 最终统一移动 ---
+
     this->moveBy(finalMoveX, finalMoveY);
 }
 
@@ -141,8 +139,8 @@ QVector<qreal> Enemy::teleportThroughWall() {
 
     bool teleported = false;
 
-    // 使用 if-else if 结构，确保单一维度传送，防止对角线同时传送导致坐标错位
-    // ---------------- 处理 X 轴（左右传送） ----------------
+
+
     if(ex < mapRect.left()) {
         tx = mapRect.right() - selfWd; // 右边界对齐
         ty = ey;                          // 确保 Y 轴（垂直方向）不发生改变
@@ -155,7 +153,7 @@ QVector<qreal> Enemy::teleportThroughWall() {
         ex = mapRect.right() - selfWd;
         teleported = true;
     }
-    // ---------------- 处理 Y 轴（上下传送） ----------------
+
     else if(ey < mapRect.top()) {
         ty = mapRect.bottom() - selfHt; // 下边界对齐
         tx = ex;                            // 确保 X 轴（水平方向）不发生改变

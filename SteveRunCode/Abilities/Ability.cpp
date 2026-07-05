@@ -20,7 +20,7 @@ Ability::Ability(QPointF spawnPos, QGraphicsItem *target)
     // 2. 设置初始位置
     setPos(anchorPos);
 
-    // 让每个技能的初始角度随机，这样多个技能同时存在时，不会“神同步”晃动
+    // 让每个技能的初始角度随机
     angle = QRandomGenerator::global()->generateDouble() * 2 * M_PI;
     floatRange = 16.0; // 在锚点上下 10 像素范围内晃动
     floatSpeed = 0.05; // 每帧角度增加量
@@ -41,10 +41,8 @@ void Ability::updateFloating() {
 }
 
 void Ability::pickUp() {
-    // 这是一个基类的实现
     // 子类（如 MachineGunAbility）会在这里写具体逻辑：playerTarget->enableMachineGun();
     qDebug() << "Ability picked up!";
 
     // 拾取后，通常我们需要把这个物体从场景中移除，并在外部 delete 它
-    // 注意：不要直接在这里 delete this，建议在主循环检测到碰撞后统一处理
 }

@@ -23,7 +23,7 @@ public:
     {
         // 1. 设置生成参数
         int numEnemies = 16;       // 16个敌人组成一个大圈
-        double radius = 300.0;     // 初始圆的半径，足够把玩家套在里面
+        double radius = 250.0;     // 初始圆的半径，足够把玩家套在里面
 
         // 2. 极坐标排兵布阵
         for (int i = 0; i < numEnemies; ++i) {

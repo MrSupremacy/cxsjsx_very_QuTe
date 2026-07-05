@@ -95,7 +95,7 @@ public:
 
             effectToPlay->play();
 
-            // 【修改点】：为本次播放分配一个独立的标识（自增ID）
+
             // 目的：防止实例被复用(Voice Stealing)后，被旧的定时器误杀
             int currentPlayId = effectToPlay->property("playId").toInt() + 1;
             effectToPlay->setProperty("playId", currentPlayId);

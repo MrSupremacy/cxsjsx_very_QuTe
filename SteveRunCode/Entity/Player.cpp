@@ -34,12 +34,12 @@ Player::Player()
 
     // 光剑技能 配置光剑
     swordItem = new QGraphicsPixmapItem(this); // 改为 PixmapItem
-    QPixmap spearPic(globalSkin::applyChoice("Spear")); // 你的长矛图片路径
+    QPixmap spearPic(globalSkin::applyChoice("Spear"));
 
     QTransform transform;
     transform.rotate(135); // 顺时针旋转 135 度
 
-    // 执行旋转（旋转时建议用 Smooth 算法，防止边缘产生难看的锯齿）
+    // 执行旋转
     spearPic = spearPic.transformed(transform, Qt::SmoothTransformation);
 
     spearPic = spearPic.scaled(90, 90, Qt::KeepAspectRatio, Qt::FastTransformation);
@@ -118,25 +118,18 @@ Player::Player()
             // 生成 currNum 个子弹 (假定 currNum 必为奇数)
             for (int var = 0; var < currNum; ++var) {
 
-                // 1. 【核心计算】：计算当前子弹相对于中心子弹的偏差索引
-                // 比如 5 颗子弹，var 分别为 0, 1, 2, 3, 4
-                // 计算出的 offsetIndex 分别为: -2, -1, 0, 1, 2 (中心刚好是 0)
+
                 double offsetIndex = var - (currNum - 1) / 2.0;
 
-                // 2. 计算生成位置
-                // 💡 提示：如果你希望所有子弹像“散弹枪”一样完全从玩家同一个点（枪口）呈扇形喷出，
-                // 可以在主程序中把传入的 distPx 设为 0。
-                // 如果希望它们像原本一样“平行排开后再扇形飞出”，保持你的 distPx 即可。
+
                 double offset = offsetIndex * distPx;
                 QPointF currentPos = this->pos() + perp * offset;
 
-                // 3. 【核心计算】：计算当前子弹的独立偏转角
-                // 比如每往旁边一颗偏离 5.0 度（你可以通过调整 5.0 这个数值改变散射的宽窄）
+
                 double angleOffsetDeg = offsetIndex * 4.5;
                 double bulletAng = -ang - qDegreesToRadians(angleOffsetDeg);
 
-                // 4. 生成子弹，传入微调后的独立角度
-                // 我们之前写的 Bullet 构造函数会自动根据这个弧度角旋转图片并计算移动向量！
+
                 Bullet* temp = new Bullet(bulletAng, currentPos);
                 if (!temp) continue;
 
@@ -237,7 +230,7 @@ void Player::mouseMove(const QPointF posInScene) {
     double dx = dirVector.x() / L * speedL;
     double dy = dirVector.y() / L * speedL;
 
-    // ================= 新增：360度丝滑旋转剑 =================
+
     // 更新最后面朝的方向（供静止时使用）
     lastDir = dirVector;
 
@@ -246,13 +239,13 @@ void Player::mouseMove(const QPointF posInScene) {
         double angle = qRadiansToDegrees(qAtan2(dirVector.y(), dirVector.x()));
         swordItem->setRotation(angle);
     }
-    // ========================================================
+
 
     // 3. 预判下一步位置
     double nextX = this->x() + dx;
     double nextY = this->y() + dy;
 
-    // ================= 新增：边界限制逻辑 =================
+
     if (this->scene()) {
         QRectF mapRect = this->scene()->sceneRect();
         QRectF playerRect = this->boundingRect();
@@ -273,7 +266,6 @@ void Player::mouseMove(const QPointF posInScene) {
             nextY = mapRect.bottom() - playerRect.height();
         }
     }
-    // ========================================================
 
     // 4. 执行移动
     this->setPos(nextX, nextY);
@@ -296,7 +288,7 @@ void Player::giveImmune(int timeMs) {
     isImmune = true;
     // 启动（或重启）计时器。
     // 如果计时器已经在运行（玩家已经是无敌状态），调用 start 会重新开始计时！
-    // 这完美解决了“吃两个无敌道具时间不叠加”的 Bug。
+
     immuneTimer->start(timeMs);
 }
 
@@ -347,11 +339,10 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
     if (haveTotem && this->scene() && !this->scene()->views().isEmpty()) {
         QGraphicsView* view = this->scene()->views().first();
 
-        // 1. 【核心修改】：获取玩家当前的场景绝对坐标
+
         QPointF playerScenePos = this->scenePos();
 
-        // 2. 【核心修改】：使用投影函数，将场景坐标转为当前屏幕上的像素坐标！ [4]
-        // 哪怕你的地图相机在滚动，它也能精准算出玩家此时在屏幕上的哪个像素点 [4]
+
         QPoint screenPos = view->mapFromScene(playerScenePos);
 
         QLabel* totemLabel = new QLabel(view);
@@ -379,7 +370,7 @@ void Player::breakShieldAndExplode(int radius, int lifeTime, bool haveTotem) {
         movie->setScaledSize(QSize(gifW, gifH));
         totemLabel->setMovie(movie);
 
-        // 3. 【核心修改】：将大动画标签的【中点】对准玩家所在的屏幕投影坐标
+
         int startX = screenPos.x() - gifW / 2;
         int startY = screenPos.y() - gifH / 2;
         totemLabel->setGeometry(startX, startY, gifW, gifH);

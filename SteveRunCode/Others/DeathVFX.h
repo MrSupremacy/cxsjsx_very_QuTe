@@ -15,7 +15,7 @@
 
 class DeathVFX : public QGraphicsObject {
 public:
-    // === 🛠️ 构造函数：需要传入敌人死亡绝对坐标，以及敌人的贴图 ===
+
     DeathVFX(QPointF spawnPos, QPixmap enemyPixmap, QGraphicsItem* parent = nullptr)
         : QGraphicsObject(parent)
         , currentFrame(0)
@@ -81,7 +81,7 @@ public:
                 painter->setOpacity(1.0);
             }
         }
-        // === 【第二阶段】：后 8 帧绘制逐渐变透明消失的死亡白烟 ===
+
         else {
             int smokeIndex = currentFrame - 1; // 计算当前白烟是第几帧
 

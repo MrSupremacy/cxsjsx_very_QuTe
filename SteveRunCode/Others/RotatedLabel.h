@@ -11,7 +11,7 @@ class RotatedLabel : public QLabel {
     Q_OBJECT
 public:
     explicit RotatedLabel(QWidget *parent = nullptr) : QLabel(parent), m_angle(30.0) {
-        // 建议：让控件背景透明，避免默认的非旋转背景干扰
+
         setAttribute(Qt::WA_TranslucentBackground);
     }
 
@@ -23,7 +23,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override {
-        // 注意：不调用 QLabel::paintEvent(event)，完全由我们手动控制绘制
+
 
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing); // 抗锯齿
@@ -56,7 +56,7 @@ protected:
         }
 
         // 6. 绘制文本
-        painter.setPen(palette().color(QPalette::WindowText)); // 使用当前调色板的文本颜色，也可自定义如 Qt::white
+        painter.setPen(palette().color(QPalette::WindowText)); // 使用当前调色板的文本颜色
         // 在背景矩形内居中绘制文本
         painter.drawText(bgRect, Qt::AlignCenter, text());
     }

@@ -21,7 +21,7 @@ public:
         this->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
         this->setPos(spawnPos);
 
-        // 1. 【性能优化】：静态加载并缓存 8 帧火花原画（避免频繁读盘卡顿） [2]
+
         static QList<QPixmap> originalSparks;
         if (originalSparks.isEmpty()) {
             for (int i = 0; i < 8; ++i) { // 对应你的 spark_0 到 spark_7
@@ -34,7 +34,7 @@ public:
             }
         }
 
-        // 2. 从这 8 张图里随机抽取一张作为当前粒子的外观贴图 [2]
+
         if (!originalSparks.isEmpty()) {
             int randIdx = QRandomGenerator::global()->bounded(originalSparks.size());
             m_pixmap = originalSparks[randIdx];
@@ -117,7 +117,7 @@ public:
         transform.rotate(90);
         rocketPic = rocketPic.transformed(transform, Qt::SmoothTransformation);
 
-        // === 🛠️ 核心修改 1：在此处自由调节你想显示的尺寸！ ===
+
         // 比如：你想让火箭看起来是 48 像素长，24 像素宽 [2]
         m_visualRect = QRectF(-20, -20, 40, 40);
 
@@ -125,7 +125,7 @@ public:
         m_pixmap = rocketPic.scaled(40, 40, Qt::KeepAspectRatio, Qt::FastTransformation);
 
 
-        // === 🛠️ 核心修改 2：在此处设定真实的碰撞箱尺寸（可以很小，方便走位） ===
+
         // 碰撞箱依然保持原来小巧的 26x10 大小，中心依然对齐 (0, 0)
         m_hitboxRect = QRectF(-13, -5, 26, 10);
 
@@ -151,7 +151,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
         Q_UNUSED(option); Q_UNUSED(widget);
 
-        // === 🛠️ 核心修改 5：使用大尺寸(m_visualRect)绘制，图片就能变大了！ === [2]
+
         painter->drawPixmap(m_visualRect.toRect(), m_pixmap);
     }
 

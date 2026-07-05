@@ -64,7 +64,7 @@ public:
                 this->currentState = State::Bouncing;
             }
 
-            // --- 【新增】：在起步的一瞬间，计算出朝向玩家的初始发射速度 ---
+
             if (this->playerTarget && this->scene()) {
                 QPointF center = this->sceneBoundingRect().center(); // 阵型中心点
                 QPointF pPos = this->playerTarget->scenePos();       // 玩家位置

@@ -234,9 +234,7 @@ OpenGLGameView::~OpenGLGameView() {
     }
 }
 
-// ---------------------------------------------------------
-// 核心改动 1：初始化 OpenGL 顶点与着色器
-// ---------------------------------------------------------
+
 void OpenGLGameView::initializeShader() {
     initializeOpenGLFunctions();
 
@@ -297,9 +295,7 @@ void main() {
     m_glInitialized = true;
 }
 
-// ---------------------------------------------------------
-// 拦截绘制事件，实现 FBO -> Shader 链路
-// ---------------------------------------------------------
+
 void OpenGLGameView::paintEvent(QPaintEvent *event)
 {
     // 保持使用真实的 dpr 计算高清物理尺寸
@@ -322,9 +318,7 @@ void OpenGLGameView::paintEvent(QPaintEvent *event)
         m_fbo = new QOpenGLFramebufferObject(physicalSize, format);
     }
 
-    // ==========================================
-    // 第一阶段：让 CPU 发出指令，GPU 把场景画到 FBO
-    // ==========================================
+
     m_fbo->bind();
     glViewport(0, 0, physicalSize.width(), physicalSize.height());
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -340,9 +334,7 @@ void OpenGLGameView::paintEvent(QPaintEvent *event)
     fboPainter.end();
     m_fbo->release();
 
-    // ==========================================
-    // 第二阶段：把 FBO 当作纹理，喂给你的自定义 Shader
-    // ==========================================
+
     glViewport(0, 0, physicalSize.width(), physicalSize.height());
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -28,7 +28,7 @@ public:
         , m_frameIntervalMs(frameIntervalMs)
         , m_lifeFrame(lifeFrame)
     {
-        // ----------------- 修改开始：加载并调整亮度 -----------------
+
         if (brightnessOffset == 0) {
             // 如果不需要调亮度，直接按普通方式加载，最快
             m_spriteSheet.load(imagePath);

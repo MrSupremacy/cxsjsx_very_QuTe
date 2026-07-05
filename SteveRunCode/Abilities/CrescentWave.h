@@ -90,7 +90,6 @@ private:
         // 判定 B：飞出了场景边界
         if (scene()) {
             // 如果剑气的中心点(pos)超出了 Scene 的边界矩形
-            // 如果你希望刚碰到边缘就销毁，可以改为: !scene()->sceneRect().contains(sceneBoundingRect())
             if (!scene()->sceneRect().contains(pos())) {
                 shouldDestroy = true;
             }

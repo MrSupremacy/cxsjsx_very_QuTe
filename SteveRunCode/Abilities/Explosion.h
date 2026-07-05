@@ -34,12 +34,11 @@ private:
     QList<MCParticle> particles; // 粒子列表
     QTimer* updateTimer;   // 粒子物理更新计时器 (60 FPS)
 
-    // === 🛠️ 核心机制：控制物理伤害是否生效的开关（实现物理与视觉完美分离） ===
+
     bool m_isDamageActive = true;
 
 public:
-    // 【数学细节】：我们将父类的 boundingBox 扩大两倍 (-2*r)，防止长寿命粒子因重力飘落出界产生残影
-    // 但物理检测半径依然保持传入的 r [2]
+
     Explosion(qreal r, int time)
         : QGraphicsEllipseItem(-2 * r, -2 * r, 4 * r, 4 * r)
         , lifeSpan(time)
@@ -55,11 +54,11 @@ public:
         // 3. 初始化生成你设定的 60 个像素烟花粒子
         int particleCount = 40 * r * r / 1296;
 
-        // 【你的新参数】：筛选后的经典 MC 亮色调调色板（绿、黄、青，高级感十足！）
+        // 【筛选后的经典 MC 亮色调调色板
         QList<QColor> mcColors = {
-            QColor(255, 255, 85),  // 黄色 (保持您的原样，这正是 MC 标志性的亮黄色)
-            QColor(110, 255, 110), // 浅绿色 (一种带有轻微发光感、清透的荧光浅绿)
-            QColor(40, 175, 40),   // 深绿色 (浓郁且饱和度高的森林绿，能与黄色和浅绿形成极佳的对比)
+            QColor(255, 255, 85),  // 黄色
+            QColor(110, 255, 110), // 浅绿色
+            QColor(40, 175, 40),   // 深绿色
         };
 
         int longestLifeFrames = 0; // 记录这批粒子中最长的寿命，以便动态决定实体的绝对生命
@@ -79,7 +78,7 @@ public:
             // 像素大小（3x3 到 5x5 的正方形）
             p.size = 3.0 + QRandomGenerator::global()->bounded(3);
 
-            // 【你的新参数】：寿命 120 ~ 240 帧左右（约合 2 ~ 4 秒的超长优雅漂浮时间）
+
             p.maxLife = (40 + QRandomGenerator::global()->bounded(40)) * sqrt(r) / 6;
             p.life = p.maxLife;
 
@@ -96,14 +95,14 @@ public:
         connect(updateTimer, &QTimer::timeout, this, &Explosion::updatePhysics);
         updateTimer->start(16);
 
-        // === 🛠️ 核心机制：伤害判定生命到期 (比如导弹是 300ms) ===
+
         QTimer::singleShot(lifeSpan, this, [this]() {
             // 物理伤害时间到，关闭物理伤害判定开关！ [4]
             // 此时圆形判定区在物理上消失，不再阻挡或杀伤怪物，但画面依然会继续播放 [4]
             this->m_isDamageActive = false;
         });
 
-        // === 🛠️ 核心机制：视觉生命到期 ===
+
         // 计算最长寿命粒子对应的毫秒数（帧数 * 16ms 加上 100 毫秒的安全余量）
         int visualLifeSpanMs = longestLifeFrames * 16 + 100;
 
@@ -116,7 +115,7 @@ public:
         });
     }
 
-    // === 🛠️ 重写物理碰撞形状，确保真实的物理杀伤半径严格保持为 r === [2]
+
     QPainterPath shape() const override {
         QPainterPath path;
         // 如果伤害开关开着，返回圆形杀伤范围；如果关了，返回空路径，代表物理上已经解除了武装 [2, 4]
@@ -127,7 +126,7 @@ public:
     }
 
 protected:
-    // === 🛠️ 重写 paint，只画好看的像素粒子，不画原本丑陋的红色大圆圈 === [2]
+
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
         Q_UNUSED(option); Q_UNUSED(widget);
 
@@ -159,7 +158,7 @@ private slots:
                 // 1. 根据速度进行位移
                 p.pos += p.vel;
 
-                // 2. 【你的新参数】：模拟空气阻力（0.87 减速极快，让粒子迅速停留在空中慢慢滑落）
+
                 p.vel.setX(p.vel.x() * 0.87);
                 p.vel.setY(p.vel.y() * 0.87);
             }

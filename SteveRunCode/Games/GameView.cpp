@@ -80,18 +80,18 @@ GameView::GameView(const DataCarrier& dc)
 
     SoundPool::instance().init(mySounds, volume * 0.9);
 
-    SoundPool::instance().setSoundWeight("Arrow_hit",        0.4);
-    SoundPool::instance().setSoundWeight("Arrow_shoot",      0.15);
-    SoundPool::instance().setSoundWeight("Enemy_die",        0.7);
+    SoundPool::instance().setSoundWeight("Arrow_hit",        0.35);
+    SoundPool::instance().setSoundWeight("Arrow_shoot",      0.25);
+    SoundPool::instance().setSoundWeight("Enemy_die",        0.6);
     SoundPool::instance().setSoundWeight("Missile_explode",  1.0);
     SoundPool::instance().setSoundWeight("Missile_launch",   1.0);
-    SoundPool::instance().setSoundWeight("Shield_break",     1.0);
+    SoundPool::instance().setSoundWeight("Shield_break",     0.7);
     SoundPool::instance().setSoundWeight("Lochunhin_fuse",   1.0);
     SoundPool::instance().setSoundWeight("Lochunhin_launch", 1.0);
     SoundPool::instance().setSoundWeight("Shield_get",       1.0);
     SoundPool::instance().setSoundWeight("Spear_get",        1.0);
-    SoundPool::instance().setSoundWeight("Circle_begin",     0.63);
-    SoundPool::instance().setSoundWeight("Square_begin",     0.7);
+    SoundPool::instance().setSoundWeight("Circle_begin",     0.7);
+    SoundPool::instance().setSoundWeight("Square_begin",     0.8);
     SoundPool::instance().setSoundWeight("Triangle_begin",   0.7);
 
 
@@ -344,9 +344,9 @@ void GameView::paintEvent(QPaintEvent *event)
         m_fbo = new QOpenGLFramebufferObject(physicalSize, format);
     }
 
-    // ==========================================
+
     // 第一阶段：将 View（包含背景和 Scene）全部画到 FBO
-    // ==========================================
+
     m_fbo->bind();
     glViewport(0, 0, physicalSize.width(), physicalSize.height());
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -359,9 +359,9 @@ void GameView::paintEvent(QPaintEvent *event)
     fboPainter.end();
     m_fbo->release();
 
-    // ==========================================
+
     // 中间阶段：计算 Scene 的物理坐标和大小
-    // ==========================================
+
     QRectF logicalSceneRect = mapFromScene(sceneRect()).boundingRect();
 
     // Qt 的 mapFromScene 返回的本来就是相对于 View 左上角的逻辑坐标，直接乘 dpr 即可
@@ -370,9 +370,9 @@ void GameView::paintEvent(QPaintEvent *event)
                          logicalSceneRect.width() * dpr,
                          logicalSceneRect.height() * dpr);
 
-    // ==========================================
+
     // 第二阶段：直接全屏绘制 Shader（移除了动态顶点和冗余Blit）
-    // ==========================================
+
     m_program.bind();
     m_program.setUniformValue("screenTexture", 0);
 
@@ -697,7 +697,7 @@ void GameView::updateGame() {
                 // 1. 获取敌人死前的绝对中心点
                 QPointF deadCenter = item->sceneBoundingRect().center();
 
-                // 2. 【核心修改】：提取该敌人此时真实的贴图
+
                 // 不管他是僵尸还是溺尸，这一步都会动态抓取到它当前的贴图
                 QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
                 QPixmap enemyPixmap;
@@ -705,7 +705,7 @@ void GameView::updateGame() {
                     enemyPixmap = pixItem->pixmap();
                 }
 
-                // 3. 【核心修改】：生成死亡红闪 + 冒烟特效 (传入坐标和敌人贴图)
+
                 DeathVFX* vfx = new DeathVFX(deadCenter, enemyPixmap);
                 scene->addItem(vfx);
 
@@ -865,7 +865,7 @@ void GameView::spawnFormation() {
         // 随机 0, 1, 2。假设 2 是包围圈 (Circle)
         int randomValue = QRandomGenerator::global()->bounded(3);
 
-        // --- 特殊处理：如果是包围圈阵型 ---
+
         if (randomValue == 2) {
             formation = new CircleFormation(player, 0, this);
             QRectF formRect = formation->boundingRect();
@@ -891,7 +891,7 @@ void GameView::spawnFormation() {
             }
         }
 
-        // --- 常规处理：如果是箭头或方块（包含被降级退回来的情况） ---
+
         if (!isSpawnOnPlayer) {
             switch(randomValue) {
             case 0:
@@ -934,7 +934,6 @@ void GameView::spawnFormation() {
             }
         }
 
-        // --- 通用步骤：无论哪种阵型，都在这里统一调用显示和加入场景 ---
 
         // 依次出现在屏幕上 (包围圈一个个画圈出现的效果也非常惊艳！)
         formation->beginSequentialSpawn(64);
